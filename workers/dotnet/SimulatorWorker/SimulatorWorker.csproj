@@ -19,7 +19,7 @@
     <WarningLevel>4</WarningLevel>
     <ExternalConsole>true</ExternalConsole>
     <PlatformTarget>x86</PlatformTarget>
-    <LangVersion>4</LangVersion>
+    <LangVersion>6</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <Optimize>true</Optimize>
@@ -28,7 +28,7 @@
     <WarningLevel>4</WarningLevel>
     <ExternalConsole>true</ExternalConsole>
     <PlatformTarget>x86</PlatformTarget>
-    <LangVersion>4</LangVersion>
+    <LangVersion>6</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -55,6 +55,28 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Hazelcast.Simulator.Worker\ClientWorker.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Connector\WorkerConnector.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Processors\IOperationProcessor.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Operations\ISimulatorOperation.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Core\SimulatorAddress.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Core\AddressLevel.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Core\ResponseType.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Core\SimulatorMessage.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Operations\OperationType.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Operations\StartTestPhaseOperation.cs" />
+    <Compile Include="Hazelcast.Simulator.Utils\ValueAttribute.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Operations\PingOperation.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Operations\TerminateWorkerOperation.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Operations\KillWorkerOperation.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Operations\CreateTestOperation.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Operations\StartTestOperation.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Operations\StopTestOperation.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Core\ConnectionManager.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Core\TestProcessorManager.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Processors\WorkerOperationProcessor.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Processors\AbstractOperationProcessor.cs" />
+    <Compile Include="Hazelcast.Simulator.TestContainer\TestContainer.cs" />
+    <Compile Include="Hazelcast.Simulator.TestContainer\TestContext.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -63,6 +85,10 @@
     <Folder Include="Hazelcast.Simulator.Worker\" />
     <Folder Include="Hazelcast.Simulator.Utils\" />
     <Folder Include="Hazelcast.Simulator.Protocol.Core\" />
+    <Folder Include="Hazelcast.Simulator.Protocol.Connector\" />
+    <Folder Include="Hazelcast.Simulator.Protocol.Processors\" />
+    <Folder Include="Hazelcast.Simulator.Protocol.Operations\" />
+    <Folder Include="Hazelcast.Simulator.TestContainer\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

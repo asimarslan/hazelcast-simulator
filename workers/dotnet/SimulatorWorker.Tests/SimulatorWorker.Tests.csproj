@@ -36,9 +36,19 @@
     <Folder Include="Hazelcast.Simulator.Worker\" />
     <Folder Include="Hazelcast.Simulator.Utils\" />
     <Folder Include="Hazelcast.Simulator.Protocol.Core\" />
+    <Folder Include="Hazelcast.Simulator.Protocol.Operations\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Hazelcast.Simulator.Protocol.Operations\OperationTypeTest.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SimulatorWorker\SimulatorWorker.csproj">
+      <Project>{2B235B7D-30DD-4620-A9F3-BE90A53C1297}</Project>
+      <Name>SimulatorWorker</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
