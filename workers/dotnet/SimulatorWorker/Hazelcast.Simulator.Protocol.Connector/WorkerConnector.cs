@@ -1,6 +1,8 @@
 ﻿using System;
 using Hazelcast.Simulator.Protocol.Core;
 using Hazelcast.Simulator.Protocol.Processors;
+using Hazelcast.Core;
+using Hazelcast.Simulator.Worker;
 
 namespace Hazelcast.Simulator.Protocol.Connector
 {
@@ -14,6 +16,11 @@ namespace Hazelcast.Simulator.Protocol.Connector
 
 		private readonly ConnectionManager connectionManager;
 		private readonly TestProcessorManager testProcessorManager;
+
+		public WorkerConnector(SimulatorAddress localAddress, int port, IHazelcastInstance hazelcastInstance, ClientWorker worker)
+		{
+			this.localAddress = localAddress;
+		}
 	}
 }
 
