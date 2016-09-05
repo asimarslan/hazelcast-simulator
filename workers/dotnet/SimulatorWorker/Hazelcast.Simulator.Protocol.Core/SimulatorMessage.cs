@@ -2,20 +2,29 @@
 
 namespace Hazelcast.Simulator.Protocol.Core
 {
-	public class SimulatorMessage
-	{
-		public SimulatorAddress Destination { get; }
-		public SimulatorAddress Source { get; }
-		public long MessageId { get; }
+    public class SimulatorMessage
+    {
+        public SimulatorAddress Destination { get; }
+        public SimulatorAddress Source { get; }
+        public long MessageId { get; }
 
-		public OperationType operationType { get; }
-		public string operationData { get; }
+        public OperationType OperationType { get; }
+        public string OperationData { get; }
 
-		public override string ToString()
-		{
-			return string.Format("[SimulatorMessage: Destination={0}, Source={1}, MessageId={2}, operationType={3}, operationData={4}]", 
-			                     Destination, Source, MessageId, operationType, operationData);
-		}
-	}
+        public SimulatorMessage(SimulatorAddress destination, SimulatorAddress source, long messageId,
+            OperationType operationType, string operationData)
+        {
+            Destination = destination;
+            Source = source;
+            MessageId = messageId;
+            OperationType = operationType;
+            OperationData = operationData;
+        }
+
+        public override string ToString()
+        {
+            return
+                $"[SimulatorMessage: Destination={Destination}, Source={Source}, MessageId={MessageId}, operationType={OperationType}, operationData={OperationData}]";
+        }
+    }
 }
-

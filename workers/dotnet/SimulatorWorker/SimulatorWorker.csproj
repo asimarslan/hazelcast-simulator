@@ -1,11 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProjectGuid>{2B235B7D-30DD-4620-A9F3-BE90A53C1297}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Hazelcast.Simulator.Worker</RootNamespace>
+    <RootNamespace>
+    </RootNamespace>
     <AssemblyName>SimulatorWorker</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
@@ -49,10 +50,18 @@
       <HintPath>..\packages\DotNetty.Transport.0.3.2\lib\net45\DotNetty.Transport.dll</HintPath>
     </Reference>
     <Reference Include="Hazelcast.Net">
-      <HintPath>..\packages\Hazelcast.Net.3.6.3.0\lib\net40\Hazelcast.Net.dll</HintPath>
+      <HintPath>..\packages\Hazelcast.Net.3.6.4.0\lib\net40\Hazelcast.Net.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Hazelcast.Simulator.Protocol.Core\Response.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Core\ResponseCodec.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Core\SimulatorAddressCodec.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Core\SimulatorMessageCodec.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Core\SimulatorProtocolException.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Handler\ConnectionValidationHandler.cs" />
+    <Compile Include="Hazelcast.Simulator.Utils\AtomicBoolean.cs" />
+    <Compile Include="Hazelcast.Simulator.Utils\Constants.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Hazelcast.Simulator.Worker\ClientWorker.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Connector\WorkerConnector.cs" />
@@ -82,6 +91,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Hazelcast.Simulator.Protocol.Handler" />
     <Folder Include="Hazelcast.Simulator.Worker\" />
     <Folder Include="Hazelcast.Simulator.Utils\" />
     <Folder Include="Hazelcast.Simulator.Protocol.Core\" />

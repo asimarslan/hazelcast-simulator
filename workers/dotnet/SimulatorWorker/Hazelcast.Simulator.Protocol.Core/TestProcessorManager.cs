@@ -1,5 +1,4 @@
-﻿using System;
-namespace Hazelcast.Simulator.Protocol.Core
+﻿namespace Hazelcast.Simulator.Protocol.Core
 {
 	public class TestProcessorManager
 	{
