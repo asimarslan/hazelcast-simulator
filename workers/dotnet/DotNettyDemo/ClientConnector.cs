@@ -64,11 +64,11 @@ namespace DotNettyDemo
 
 		public override void ChannelActive(IChannelHandlerContext context)
 		{
-			var message = Unpooled.Buffer(256);
-			byte[] messageBytes = Encoding.UTF8.GetBytes("Hello world-"+i++);
-			message.WriteBytes(messageBytes);
-
-			context.WriteAndFlushAsync(message);
+//			var message = Unpooled.Buffer(256);
+//			byte[] messageBytes = Encoding.UTF8.GetBytes("Hello world-"+i++);
+//			message.WriteBytes(messageBytes);
+//
+//			context.WriteAndFlushAsync(message);
 		}
 		public override void ChannelRead(IChannelHandlerContext context, object message)
 		{
@@ -78,11 +78,11 @@ namespace DotNettyDemo
 				Console.WriteLine("Received from server: " + byteBuffer.ToString(Encoding.UTF8));
 			}
 
-			var message2 = Unpooled.Buffer(256);
-			byte[] messageBytes = Encoding.UTF8.GetBytes("Hello world-"+i++);
-			message2.WriteBytes(messageBytes);
-
-			context.WriteAsync(message2);
+//			var message2 = Unpooled.Buffer(256);
+//			byte[] messageBytes = Encoding.UTF8.GetBytes("Hello world-"+i++);
+//			message2.WriteBytes(messageBytes);
+//
+//			context.WriteAsync(message2);
 		}
 
 		public override void ChannelReadComplete(IChannelHandlerContext context) => context.Flush();

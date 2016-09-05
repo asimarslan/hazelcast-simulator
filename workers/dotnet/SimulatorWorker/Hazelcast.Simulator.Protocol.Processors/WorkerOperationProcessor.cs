@@ -11,7 +11,7 @@ namespace Hazelcast.Simulator.Protocol.Processors
 		readonly ClientWorker worker;
 		readonly SimulatorAddress simulatorAddress;
 
-		ConcurrentDictionary<string, TestContainer> tests = new ConcurrentDictionary<string, TestContainer>();
+//		ConcurrentDictionary<string, TestContainer> tests = new ConcurrentDictionary<string, TestContainer>();
 
 		public WorkerOperationProcessor(IHazelcastInstance hazelcastInstance, ClientWorker worker, SimulatorAddress simulatorAddress)
 		{
