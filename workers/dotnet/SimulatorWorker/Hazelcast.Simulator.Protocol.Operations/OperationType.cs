@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
 using Hazelcast.Simulator.Utils;
 
 namespace Hazelcast.Simulator.Protocol.Operations
@@ -18,6 +16,9 @@ namespace Hazelcast.Simulator.Protocol.Operations
 
 		[Value(typeof(CreateTestOperation))]
 		CREATE_TEST = 4002,
+
+	    [Value(typeof(ExecuteScriptOperation))]
+	    EXECUTE_SCRIPT = 4003,
 
 		[Value(typeof(StartTestPhaseOperation))]
 		START_TEST_PHASE=5000,

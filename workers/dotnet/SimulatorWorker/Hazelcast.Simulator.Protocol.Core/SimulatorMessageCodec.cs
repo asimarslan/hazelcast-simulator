@@ -53,27 +53,27 @@ namespace Hazelcast.Simulator.Protocol.Core
             return new SimulatorMessage(destination, source, messageId, operationType, operationData);
         }
 
-        public static bool IsSimulatorMessage(IByteBuffer buffer)
+        public static bool IsSimulatorMessage(this IByteBuffer buffer)
         {
             return buffer.GetInt(OFFSET_MAGIC_BYTES) == MAGIC_BYTES;
         }
 
-        public static long GetMessageId(this IByteBuffer buffer)
+        public static long GetSimulatorMessageId(this IByteBuffer buffer)
         {
             return buffer.GetLong(OFFSET_MESSAGE_ID);
         }
 
-        public static int GetDestinationAddressLevel(IByteBuffer buffer)
+        public static int GetSimulatorMessageDestinationAddressLevel(this IByteBuffer buffer)
         {
             return buffer.GetInt(OFFSET_DST_ADDRESS);
         }
 
-        public static int GetChildAddressIndex(IByteBuffer buffer, int addressLevelValue)
+        public static int GetSimulatorMessageChildAddressIndex(this IByteBuffer buffer, int addressLevelValue)
         {
             return buffer.GetInt(OFFSET_DST_ADDRESS + (addressLevelValue + 1) * INT_SIZE);
         }
 
-        public static SimulatorAddress GetSourceAddress(IByteBuffer buffer)
+        public static SimulatorAddress GetSimulatorMessageSourceAddress(this IByteBuffer buffer)
         {
             return buffer.Slice(OFFSET_SRC_ADDRESS, ADDRESS_SIZE).DecodeSimulatorAddress();
         }

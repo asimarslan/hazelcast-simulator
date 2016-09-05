@@ -1,4 +1,7 @@
-﻿using DotNetty.Buffers;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using DotNetty.Buffers;
 using static Hazelcast.Simulator.Utils.Constants;
 
 namespace Hazelcast.Simulator.Protocol.Core
@@ -10,71 +13,93 @@ namespace Hazelcast.Simulator.Protocol.Core
         private const int OFFSET_MAGIC_BYTES = INT_SIZE;
         private const int OFFSET_MESSAGE_ID = OFFSET_MAGIC_BYTES + INT_SIZE;
         private const int OFFSET_DST_ADDRESS = OFFSET_MESSAGE_ID + LONG_SIZE;
-        private const int HEADER_SIZE = INT_SIZE + LONG_SIZE + ADDRESS_SIZE;
-        private const int DATA_ENTRY_SIZE = ADDRESS_SIZE + INT_SIZE;
 
         public static void EncodeByteBuf(this Response response, IByteBuffer buffer)
         {
-            buffer.WriteInt(HEADER_SIZE + response.Size() * DATA_ENTRY_SIZE);
+            var parts = response.Parts;
+
+            // write place holder for length. Eventually we'll overwrite it with the correct length.
+            buffer.WriteInt(0);
+            var start = buffer.WriterIndex;
+
             buffer.WriteInt(MAGIC_BYTES);
-
             buffer.WriteLong(response.MessageId);
-            SimulatorAddressCodec.encodeByteBuf(response.getDestination(), buffer);
+            response.Destination.EncodeByteBuf(buffer);
 
-            for (Map.Entry < SimulatorAddress, ResponseType > entry : response.entrySet())
+            buffer.WriteInt(parts.Count);
+            foreach (KeyValuePair<SimulatorAddress, Part> pair in parts)
             {
-                SimulatorAddressCodec.encodeByteBuf(entry.getKey(), buffer);
-                buffer.writeInt(entry.getValue().toInt());
+                pair.Key.EncodeByteBuf(buffer);
+                var part = pair.Value;
+                buffer.WriteInt((int) part.ResponseType);
+
+                var payload = part.Payload;
+                if (payload == null)
+                {
+                    buffer.WriteInt(-1);
+                }
+                else
+                {
+                    var data = Encoding.UTF8.GetBytes(payload);
+                    buffer.WriteInt(data.Length);
+                    buffer.WriteBytes(data);
+                }
             }
+
+            var length = buffer.WriterIndex - start;
+            buffer.SetInt(start - INT_SIZE, length);
         }
 
-        public static Response decodeResponse(IByteBuffer buffer)
+        public static Response DecodeResponse(this IByteBuffer buffer)
         {
-            int frameLength = buffer.readInt();
-            int dataLength = (frameLength - HEADER_SIZE) / DATA_ENTRY_SIZE;
+            buffer.ReadInt(); //frameLength
 
-            if (buffer.readInt() != MAGIC_BYTES)
+            if (buffer.ReadInt() != MAGIC_BYTES)
             {
-                throw new IllegalArgumentException("Invalid magic bytes for Response");
+                throw new ArgumentException("Invalid magic bytes for Response");
             }
 
-            long messageId = buffer.readLong();
-            SimulatorAddress destination = decodeSimulatorAddress(buffer);
-            Response response = new Response(messageId, destination);
+            var messageId = buffer.ReadLong();
+            var destination = buffer.DecodeSimulatorAddress();
+            var response = new Response(messageId, destination);
 
-            for (int i = 0; i < dataLength; i++)
+            var partCount = buffer.ReadInt();
+            for (var i = 0; i < partCount; i++)
             {
-                SimulatorAddress source = decodeSimulatorAddress(buffer);
-                ResponseType responseType = ResponseType.fromInt(buffer.readInt());
-                response.addResponse(source, responseType);
+                var source = buffer.DecodeSimulatorAddress();
+                var responseType = (ResponseType) buffer.ReadInt();
+
+                string payload = null;
+                var size = buffer.ReadInt();
+                if (size > -1)
+                {
+                    payload = buffer.ReadSlice(size).ToString(Encoding.UTF8);
+                }
+
+                response.AddPart(source, responseType, payload);
             }
 
             return response;
         }
 
-        public static boolean isResponse(IByteBuffer buffer)
+        public static bool IsResponse(this IByteBuffer buffer)
         {
-            return (in.
-            getInt(OFFSET_MAGIC_BYTES) == MAGIC_BYTES)
-            ;
+            return buffer.GetInt(OFFSET_MAGIC_BYTES) == MAGIC_BYTES;
         }
 
-        public static long getMessageId(IByteBuffer buffer)
+        public static long GetResponseMessageId(this IByteBuffer buffer)
         {
-            return in.
-            getLong(OFFSET_MESSAGE_ID);
+            return buffer.GetLong(OFFSET_MESSAGE_ID);
         }
 
-        public static int getDestinationAddressLevel(IByteBuffer buffer)
+        public static int GetResponseDestinationAddressLevel(this IByteBuffer buffer)
         {
-            return in.
-            getInt(OFFSET_DST_ADDRESS);
+            return buffer.GetInt(OFFSET_DST_ADDRESS);
         }
 
-        public static int getChildAddressIndex(IByteBuffer buffer, int addressLevelValue)
+        public static int GetResponseChildAddressIndex(this IByteBuffer buffer, int addressLevelValue)
         {
-            return in.
-            getInt(OFFSET_DST_ADDRESS + ((addressLevelValue + 1) * INT_SIZE));
+            return buffer.GetInt(OFFSET_DST_ADDRESS + (addressLevelValue + 1) * INT_SIZE);
         }
     }
 }
