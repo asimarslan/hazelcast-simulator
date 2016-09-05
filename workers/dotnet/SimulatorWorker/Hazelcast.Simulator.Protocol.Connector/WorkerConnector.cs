@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
-using DotNetty.Buffers;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
@@ -14,7 +13,6 @@ using Hazelcast.Simulator.Utils;
 using Hazelcast.Simulator.Worker;
 using log4net;
 
-using DotNetty.Transport.Channels;
 using Hazelcast.Simulator.Protocol.Handler;
 
 namespace Hazelcast.Simulator.Protocol.Connector
@@ -43,10 +41,11 @@ namespace Hazelcast.Simulator.Protocol.Connector
 
         private readonly BlockingCollection<SimulatorMessage> messageQueue = new BlockingCollection<SimulatorMessage>();
 
-        private IChannel _channel = null;
+        private IChannel channel;
 
         public void SetChannel(IChannel channel)
         {
+            this.channel = channel;
         }
 
         public WorkerConnector(SimulatorAddress localAddress, int port, IHazelcastInstance hazelcastInstance,
@@ -89,7 +88,7 @@ namespace Hazelcast.Simulator.Protocol.Connector
             pipeline.AddLast("connectionValidationHandler", new ConnectionValidationHandler(SetChannel) );
 //            pipeline.AddLast("connectionValidationHandler", new ChannelInboundHandlerAdapter() {} ConnectionValidationHandler())};
 //            pipeline.AddLast("connectionListenerHandler", new ConnectionListenerHandler(connectionManager));
-//            pipeline.AddLast("responseEncoder", new ResponseEncoder(localAddress));
+            pipeline.AddLast("responseEncoder", new ResponseEncoder(localAddress));
 //            pipeline.AddLast("messageEncoder", new MessageEncoder(localAddress, localAddress.getParent()));
 //            pipeline.AddLast("frameDecoder", new SimulatorFrameDecoder());
 //            pipeline.AddLast("protocolDecoder", new SimulatorProtocolDecoder(localAddress));
