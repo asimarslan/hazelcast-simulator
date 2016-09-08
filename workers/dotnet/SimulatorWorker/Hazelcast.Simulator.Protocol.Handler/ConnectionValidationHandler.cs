@@ -7,7 +7,7 @@ namespace Hazelcast.Simulator.Protocol.Handler
 {
     public class ConnectionValidationHandler : ChannelHandlerAdapter
     {
-        internal readonly ILog Logger = LogManager.GetLogger(typeof(WorkerConnector));
+        private readonly ILog Logger = LogManager.GetLogger(typeof(WorkerConnector));
 
 //        private const int MinimumByteBufferSize = 8;
         private readonly Action<IChannel> setChannel;

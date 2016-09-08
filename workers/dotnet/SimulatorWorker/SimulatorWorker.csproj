@@ -57,7 +57,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DotNetty.Codec\MessageToByteEncoder.cs" />
+    <Compile Include="DotNetty.Codecs\MessageToByteEncoder.cs" />
+    <Compile Include="DotNetty.Transport.Channels\SimpleChannelInboundHandler.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Core\Response.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Core\ResponseCodec.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Core\SimulatorAddressCodec.cs" />
@@ -65,7 +66,14 @@
     <Compile Include="Hazelcast.Simulator.Protocol.Core\SimulatorProtocolException.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Handler\ConnectionValidationHandler.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Handler\ResponseEncoder.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Handler\SimulatorFrameDecoder.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Handler\SimulatorMessageConsumeHandler.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Handler\SimulatorMessageEncoder.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Handler\SimulatorProtocolDecoder.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\ExecuteScriptOperation.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Processors\OperationContext.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Processors\OperationProcessor.cs" />
+    <Compile Include="Hazelcast.Simulator.Test\TestCase.cs" />
     <Compile Include="Hazelcast.Simulator.Utils\AtomicBoolean.cs" />
     <Compile Include="Hazelcast.Simulator.Utils\Constants.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -90,14 +98,15 @@
     <Compile Include="Hazelcast.Simulator.Protocol.Core\TestProcessorManager.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Processors\WorkerOperationProcessor.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Processors\AbstractOperationProcessor.cs" />
-    <Compile Include="Hazelcast.Simulator.TestContainer\TestContainer.cs" />
-    <Compile Include="Hazelcast.Simulator.TestContainer\TestContext.cs" />
+    <Compile Include="Hazelcast.Simulator.Test\TestContainer.cs" />
+    <Compile Include="Hazelcast.Simulator.Test\TestContext.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="DotNetty.Codec" />
+    <Folder Include="DotNetty.Codecs" />
+    <Folder Include="DotNetty.Transport.Channels" />
     <Folder Include="Hazelcast.Simulator.Protocol.Handler" />
     <Folder Include="Hazelcast.Simulator.Worker\" />
     <Folder Include="Hazelcast.Simulator.Utils\" />
@@ -105,7 +114,7 @@
     <Folder Include="Hazelcast.Simulator.Protocol.Connector\" />
     <Folder Include="Hazelcast.Simulator.Protocol.Processors\" />
     <Folder Include="Hazelcast.Simulator.Protocol.Operations\" />
-    <Folder Include="Hazelcast.Simulator.TestContainer\" />
+    <Folder Include="Hazelcast.Simulator.Test\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
