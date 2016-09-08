@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace Hazelcast.Simulator.Protocol.Core
 {
@@ -90,6 +91,60 @@ namespace Hazelcast.Simulator.Protocol.Core
                     return COORDINATOR;
                 default:
                     throw new ArgumentException($"No parent for {this.AddressLevel}");
+            }
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (this == obj)
+            {
+                return true;
+            }
+            if (obj == null || this.GetType() != obj.GetType())
+            {
+                return false;
+            }
+            SimulatorAddress that = obj as SimulatorAddress;
+            if (this.AgentIndex != that.AgentIndex)
+            {
+                return false;
+            }
+            if (this.WorkerIndex != that.WorkerIndex)
+            {
+                return false;
+
+            }
+            if (this.TestIndex != that.TestIndex)
+            {
+                return false;
+            }
+            return this.AddressLevel == that.AddressLevel;
+        }
+
+        public override int GetHashCode()
+        {
+            int result = this.AddressLevel.GetHashCode();
+            result = 31 * result + this.AgentIndex;
+            result = 31 * result + this.WorkerIndex;
+            result = 31 * result + this.TestIndex;
+            return result;
+        }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(AddressLevel.REMOTE == this.AddressLevel ? REMOTE_STRING : COORDINATOR_STRING);
+            this.AppendAddressLevel(sb, AddressLevel.COORDINATOR, "_A", this.AgentIndex);
+            this.AppendAddressLevel(sb, AddressLevel.AGENT, "_W", this.WorkerIndex);
+            this.AppendAddressLevel(sb, AddressLevel.WORKER, "_T", this.TestIndex);
+            return sb.ToString();
+        }
+
+        private void AppendAddressLevel(StringBuilder sb, AddressLevel parent, string name, int index)
+        {
+            if (parent.IsParentAddressLevel(this.AddressLevel))
+            {
+                sb.Append(name).Append(index != 0 ? index.ToString() : "*");
             }
         }
     }

@@ -24,8 +24,8 @@ namespace Hazelcast.Simulator.Protocol.Operations
         public CreateTestOperation(int testIndex, TestCase testCase)
         {
             this.TestIndex = testIndex;
-            this.testId = testCase.Id;
-            this.properties = testCase.Properties;
+            this.TestId = testCase.Id;
+            this.Properties = testCase.Properties;
         }
 
         public Task Run(OperationContext operationContext, ISimulatorOperation simulatorOperation)
