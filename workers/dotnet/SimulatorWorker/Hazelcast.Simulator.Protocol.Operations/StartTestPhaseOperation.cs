@@ -1,14 +1,18 @@
-﻿namespace Hazelcast.Simulator.Protocol.Operations
+﻿using System.Threading.Tasks;
+using Hazelcast.Simulator.Protocol.Processors;
+using Newtonsoft.Json;
+
+namespace Hazelcast.Simulator.Protocol.Operations
 {
 	public class StartTestPhaseOperation:ISimulatorOperation
 	{
-		public string TestPhase { get;}
+	    [JsonProperty("testPhase")]
+	    private readonly string testPhase;
 
-		public StartTestPhaseOperation(string testPhase)
-		{
-			TestPhase = testPhase;
-		}
-
+	    public Task Run(OperationContext operationContext, ISimulatorOperation simulatorOperation)
+	    {
+	        throw new System.NotImplementedException();
+	    }
 	}
 }
 

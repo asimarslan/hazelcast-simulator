@@ -7,25 +7,25 @@ using Newtonsoft.Json;
 namespace Hazelcast.Simulator.Protocol.Operations
 {
 
-    ///
+    /// <summary>
     /// Creates a Simulator Test based on an index, a testId and a property map.
-    ///
+    //</summary>
     public class CreateTestOperation : ISimulatorOperation
     {
         [JsonProperty("testIndex")]
-        public readonly int TestIndex;
+        private readonly int testIndex;
 
         [JsonProperty("testId")]
-        public readonly string TestId;
+        private readonly string testId;
 
-        [JsonIgnore]
-        public readonly IDictionary<string, string> Properties;
+        [JsonProperty("properties")]
+        private readonly IDictionary<string, string> properties;
 
         public CreateTestOperation(int testIndex, TestCase testCase)
         {
-            this.TestIndex = testIndex;
-            this.TestId = testCase.Id;
-            this.Properties = testCase.Properties;
+            this.testIndex = testIndex;
+            this.testId = testCase.Id;
+            this.properties = testCase.Properties;
         }
 
         public Task Run(OperationContext operationContext, ISimulatorOperation simulatorOperation)

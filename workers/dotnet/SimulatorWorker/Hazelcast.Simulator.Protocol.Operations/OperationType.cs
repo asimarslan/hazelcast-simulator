@@ -5,14 +5,17 @@ namespace Hazelcast.Simulator.Protocol.Operations
 {
 	public enum OperationType
 	{
+	    [Value(typeof(IntegrationTestOperation))]
+	    INTEGERATION_TEST=0,
+
+	    [Value(typeof(LogOperation))]
+	    LOG=1,
+
 		[Value(typeof(PingOperation))]
 		PING = 4000,
 
 		[Value(typeof(TerminateWorkerOperation))]
 		TERMINATE_WORKER = 4001,
-
-		[Value(typeof(KillWorkerOperation))]
-		KILL_WORKER = 4003,
 
 		[Value(typeof(CreateTestOperation))]
 		CREATE_TEST = 4002,
@@ -30,7 +33,7 @@ namespace Hazelcast.Simulator.Protocol.Operations
 		STOP_TEST=5002
 	}
 
-	public static class OperationTypes
+    public static class OperationTypes
 	{
 		public static Type GetClassType(this OperationType ot)
 		{

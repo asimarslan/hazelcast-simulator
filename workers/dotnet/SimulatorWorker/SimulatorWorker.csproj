@@ -71,6 +71,8 @@
     <Compile Include="Hazelcast.Simulator.Protocol.Handler\SimulatorMessageEncoder.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Handler\SimulatorProtocolDecoder.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\ExecuteScriptOperation.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Operations\IntegrationTestOperation.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Operations\LogOperation.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Processors\OperationContext.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Processors\OperationProcessor.cs" />
     <Compile Include="Hazelcast.Simulator.Test\TestCase.cs" />
@@ -90,7 +92,6 @@
     <Compile Include="Hazelcast.Simulator.Utils\ValueAttribute.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\PingOperation.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\TerminateWorkerOperation.cs" />
-    <Compile Include="Hazelcast.Simulator.Protocol.Operations\KillWorkerOperation.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\CreateTestOperation.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\StartTestOperation.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\StopTestOperation.cs" />
