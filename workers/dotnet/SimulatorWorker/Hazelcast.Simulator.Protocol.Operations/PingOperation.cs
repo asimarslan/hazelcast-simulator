@@ -1,4 +1,7 @@
-﻿namespace Hazelcast.Simulator.Protocol.Operations
+﻿using System.Threading.Tasks;
+using Hazelcast.Simulator.Protocol.Processors;
+
+namespace Hazelcast.Simulator.Protocol.Operations
 {
 	/**
 	 * Creates traffic on the wire, so the WorkerProcessFailureMonitor
@@ -8,5 +11,9 @@
 	 */
 	public class PingOperation : ISimulatorOperation
 	{
+	    public Task Run(OperationContext operationContext, ISimulatorOperation simulatorOperation)
+	    {
+	        throw new System.NotImplementedException();
+	    }
 	}
 }

@@ -1,5 +1,5 @@
 ﻿using System;
-namespace Hazelcast.Simulator.TestContainer
+namespace Hazelcast.Simulator.Test
 {
 	/**
 	 * Container for test instances.

@@ -1,6 +1,6 @@
 ﻿using System;
 using Hazelcast.Core;
-namespace Hazelcast.Simulator.TestContainer
+namespace Hazelcast.Simulator.Test
 {
 	public class TestContext
 	{
