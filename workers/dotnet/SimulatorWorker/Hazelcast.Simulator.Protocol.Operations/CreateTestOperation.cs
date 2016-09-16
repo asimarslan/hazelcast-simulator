@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Hazelcast.Simulator.Protocol.Connector;
 using Hazelcast.Simulator.Protocol.Processors;
 using Hazelcast.Simulator.Test;
+using log4net;
 using Newtonsoft.Json;
 
 namespace Hazelcast.Simulator.Protocol.Operations
@@ -12,6 +14,8 @@ namespace Hazelcast.Simulator.Protocol.Operations
     //</summary>
     public class CreateTestOperation : ISimulatorOperation
     {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(CreateTestOperation));
+
         [JsonProperty("testIndex")]
         private readonly int testIndex;
 
@@ -21,16 +25,22 @@ namespace Hazelcast.Simulator.Protocol.Operations
         [JsonProperty("properties")]
         private readonly IDictionary<string, string> properties;
 
+        [JsonIgnore]
+        private readonly TestCase testCase;
+
         public CreateTestOperation(int testIndex, TestCase testCase)
         {
             this.testIndex = testIndex;
             this.testId = testCase.Id;
             this.properties = testCase.Properties;
+            this.testCase = new TestCase(this.testId, this.properties);
         }
 
-        public Task Run(OperationContext operationContext, ISimulatorOperation simulatorOperation)
+        public Task Run(OperationContext opCtx, ISimulatorOperation simulatorOperation)
         {
-            throw new System.NotImplementedException();
+            Logger.Info(this.testCase.ToString());
+
+            opCtx.
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace Hazelcast.Simulator.Utils
+﻿using System;
+
+namespace Hazelcast.Simulator.Utils
 {
     public class Constants
     {
@@ -8,6 +10,6 @@
 
         public const int ADDRESS_SIZE = 4 * INT_SIZE;
 
-
+        public static readonly string NEW_LINE = Environment.NewLine;
     }
 }
