@@ -1,46 +1,43 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using Hazelcast.Core;
+using static Hazelcast.Simulator.Protocol.Core.SimulatorAddress;
+
 namespace Hazelcast.Simulator.Test
 {
-	public class TestContext
-	{
-		public const string LOCALHOST = "127.0.0.1";
+    public class TestContext : ITestContext
+    {
+        public const string LOCALHOST = "127.0.0.1";
 
-		public IHazelcastInstance TargetInstance { get; private set; }
-		public string TestId { get; private set;}
-		public string PublicIpAddress { get; private set; }
+        private IHazelcastInstance targetInstance;
+        private readonly string testId;
+        private readonly string publicIpAddress;
 
-		volatile bool _stopped;
+        private volatile bool stopped;
+        private bool warming;
 
-		public TestContext(string testId, IHazelcastInstance targetInstance=null, string publicIpAddress=LOCALHOST)
-		{
-			TestId = testId;
-			TargetInstance = targetInstance;
-			PublicIpAddress = publicIpAddress;
-		}
+        public TestContext(string testId, IHazelcastInstance targetInstance = null, string publicIpAddress = LOCALHOST)
+        {
+            this.testId = testId;
+            this.targetInstance = targetInstance;
+            this.publicIpAddress = publicIpAddress;
+        }
 
-		public bool IsStoppped { 
-			get 
-			{
-				return _stopped;
-			}
-			private set 
-			{ 
-				_stopped = value; 
-			} 
-		}
+        public bool IsWarmingUp() => this.warming;
 
-		public void Stop()
-		{
-			_stopped = true;
-		}
+        public string GetTestId() => this.testId;
 
-		public void AfterLocalWarmup()
-		{
-			_stopped = false;
-		}
+        public string GetPublicIpAddress() => this.publicIpAddress;
 
+        public bool IsStopped() => this.stopped;
 
-	}
+        public void Stop() => this.stopped = true;
+
+        public void EchoCoordinator(string msg)
+        {
+            //	        connector.Invoke(COORDINATOR, new LogOperation(message));
+        }
+
+        public void AfterLocalWarmup() => this.stopped = false;
+    }
 }
-

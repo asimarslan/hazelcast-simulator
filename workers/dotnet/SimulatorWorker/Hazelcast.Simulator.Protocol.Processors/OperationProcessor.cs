@@ -23,8 +23,12 @@ namespace Hazelcast.Simulator.Protocol.Processors
 {
     public class OperationProcessor
     {
-        private OperationContext operationContext;
+        private readonly OperationContext operationContext;
 
+        public OperationProcessor()
+        {
+            this.operationContext = new OperationContext();
+        }
 
         public void SubmitAsync(SimulatorMessage simulatorMessage)
         {
@@ -42,7 +46,7 @@ namespace Hazelcast.Simulator.Protocol.Processors
         private async Task ExecuteOperation(ISimulatorOperation simulatorOperation)
         {
 //            InitOperation(simulatorOperation);
-            await simulatorOperation.Run(this.operationContext, simulatorOperation);
+            await simulatorOperation.Run(this.operationContext);
         }
 
 //        private void InitOperation(ISimulatorOperation simulatorOperation)

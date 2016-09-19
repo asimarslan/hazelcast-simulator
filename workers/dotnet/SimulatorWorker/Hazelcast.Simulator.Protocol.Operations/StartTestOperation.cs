@@ -23,7 +23,7 @@ namespace Hazelcast.Simulator.Protocol.Operations
 
         public bool MatchesTargetWorkers(SimulatorAddress workerAddress) => this.targetWorkers.Count == 0 || this.targetWorkers.Contains(workerAddress.ToString());
 
-        public Task Run(OperationContext operationContext, ISimulatorOperation simulatorOperation)
+        public Task Run(OperationContext operationContext)
         {
             throw new System.NotImplementedException();
         }

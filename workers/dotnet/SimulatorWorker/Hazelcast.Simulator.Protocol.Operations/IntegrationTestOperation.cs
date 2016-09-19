@@ -34,7 +34,7 @@ namespace Hazelcast.Simulator.Protocol.Operations
         ///Defines the payload of this operation.
         public string TestData { get; }
 
-        public Task Run(OperationContext operationContext, ISimulatorOperation simulatorOperation)
+        public Task Run(OperationContext operationContext)
         {
             throw new System.NotImplementedException();
         }

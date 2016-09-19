@@ -23,7 +23,7 @@ namespace Hazelcast.Simulator.Protocol.Operations
         private readonly string level;
 
 
-        public Task Run(OperationContext operationContext, ISimulatorOperation simulatorOperation)
+        public Task Run(OperationContext operationContext)
         {
             throw new System.NotImplementedException();
         }

@@ -5,7 +5,7 @@ namespace Hazelcast.Simulator.Protocol.Operations
 {
 	public interface ISimulatorOperation
 	{
-	    Task Run(OperationContext operationContext, ISimulatorOperation simulatorOperation);
+	    Task Run(OperationContext operationContext);
 	}
 }
 

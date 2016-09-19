@@ -9,7 +9,7 @@ namespace Hazelcast.Simulator.Protocol.Operations
 	    [JsonProperty("testPhase")]
 	    private readonly string testPhase;
 
-	    public Task Run(OperationContext operationContext, ISimulatorOperation simulatorOperation)
+	    public Task Run(OperationContext operationContext)
 	    {
 	        throw new System.NotImplementedException();
 	    }

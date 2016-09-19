@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Hazelcast.Simulator.Protocol.Connector;
 using Hazelcast.Simulator.Protocol.Processors;
@@ -36,11 +37,16 @@ namespace Hazelcast.Simulator.Protocol.Operations
             this.testCase = new TestCase(this.testId, this.properties);
         }
 
-        public Task Run(OperationContext opCtx, ISimulatorOperation simulatorOperation)
+        public Task Run(OperationContext ctx)
         {
             Logger.Info(this.testCase.ToString());
 
-            opCtx.
+            if (!ctx.Tests.TryAdd(this.testId, new TestContainer()))
+            {
+                throw new InvalidOperationException($"Can't init {this.testCase}, another test with testId {this.testId} already exists");
+            }
+
+
         }
     }
 }

@@ -75,6 +75,8 @@
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\LogOperation.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Processors\OperationContext.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Processors\OperationProcessor.cs" />
+    <Compile Include="Hazelcast.Simulator.Test\Attributes.cs" />
+    <Compile Include="Hazelcast.Simulator.Test\ITestContext.cs" />
     <Compile Include="Hazelcast.Simulator.Test\TestCase.cs" />
     <Compile Include="Hazelcast.Simulator.Utils\AtomicBoolean.cs" />
     <Compile Include="Hazelcast.Simulator.Utils\Constants.cs" />
