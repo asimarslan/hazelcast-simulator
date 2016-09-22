@@ -17,18 +17,20 @@ namespace Hazelcast.Simulator.Test
 {
 
     [AttributeUsage(AttributeTargets.Method)]
-    public class SetUpAttribute : Attribute
+    public class SetupAttribute : Attribute
     {
     }
 
     [AttributeUsage(AttributeTargets.Method)]
     public class TeardownAttribute : Attribute
     {
+        public bool Global { get; set; } = false;
     }
 
     [AttributeUsage(AttributeTargets.Method)]
     public class VerifyAttribute : Attribute
     {
+        public bool Global { get; set; } = false;
     }
 
     [AttributeUsage(AttributeTargets.Method)]
@@ -49,6 +51,7 @@ namespace Hazelcast.Simulator.Test
     [AttributeUsage(AttributeTargets.Method)]
     public class PrepareAttribute : Attribute
     {
+        public bool Global { get; set; } = false;
     }
 
     [AttributeUsage(AttributeTargets.Field)]

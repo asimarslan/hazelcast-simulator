@@ -22,7 +22,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import sun.management.resources.agent;
 
 import java.io.File;
 
@@ -116,6 +115,27 @@ public class CoordinatorTest {
     }
 
     @Test
+    public void install() throws Exception {
+        String commitHash = "0dc65895e880eb4cbdd6996e355913992bf987d9";
+        String versionSpec = "git=" + commitHash;
+        coordinator.install(versionSpec);
+
+        String worker = coordinator.workerStart(
+                new RcWorkerStartOperation()
+                        .setWorkerType("member")
+                        .setHzConfig(hzConfig)
+                        .setVersionSpec(versionSpec));
+
+        StubPromise promise = new StubPromise();
+        coordinator.workerScript(
+                new RcWorkerScriptOperation(
+                        "js:com.hazelcast.instance.BuildInfoProvider.getBuildInfo().getRevision()"), promise);
+
+        assertEquals(SUCCESS, promise.get());
+        System.out.println(promise.getResponse());
+    }
+
+    @Test
     public void workersStart_multipleWorkers() throws Exception {
         assertEquals("C_A1_W" + (initialWorkerIndex + 1),
                 coordinator.workerStart(new RcWorkerStartOperation()
@@ -198,6 +218,23 @@ public class CoordinatorTest {
         coordinator.workerStart(new RcWorkerStartOperation().setHzConfig(hzConfig));
 
         TestSuite suite = newBasicTestSuite();
+
+        StubPromise promise = new StubPromise();
+        coordinator.testRun(new RcTestRunOperation(suite).setAsync(false), promise);
+
+        assertEquals(SUCCESS, promise.get());
+    }
+
+    @Test
+    public void testRunDotNetClient() throws Exception {
+        // start worker.
+        coordinator.workerStart(new RcWorkerStartOperation().setHzConfig(hzConfig));
+
+        // start client .net client
+        coordinator.workerStart(new RcWorkerStartOperation().setHzConfig("dotnetclientconfig").setWorkerType("dotnetclient"));
+
+        TestSuite suite = newBasicTestSuite();
+//        TestSuite suite = new TestSuite().addTest(new TestCase());
 
         StubPromise promise = new StubPromise();
         coordinator.testRun(new RcTestRunOperation(suite).setAsync(false), promise);

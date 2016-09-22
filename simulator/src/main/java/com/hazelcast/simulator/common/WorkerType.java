@@ -25,6 +25,7 @@ public final class WorkerType {
     public static final WorkerType MEMBER = new WorkerType("member");
     public static final WorkerType JAVA_CLIENT = new WorkerType("javaclient");
     public static final WorkerType LITE_MEMBER = new WorkerType("litemember");
+    public static final WorkerType DOTNET_CLIENT = new WorkerType("dotnetclient");
 
     private final String name;
 

@@ -75,12 +75,18 @@
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\LogOperation.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Processors\OperationContext.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Processors\OperationProcessor.cs" />
+    <Compile Include="Hazelcast.Simulator.Tests\FailingTest.cs" />
+    <Compile Include="Hazelcast.Simulator.Tests\SuccessTest.cs" />
+    <Compile Include="Hazelcast.Simulator.Test\AbstractTest.cs" />
     <Compile Include="Hazelcast.Simulator.Test\Attributes.cs" />
     <Compile Include="Hazelcast.Simulator.Test\ITestContext.cs" />
     <Compile Include="Hazelcast.Simulator.Test\TestCase.cs" />
+    <Compile Include="Hazelcast.Simulator.Test\TestException.cs" />
     <Compile Include="Hazelcast.Simulator.Test\TestPhase.cs" />
     <Compile Include="Hazelcast.Simulator.Utils\AtomicBoolean.cs" />
     <Compile Include="Hazelcast.Simulator.Utils\Constants.cs" />
+    <Compile Include="Hazelcast.Simulator.Utils\DependencyInjectionUtil.cs" />
+    <Compile Include="Hazelcast.Simulator.Utils\ReflectionUtil.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Hazelcast.Simulator.Worker\ClientWorker.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Connector\WorkerConnector.cs" />
@@ -112,6 +118,7 @@
     <Folder Include="DotNetty.Codecs" />
     <Folder Include="DotNetty.Transport.Channels" />
     <Folder Include="Hazelcast.Simulator.Protocol.Handler" />
+    <Folder Include="Hazelcast.Simulator.Tests" />
     <Folder Include="Hazelcast.Simulator.Worker\" />
     <Folder Include="Hazelcast.Simulator.Utils\" />
     <Folder Include="Hazelcast.Simulator.Protocol.Core\" />

@@ -516,6 +516,12 @@ public class Coordinator implements Closeable {
                     componentRegistry,
                     env,
                     parameters.getLicenseKey());
+        } else if (WorkerType.DOTNET_CLIENT.equals(workerType)) {
+            config = initClientHzConfig(
+                    op.getHzConfig() == null ? loadClientHzConfig() : op.getHzConfig(),
+                    componentRegistry,
+                    env,
+                    parameters.getLicenseKey());
         } else {
             throw new IllegalStateException("Unrecognized workerType [" + workerType + "]");
         }

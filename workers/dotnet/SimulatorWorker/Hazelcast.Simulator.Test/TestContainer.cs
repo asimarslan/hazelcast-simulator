@@ -22,17 +22,32 @@ namespace Hazelcast.Simulator.Test
 	 */
 	public class TestContainer
 	{
-	    private TestContext testContext;
+	    private readonly TestContext testContext;
+	    private readonly TestCase testCase;
+
 	    private TestPhase currentPhase;
 
 	    private AtomicBoolean running = new AtomicBoolean(false);
 
 	    private IDictionary<TestPhase, Delegate> phaseDelegates = new Dictionary<TestPhase, Delegate>();
 
+	    private object testInstance;
+
 	    public TestContainer(TestContext testContext, TestCase testCase)
 	    {
+	        this.testContext = testContext;
+	        this.testCase = testCase;
+
+	        this.testInstance = ReflectionUtil.CreateInstanceOfType(testCase.GetClassname());
+
+	        this.InjectDependencies();
 
 	        this.RegisterPhaseDelegates();
+	    }
+
+	    private void InjectDependencies()
+	    {
+	        throw new NotImplementedException();
 	    }
 
 	    public async Task Invoke(TestPhase testPhase)
@@ -52,7 +67,6 @@ namespace Hazelcast.Simulator.Test
 	        {
 	            this.testContext.AfterWarmup();
 	        }
-
 
 	    }
 
