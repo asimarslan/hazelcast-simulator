@@ -12,11 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using log4net;
 using System.Collections.Generic;
 using System.Text;
-using Newtonsoft.Json;
 using static Hazelcast.Simulator.Utils.Constants;
 
 namespace Hazelcast.Simulator.Test
@@ -25,10 +23,8 @@ namespace Hazelcast.Simulator.Test
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(TestCase));
 
-        [JsonProperty("id")]
         public string Id { get; set; }
 
-        [JsonProperty("properties")]
         public IDictionary<string, string> Properties { get; }
 
         public TestCase(string testId, IDictionary<string, string> properties)
@@ -37,11 +33,28 @@ namespace Hazelcast.Simulator.Test
             this.Properties = properties;
         }
 
+        public string GetClassname() => this.Properties["class"];
+
+        public string GetProperty(string name) => this.Properties[name];
+
+        public string SetProperty(string name, string value) => this.Properties[name] = value;
+
+        public void OverrideProperties(IDictionary<string, string> properties)
+        {
+            foreach (KeyValuePair<string, string> pair in this.Properties)
+            {
+                if (properties.ContainsKey(pair.Key))
+                {
+                    this.SetProperty(pair.Key, pair.Value);
+                }
+            }
+        }
+
         public override string ToString()
         {
             var sb = new StringBuilder("TestCase{");
-            sb.Append(NEW_LINE).Append("    ").Append("id=").Append(id);
-            sb.Append(',').Append(NEW_LINE).Append("    ").Append("class=").Append(getClassname());
+            sb.Append(NEW_LINE).Append("    ").Append("id=").Append(this.Id);
+            sb.Append(',').Append(NEW_LINE).Append("    ").Append("class=").Append(this.GetClassname());
 
             var keys = new List<string>(this.Properties.Keys);
             keys.Sort();
@@ -56,6 +69,5 @@ namespace Hazelcast.Simulator.Test
             sb.Append(NEW_LINE).Append('}');
             return sb.ToString();
         }
-    }
     }
 }

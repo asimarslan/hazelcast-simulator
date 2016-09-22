@@ -2,7 +2,7 @@
 
 namespace Hazelcast.Simulator.Utils
 {
-  internal class AtomicBoolean
+  class AtomicBoolean
   {
     private int _value;
 
@@ -19,13 +19,10 @@ namespace Hazelcast.Simulator.Utils
     {
       var e = expect ? 1 : 0;
       var u = update ? 1 : 0;
-      return (Interlocked.CompareExchange(ref _value, u, e) == e);
+      return Interlocked.CompareExchange(ref _value, u, e) == e;
     }
 
-    public bool Get()
-    {
-      return _value != 0;
-    }
+    public bool Get() => this._value != 0;
 
     public bool GetAndSet(bool newValue)
     {
@@ -42,9 +39,6 @@ namespace Hazelcast.Simulator.Utils
       _value = newValue ? 1 : 0;
     }
 
-    public bool WeakCompareAndSet(bool expect, bool update)
-    {
-      return CompareAndSet(expect, update);
-    }
+    public bool WeakCompareAndSet(bool expect, bool update) => this.CompareAndSet(expect, update);
   }
 }

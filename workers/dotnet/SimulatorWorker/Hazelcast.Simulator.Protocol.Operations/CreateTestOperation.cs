@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Hazelcast.Simulator.Protocol.Connector;
+using Hazelcast.Simulator.Protocol.Core;
 using Hazelcast.Simulator.Protocol.Processors;
 using Hazelcast.Simulator.Test;
 using log4net;
@@ -37,7 +38,7 @@ namespace Hazelcast.Simulator.Protocol.Operations
             this.testCase = new TestCase(this.testId, this.properties);
         }
 
-        public Task Run(OperationContext ctx)
+        public async Task Run(OperationContext ctx, SimulatorMessage msg)
         {
             Logger.Info(this.testCase.ToString());
 
@@ -45,8 +46,6 @@ namespace Hazelcast.Simulator.Protocol.Operations
             {
                 throw new InvalidOperationException($"Can't init {this.testCase}, another test with testId {this.testId} already exists");
             }
-
-
         }
     }
 }

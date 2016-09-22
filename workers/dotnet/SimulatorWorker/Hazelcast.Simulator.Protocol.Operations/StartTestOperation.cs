@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Hazelcast.Simulator.Protocol.Core;
 using Hazelcast.Simulator.Protocol.Processors;
+using Hazelcast.Simulator.Test;
 using Newtonsoft.Json;
 
 namespace Hazelcast.Simulator.Protocol.Operations
@@ -23,9 +25,32 @@ namespace Hazelcast.Simulator.Protocol.Operations
 
         public bool MatchesTargetWorkers(SimulatorAddress workerAddress) => this.targetWorkers.Count == 0 || this.targetWorkers.Contains(workerAddress.ToString());
 
-        public Task Run(OperationContext operationContext)
+        public async Task Run(OperationContext operationContext, SimulatorMessage msg)
         {
-            throw new System.NotImplementedException();
+            TestContainer testContainer;
+            if (!operationContext.Tests.TryGetValue(msg.Destination.TestIndex, out testContainer))
+            {
+                throw new InvalidOperationException($"Test not created yet with testIndex:{msg.Destination.TestIndex}");
+            }
+            TestPhase testPhase = this.warmup ? TestPhase.Warmup : TestPhase.Run;
+
+            if (this.SkipRunPhase())
+            {
+                this.SendPhaseCompletedOperation(testPhase);
+                return;
+            }
+
+            await testContainer.Invoke(testPhase);
+        }
+
+        private bool SkipRunPhase()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void SendPhaseCompletedOperation(TestPhase tp)
+        {
+            throw new NotImplementedException();
         }
     }
 }

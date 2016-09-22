@@ -9,13 +9,13 @@ namespace Hazelcast.Simulator.Protocol.Processors
     {
         public IHazelcastInstance HazelcastInstance { get;}
         public SimulatorAddress WorkerAddress { get; }
-        public ConcurrentDictionary<string, TestContainer> Tests { get; }
+        public ConcurrentDictionary<int, TestContainer> Tests { get; }
 
         public OperationContext(IHazelcastInstance hazelcastInstance, SimulatorAddress workerAddress)
         {
             this.HazelcastInstance = hazelcastInstance;
             this.WorkerAddress = workerAddress;
-            this.Tests = new ConcurrentDictionary<string, TestContainer>();
+            this.Tests = new ConcurrentDictionary<int, TestContainer>();
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Hazelcast.Simulator.Protocol.Core;
 using Hazelcast.Simulator.Protocol.Processors;
 
 namespace Hazelcast.Simulator.Protocol.Operations
@@ -11,7 +12,7 @@ namespace Hazelcast.Simulator.Protocol.Operations
 	 */
 	public class PingOperation : ISimulatorOperation
 	{
-	    public Task Run(OperationContext operationContext)
+	    public Task Run(OperationContext operationContext, SimulatorMessage msg)
 	    {
 	        throw new System.NotImplementedException();
 	    }

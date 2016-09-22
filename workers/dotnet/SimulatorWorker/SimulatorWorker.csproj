@@ -78,6 +78,7 @@
     <Compile Include="Hazelcast.Simulator.Test\Attributes.cs" />
     <Compile Include="Hazelcast.Simulator.Test\ITestContext.cs" />
     <Compile Include="Hazelcast.Simulator.Test\TestCase.cs" />
+    <Compile Include="Hazelcast.Simulator.Test\TestPhase.cs" />
     <Compile Include="Hazelcast.Simulator.Utils\AtomicBoolean.cs" />
     <Compile Include="Hazelcast.Simulator.Utils\Constants.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -1,4 +1,11 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using DotNetty.Common.Utilities;
+using Hazelcast.Simulator.Utils;
+
 namespace Hazelcast.Simulator.Test
 {
 	/**
@@ -15,9 +22,44 @@ namespace Hazelcast.Simulator.Test
 	 */
 	public class TestContainer
 	{
-		public TestContainer()
-		{
-		}
+	    private TestContext testContext;
+	    private TestPhase currentPhase;
+
+	    private AtomicBoolean running = new AtomicBoolean(false);
+
+	    private IDictionary<TestPhase, Delegate> phaseDelegates = new Dictionary<TestPhase, Delegate>();
+
+	    public TestContainer(TestContext testContext, TestCase testCase)
+	    {
+
+	        this.RegisterPhaseDelegates();
+	    }
+
+	    public async Task Invoke(TestPhase testPhase)
+	    {
+	        if (!this.running.CompareAndSet(false, true))
+	        {
+	            throw new InvalidOperationException($"Test:{this.testContext.GetTestId()} is still running phase:{this.currentPhase}");
+	        }
+	        this.currentPhase = testPhase;
+
+
+	        if (testPhase == TestPhase.Warmup)
+	        {
+	            this.testContext.BeforeWarmup();
+	        }
+	        else if (testPhase == TestPhase.LocalAfterWarmup)
+	        {
+	            this.testContext.AfterWarmup();
+	        }
+
+
+	    }
+
+	    private void RegisterPhaseDelegates()
+	    {
+	        throw new NotImplementedException();
+	    }
 	}
 }
 

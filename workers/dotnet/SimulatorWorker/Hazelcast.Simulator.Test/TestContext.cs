@@ -14,7 +14,7 @@ namespace Hazelcast.Simulator.Test
         private readonly string publicIpAddress;
 
         private volatile bool stopped;
-        private bool warming;
+        private bool warmingUp;
 
         public TestContext(string testId, IHazelcastInstance targetInstance = null, string publicIpAddress = LOCALHOST)
         {
@@ -23,7 +23,7 @@ namespace Hazelcast.Simulator.Test
             this.publicIpAddress = publicIpAddress;
         }
 
-        public bool IsWarmingUp() => this.warming;
+        public bool IsWarmingUp() => this.warmingUp;
 
         public string GetTestId() => this.testId;
 
@@ -38,6 +38,8 @@ namespace Hazelcast.Simulator.Test
             //	        connector.Invoke(COORDINATOR, new LogOperation(message));
         }
 
-        public void AfterLocalWarmup() => this.stopped = false;
+        public void BeforeWarmup() => this.warmingUp = true;
+
+        public void AfterWarmup() => this.warmingUp = this.stopped = false;
     }
 }

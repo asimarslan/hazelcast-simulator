@@ -43,10 +43,10 @@ namespace Hazelcast.Simulator.Protocol.Processors
             await this.ExecuteOperation(simulatorOperation);
         }
 
-        private async Task ExecuteOperation(ISimulatorOperation simulatorOperation)
+        private async Task ExecuteOperation(ISimulatorOperation simulatorOperation, SimulatorMessage msg)
         {
 //            InitOperation(simulatorOperation);
-            await simulatorOperation.Run(this.operationContext);
+            await simulatorOperation.Run(this.operationContext, TODO);
         }
 
 //        private void InitOperation(ISimulatorOperation simulatorOperation)
