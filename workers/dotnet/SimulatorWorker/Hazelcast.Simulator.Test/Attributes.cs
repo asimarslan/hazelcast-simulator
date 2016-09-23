@@ -57,6 +57,7 @@ namespace Hazelcast.Simulator.Test
     [AttributeUsage(AttributeTargets.Field)]
     public class InjectAttribute : Attribute
     {
+        public string Property { get; set; }
     }
 
     [AttributeUsage(AttributeTargets.Field)]

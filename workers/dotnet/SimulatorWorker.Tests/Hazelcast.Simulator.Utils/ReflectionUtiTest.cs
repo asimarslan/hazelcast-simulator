@@ -11,27 +11,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-
-namespace Hazelcast.Simulator.Utils
+namespace SimulatorWorker.Test.Hazelcast.Simulator.Utils
 {
-    public class ReflectionUtil
+    public class ReflectionUtiTest
     {
-        public static object CreateInstanceOfType(string typeName)
-        {
-            Type type = Type.GetType(typeName, true, false);
-            return Activator.CreateInstance(type);
-        }
-
-        public static IEnumerable<MemberInfo> GetFieldWithAttribute(Type type, Type attributeType)
-        {
-            return type.GetMembers(BindingFlags.Instance | BindingFlags.GetField).Where(field => field.IsDefined(attributeType, true));
-        }
-
 
     }
 }

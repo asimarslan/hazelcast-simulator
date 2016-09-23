@@ -43,6 +43,7 @@
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\OperationTypeTest.cs" />
     <Compile Include="Hazelcast.Simulator.Test\TestContainerTest.cs" />
     <Compile Include="Hazelcast.Simulator.Test\TestPhaseTest.cs" />
+    <Compile Include="Hazelcast.Simulator.Utils\ReflectionUtiTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SimulatorWorker\SimulatorWorker.csproj">
