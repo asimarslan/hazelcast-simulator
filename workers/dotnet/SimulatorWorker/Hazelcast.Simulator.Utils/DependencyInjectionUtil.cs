@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Hazelcast.Simulator.Test;
@@ -23,18 +22,19 @@ namespace Hazelcast.Simulator.Utils
     public class DependencyInjectionUtil
     {
 
-        public void Inject(object instance, string fieldName, object value)
+        public static bool Inject(object instance, string fieldName, object value)
         {
             IEnumerable<MemberInfo> fieldWithAttribute = GetFieldWithAttribute(instance.GetType(), typeof(InjectAttribute));
-            foreach (var memberInfo in fieldWithAttribute)
+            foreach (MemberInfo memberInfo in fieldWithAttribute)
             {
-                var fieldInfo = memberInfo as FieldInfo;
-                var injectAttr = fieldInfo.GetCustomAttribute<InjectAttribute>();
-                if (fieldInfo != null && injectAttr.Property == fieldName)
+                var injectAttr = memberInfo.GetCustomAttribute<InjectAttribute>();
+                if (injectAttr.Property == fieldName)
                 {
-                    fieldInfo.SetValue(instance, value);
+                    SetValue(instance, memberInfo, value);
+                    return true;
                 }
             }
+            return false;
         }
     }
 }

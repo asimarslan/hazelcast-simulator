@@ -42,7 +42,8 @@ namespace Hazelcast.Simulator.Protocol.Operations
         {
             Logger.Info(this.testCase.ToString());
 
-            if (!ctx.Tests.TryAdd(this.testId, new TestContainer()))
+            TestContext testContext= null; //TODO fixme
+            if (!ctx.Tests.TryAdd(this.testIndex, new TestContainer(testContext, this.testCase)))
             {
                 throw new InvalidOperationException($"Can't init {this.testCase}, another test with testId {this.testId} already exists");
             }

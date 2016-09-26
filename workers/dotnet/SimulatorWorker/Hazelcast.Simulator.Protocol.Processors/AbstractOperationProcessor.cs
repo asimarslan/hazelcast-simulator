@@ -12,9 +12,11 @@ namespace Hazelcast.Simulator.Protocol.Processors
     {
         private static ILog Logger = LogManager.GetLogger(typeof(AbstractOperationProcessor));
 
-        public Task<ResponseType> Process(SimulatorMessage msg)
+        public async Task<ResponseType> Process(SimulatorMessage msg)
         {
             var simulatorOperation = JsonConvert.DeserializeObject(msg.OperationData, msg.OperationType.GetClassType());
+
+            throw new NotImplementedException();
         }
     }
 }

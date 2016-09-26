@@ -1,12 +1,11 @@
-﻿using Hazelcast.Simulator.Test;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
-namespace Hazelcast.Simulator.Protocol.Operations
+namespace Hazelcast.Simulator.Test
 {
 	[TestFixture]
 	public class TestPhaseTest
 	{
-		[NUnit.Framework.SetUp]
+		[SetUp]
 		public void Setup()
 		{
 		}

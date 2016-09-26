@@ -27,7 +27,7 @@ namespace Hazelcast.Simulator.Protocol.Processors
 
         public OperationProcessor()
         {
-            this.operationContext = new OperationContext();
+//            this.operationContext = new OperationContext();
         }
 
         public void SubmitAsync(SimulatorMessage simulatorMessage)
@@ -40,13 +40,13 @@ namespace Hazelcast.Simulator.Protocol.Processors
             var simulatorOperation = JsonConvert.DeserializeObject(msg.OperationData, msg.OperationType.GetClassType())
                 as ISimulatorOperation;
 
-            await this.ExecuteOperation(simulatorOperation);
+//            await this.ExecuteOperation(simulatorOperation);
         }
 
         private async Task ExecuteOperation(ISimulatorOperation simulatorOperation, SimulatorMessage msg)
         {
 //            InitOperation(simulatorOperation);
-            await simulatorOperation.Run(this.operationContext, TODO);
+//            await simulatorOperation.Run(this.operationContext, TODO);
         }
 
 //        private void InitOperation(ISimulatorOperation simulatorOperation)

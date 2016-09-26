@@ -54,7 +54,7 @@ namespace Hazelcast.Simulator.Test
         public bool Global { get; set; } = false;
     }
 
-    [AttributeUsage(AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property )]
     public class InjectAttribute : Attribute
     {
         public string Property { get; set; }

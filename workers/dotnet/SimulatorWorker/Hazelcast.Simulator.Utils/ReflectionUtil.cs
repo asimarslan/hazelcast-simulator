@@ -29,9 +29,23 @@ namespace Hazelcast.Simulator.Utils
 
         public static IEnumerable<MemberInfo> GetFieldWithAttribute(Type type, Type attributeType)
         {
-            return type.GetMembers(BindingFlags.Instance | BindingFlags.GetField).Where(field => field.IsDefined(attributeType, true));
+            //| BindingFlags.GetField| BindingFlags.GetProperty
+            return type.GetMembers(BindingFlags.Public | BindingFlags.Instance).Where(field => field.IsDefined(attributeType, true));
         }
 
-
+        public static void SetValue(object instance, MemberInfo memberInfo, object value)
+        {
+            switch (memberInfo.MemberType)
+            {
+                case MemberTypes.Field:
+                    ((FieldInfo)memberInfo).SetValue(instance, value);
+                    break;
+                case MemberTypes.Property:
+                    ((PropertyInfo)memberInfo).SetValue(instance, value);
+                    break;
+                default:
+                    throw new NotSupportedException();
+            }
+        }
     }
 }
