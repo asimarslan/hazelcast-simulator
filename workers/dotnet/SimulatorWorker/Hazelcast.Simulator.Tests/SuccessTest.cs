@@ -25,22 +25,22 @@ namespace Hazelcast.Simulator.Tests
         [Setup]
         public void Setup(ITestContext testContext) => this.context = testContext;
 
-        [Teardown(Global = false)]
+        [Teardown]
         public void LocalTearDown() {}
 
-        [Teardown(Global = true)]
+        [Teardown(true)]
         public void GlobalTearDown() {}
 
-        [Prepare(Global = false)]
+        [Prepare]
         public void LocalPrepare() => Thread.Sleep(1);
 
-        [Prepare(Global = true)]
+        [Prepare(true)]
         public void GlobalPrepare() => Thread.Sleep(1);
 
-        [Verify(Global = false)]
+        [Verify]
         public void LocalVerify() {}
 
-        [Verify(Global = true)]
+        [Verify(true)]
         public void GlobalVerify() {}
 
         [Run]

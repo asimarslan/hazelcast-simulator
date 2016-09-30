@@ -35,6 +35,9 @@
     <Reference Include="DotNetty.Codecs, Version=0.3.2.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\packages\DotNetty.Codecs.0.3.2\lib\net45\DotNetty.Codecs.dll</HintPath>
     </Reference>
+    <Reference Include="HdrHistogram, Version=1.0.0.0, Culture=neutral, PublicKeyToken=56a8eed952212876">
+      <HintPath>..\packages\HdrHistogram.1.14.0\lib\net45\HdrHistogram.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="log4net">
       <HintPath>..\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
@@ -59,6 +62,9 @@
   <ItemGroup>
     <Compile Include="DotNetty.Codecs\MessageToByteEncoder.cs" />
     <Compile Include="DotNetty.Transport.Channels\SimpleChannelInboundHandler.cs" />
+    <Compile Include="Hazelcast.Simulator.Probe\EmptyProbe.cs" />
+    <Compile Include="Hazelcast.Simulator.Probe\HdrProbe.cs" />
+    <Compile Include="Hazelcast.Simulator.Probe\IProbe.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Core\Response.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Core\ResponseCodec.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Core\SimulatorAddressCodec.cs" />
@@ -84,6 +90,7 @@
     <Compile Include="Hazelcast.Simulator.Test\TestException.cs" />
     <Compile Include="Hazelcast.Simulator.Test\TestPhase.cs" />
     <Compile Include="Hazelcast.Simulator.Utils\AtomicBoolean.cs" />
+    <Compile Include="Hazelcast.Simulator.Utils\BindingContainer.cs" />
     <Compile Include="Hazelcast.Simulator.Utils\Constants.cs" />
     <Compile Include="Hazelcast.Simulator.Utils\DependencyInjectionUtil.cs" />
     <Compile Include="Hazelcast.Simulator.Utils\ReflectionUtil.cs" />
@@ -119,6 +126,7 @@
     <Folder Include="DotNetty.Transport.Channels" />
     <Folder Include="Hazelcast.Simulator.Protocol.Handler" />
     <Folder Include="Hazelcast.Simulator.Tests" />
+    <Folder Include="Hazelcast.Simulator.Worker" />
     <Folder Include="Hazelcast.Simulator.Worker\" />
     <Folder Include="Hazelcast.Simulator.Utils\" />
     <Folder Include="Hazelcast.Simulator.Protocol.Core\" />

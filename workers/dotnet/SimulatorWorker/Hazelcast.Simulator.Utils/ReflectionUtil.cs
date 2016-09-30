@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Hazelcast.Simulator.Test;
 
 namespace Hazelcast.Simulator.Utils
 {
@@ -27,10 +28,20 @@ namespace Hazelcast.Simulator.Utils
             return Activator.CreateInstance(type);
         }
 
+        public static MemberInfo[] FindMemberInfo(Type type, string memberName)
+        {
+            MemberInfo[] memberInfos = GetFieldWithAttribute(type, typeof(NamedAttribute)).ToArray();
+            if (memberInfos.Length == 0)
+            {
+                memberInfos = type.GetMember(memberName, BindingFlags.Public | BindingFlags.Instance);
+            }
+            return memberInfos;
+        }
+
         public static IEnumerable<MemberInfo> GetFieldWithAttribute(Type type, Type attributeType)
         {
-            //| BindingFlags.GetField| BindingFlags.GetProperty
-            return type.GetMembers(BindingFlags.Public | BindingFlags.Instance).Where(field => field.IsDefined(attributeType, true));
+            MemberInfo[] memberInfos = type.GetMembers(BindingFlags.Public | BindingFlags.Instance);
+            return memberInfos.Where(field => field.IsDefined(attributeType, true));
         }
 
         public static void SetValue(object instance, MemberInfo memberInfo, object value)
@@ -42,6 +53,25 @@ namespace Hazelcast.Simulator.Utils
                     break;
                 case MemberTypes.Property:
                     ((PropertyInfo)memberInfo).SetValue(instance, value);
+                    break;
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+
+        public static void SetValue(object instance, MemberInfo memberInfo, string valueStr)
+        {
+            switch (memberInfo.MemberType)
+            {
+                case MemberTypes.Field:
+                    var fieldInfo = (FieldInfo)memberInfo;
+                    var fieldValue = Convert.ChangeType(valueStr, fieldInfo.FieldType);
+                    fieldInfo.SetValue(instance, fieldValue);
+                    break;
+                case MemberTypes.Property:
+                    var propertyInfo = (PropertyInfo)memberInfo;
+                    var propertyValue = Convert.ChangeType(valueStr, propertyInfo.PropertyType);
+                    propertyInfo.SetValue(instance, propertyValue);
                     break;
                 default:
                     throw new NotSupportedException();

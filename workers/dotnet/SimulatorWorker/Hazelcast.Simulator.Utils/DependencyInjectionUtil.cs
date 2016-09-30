@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Hazelcast.Simulator.Test;
@@ -22,7 +23,57 @@ namespace Hazelcast.Simulator.Utils
     public class DependencyInjectionUtil
     {
 
-        public static bool Inject(object instance, string fieldName, object value)
+        public static bool Inject(object instance, string fieldPath, object value)
+        {
+            var fieldWithAttribute = GetFieldWithAttribute(instance.GetType(), typeof(InjectAttribute));
+            foreach (MemberInfo memberInfo in fieldWithAttribute)
+            {
+                var injectAttr = memberInfo.GetCustomAttribute<InjectAttribute>();
+                if (injectAttr.Property == fieldPath)
+                {
+                    SetValue(instance, memberInfo, value);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public static bool Inject(object instance, string fieldPath, string valueStr)
+        {
+            valueStr = valueStr.Trim();
+            string[] path = fieldPath.Split('.');
+
+            object targetObject = FindTargetObject(instance, path);
+
+            return Inject0(instance, path, valueStr);
+        }
+
+        private static object FindTargetObject(object parent, string[] fieldPath)
+        {
+            for (int i = 0; i < fieldPath.Length-1; i++)
+            {
+                Type type = parent.GetType();
+                var fieldName = fieldPath[i];
+
+                FindField(type, fieldName);
+            }
+
+
+        }
+
+        internal static bool Inject0(object instance, string[] fieldPath, string valueStr)
+        {
+            if (fieldPath.Length < 1)
+            {
+                return false;
+            }
+            if (fieldPath.Length > 1)
+            {
+
+            }
+        }
+
+        internal static bool InjectToField(object instance, string fieldName, string valueStr)
         {
             IEnumerable<MemberInfo> fieldWithAttribute = GetFieldWithAttribute(instance.GetType(), typeof(InjectAttribute));
             foreach (MemberInfo memberInfo in fieldWithAttribute)
@@ -30,7 +81,7 @@ namespace Hazelcast.Simulator.Utils
                 var injectAttr = memberInfo.GetCustomAttribute<InjectAttribute>();
                 if (injectAttr.Property == fieldName)
                 {
-                    SetValue(instance, memberInfo, value);
+                    SetValue(instance, memberInfo, valueStr);
                     return true;
                 }
             }

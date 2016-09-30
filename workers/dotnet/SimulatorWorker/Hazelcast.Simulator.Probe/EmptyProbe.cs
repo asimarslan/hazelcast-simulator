@@ -11,36 +11,20 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-using System.Threading;
-using Hazelcast.Simulator.Test;
-
-namespace Hazelcast.Simulator.Tests
+namespace Hazelcast.Simulator.Probe
 {
-    public class FailingTest : AbstractTest
+    /// <summary>
+    /// A <see cref="IProbe"/> implementation that doesn't do anything.
+    /// </summary>
+    public class EmptyProbe : IProbe
     {
-        public int count;
+        public static readonly EmptyProbe Instance = new EmptyProbe();
 
-        [Prepare]
-        public void Prepare() => Thread.Sleep(1);
+        public bool IsPartOfTotalThroughput() => false;
 
+        public void Done(long startNanos) {}
 
-        [Verify]
-        public void Verify() {}
-
-        [Verify(true)]
-        public void GlobalVerify(){}
-
-        [Run]
-        public void Run()
-        {
-            if (!this.testContext.IsStopped())
-            {
-                Thread.Sleep(1);
-                this.count++;
-                throw new TestException($"This test should fail: {this.count}");
-            }
-        }
+        public void RecordValue(long latencyNanos) {}
 
     }
 }

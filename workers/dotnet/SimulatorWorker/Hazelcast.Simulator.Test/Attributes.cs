@@ -24,13 +24,23 @@ namespace Hazelcast.Simulator.Test
     [AttributeUsage(AttributeTargets.Method)]
     public class TeardownAttribute : Attribute
     {
-        public bool Global { get; set; } = false;
+        public bool Global { get; set; }
+
+        public TeardownAttribute(bool global = false)
+        {
+            this.Global = global;
+        }
     }
 
     [AttributeUsage(AttributeTargets.Method)]
     public class VerifyAttribute : Attribute
     {
-        public bool Global { get; set; } = false;
+        public bool Global { get; set; }
+
+        public VerifyAttribute(bool global = false)
+        {
+            this.Global = global;
+        }
     }
 
     [AttributeUsage(AttributeTargets.Method)]
@@ -51,18 +61,38 @@ namespace Hazelcast.Simulator.Test
     [AttributeUsage(AttributeTargets.Method)]
     public class PrepareAttribute : Attribute
     {
-        public bool Global { get; set; } = false;
-    }
+        public bool Global { get; set; }
 
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property )]
-    public class InjectAttribute : Attribute
-    {
-        public string Property { get; set; }
+        public PrepareAttribute(bool global = false)
+        {
+            this.Global = global;
+        }
     }
 
     [AttributeUsage(AttributeTargets.Field)]
     public class TimeStepAttribute : Attribute
     {
         public double Probability { get; set; }
+
+        public TimeStepAttribute(double probability)
+        {
+            this.Probability = probability;
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property )]
+    public class InjectAttribute : Attribute
+    {
+    }
+
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property )]
+    public class NamedAttribute : Attribute
+    {
+        public string Name { get; set; }
+
+        public NamedAttribute(string name)
+        {
+            this.Name = name;
+        }
     }
 }

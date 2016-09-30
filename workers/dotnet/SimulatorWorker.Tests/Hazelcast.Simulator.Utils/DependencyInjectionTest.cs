@@ -39,6 +39,15 @@ namespace Hazelcast.Simulator.Utils
         }
 
         [Test]
+        public void TestInjectPublicNonStaticFieldWithStringValue()
+        {
+            const string strVal = "100";
+            var obj = new Dependent();
+            Inject(obj,"testLongField", strVal);
+            Assert.AreEqual(obj.testLongField, long.Parse(strVal) );
+        }
+
+        [Test]
         public void TestInjectPublicNonStaticProperty()
         {
             const int intVal = 99;
@@ -70,18 +79,34 @@ namespace Hazelcast.Simulator.Utils
 
     public class Dependent
     {
-        [Inject(Property = "testStrField")]
+        [Inject, Named("testStrField")]
         public string testStrField;
 
-        [Inject(Property = "TestIntProperty")]
+        [Inject, Named("testLongField")]
+        public long testLongField;
+
+        [Inject, Named("TestIntProperty")]
         public int TestIntProperty { get; set; }
 
-        [Inject(Property = "privateField")]
+        [Inject, Named("privateField")]
         private long privateField=1;
 
-        [Inject(Property = "staticField")]
+        [Inject, Named("staticField")]
         public static long StaticField=100;
 
+        [Named("child")]
+        public Child child;
+
         public long GetPrivateFieldValue() => this.privateField;
+    }
+
+    public class Child
+    {
+        [Inject, Named("childLongField")]
+        public long ChildLongField;
+
+        [Named("grandChild")]
+        public Child child;
+
     }
 }

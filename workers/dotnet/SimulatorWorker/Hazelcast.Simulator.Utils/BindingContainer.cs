@@ -12,35 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Threading;
+using System.Collections.Concurrent;
 using Hazelcast.Simulator.Test;
 
-namespace Hazelcast.Simulator.Tests
+namespace Hazelcast.Simulator.Utils
 {
-    public class FailingTest : AbstractTest
+    public class BindingContainer
     {
-        public int count;
+        private readonly ConcurrentDictionary<string, object> scopeData = new ConcurrentDictionary<string, object>();
 
-        [Prepare]
-        public void Prepare() => Thread.Sleep(1);
-
-
-        [Verify]
-        public void Verify() {}
-
-        [Verify(true)]
-        public void GlobalVerify(){}
-
-        [Run]
-        public void Run()
+        public BindingContainer(TestContext testContext)
         {
-            if (!this.testContext.IsStopped())
-            {
-                Thread.Sleep(1);
-                this.count++;
-                throw new TestException($"This test should fail: {this.count}");
-            }
         }
-
     }
 }
