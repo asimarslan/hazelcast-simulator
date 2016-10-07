@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 using System;
+using Hazelcast.Simulator.Metronome;
 
 namespace Hazelcast.Simulator.Test
 {
@@ -83,6 +84,28 @@ namespace Hazelcast.Simulator.Test
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property )]
     public class InjectAttribute : Attribute
     {
+    }
+
+    public class InjectProbeAttribute : InjectAttribute
+    {
+        public bool useForThroughput { get; set; }
+
+        public InjectProbeAttribute(bool useForThroughput = false)
+        {
+            this.useForThroughput = useForThroughput;
+        }
+    }
+
+    public class InjectMetronomeAttribute : InjectAttribute
+    {
+        public int IntervalMillis { get; set; }
+        public MetronomeType MetronomeType { get; set; }
+
+        public InjectMetronomeAttribute(int intervalMillis = 0, MetronomeType metronomeType= MetronomeType.Nop)
+        {
+            this.IntervalMillis = intervalMillis;
+            this.MetronomeType = metronomeType;
+        }
     }
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property )]

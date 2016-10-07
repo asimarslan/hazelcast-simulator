@@ -22,70 +22,115 @@ namespace Hazelcast.Simulator.Utils
 {
     public class DependencyInjectionUtil
     {
-
-        public static bool Inject(object instance, string fieldPath, object value)
-        {
-            var fieldWithAttribute = GetFieldWithAttribute(instance.GetType(), typeof(InjectAttribute));
-            foreach (MemberInfo memberInfo in fieldWithAttribute)
-            {
-                var injectAttr = memberInfo.GetCustomAttribute<InjectAttribute>();
-                if (injectAttr.Property == fieldPath)
-                {
-                    SetValue(instance, memberInfo, value);
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public static bool Inject(object instance, string fieldPath, string valueStr)
+        //
+        //        public static bool Inject(object instance, string fieldPath, object value)
+        //        {
+        //            var fieldWithAttribute = GetFieldWithAttribute(instance.GetType(), typeof(InjectAttribute));
+        //            foreach (MemberInfo memberInfo in fieldWithAttribute)
+        //            {
+        //                var injectAttr = memberInfo.GetCustomAttribute<InjectAttribute>();
+        //                if (injectAttr.Property == fieldPath)
+        //                {
+        //                    SetValue(instance, memberInfo, value);
+        //                    return true;
+        //                }
+        //            }
+        //            return false;
+        //        }
+        //
+        public static bool Inject(object instance, string property, string valueStr)
         {
             valueStr = valueStr.Trim();
-            string[] path = fieldPath.Split('.');
+            string[] path = property.Split('.');
 
-            object targetObject = FindTargetObject(instance, path);
-
-            return Inject0(instance, path, valueStr);
-        }
-
-        private static object FindTargetObject(object parent, string[] fieldPath)
-        {
-            for (int i = 0; i < fieldPath.Length-1; i++)
-            {
-                Type type = parent.GetType();
-                var fieldName = fieldPath[i];
-
-                FindField(type, fieldName);
-            }
-
-
-        }
-
-        internal static bool Inject0(object instance, string[] fieldPath, string valueStr)
-        {
-            if (fieldPath.Length < 1)
+            instance = FindTargetObject(instance, property, path);
+            if (instance == null)
             {
                 return false;
             }
-            if (fieldPath.Length > 1)
-            {
 
+            MemberInfo memberInfo = FindMemberInfo(instance.GetType(), path[path.Length - 1]);
+            if (memberInfo == null || IsProbeType(memberInfo))
+            {
+                return false;
+            }
+
+            try
+            {
+                SetValue(instance, memberInfo, valueStr);
+                return true;
+            }
+            catch (Exception e)
+            {
+                throw new BindingException($"Failed to bind value {valueStr} to property {property} of type {GetFieldType(memberInfo)}");
             }
         }
 
-        internal static bool InjectToField(object instance, string fieldName, string valueStr)
+        private static object FindTargetObject(object parent, string property, string[] fieldPath)
         {
-            IEnumerable<MemberInfo> fieldWithAttribute = GetFieldWithAttribute(instance.GetType(), typeof(InjectAttribute));
-            foreach (MemberInfo memberInfo in fieldWithAttribute)
+            for (int i = 0; i < fieldPath.Length - 1; i++)
             {
-                var injectAttr = memberInfo.GetCustomAttribute<InjectAttribute>();
-                if (injectAttr.Property == fieldName)
+                Type type = parent.GetType();
+                var fieldName = fieldPath[i];
+                MemberInfo memberInfo = FindMemberInfo(type, fieldName);
+                if (memberInfo == null)
                 {
-                    SetValue(instance, memberInfo, valueStr);
-                    return true;
+                    if (i == 0)
+                    {
+                        //we have no match at all
+                        return null;
+                    }
+                    else
+                    {
+                        throw new BindingException($"Failed to find field {type.Name}.{fieldName} in property {property}");
+                    }
                 }
+
+                object child = GetValue(parent, memberInfo);
+                if (child == null)
+                {
+                    try
+                    {
+                        child = Activator.CreateInstance(GetFieldType(memberInfo));
+                        SetValue(parent, memberInfo, child);
+                    }
+                    catch (Exception e)
+                    {
+
+                        throw new BindingException($"Failed to initialize the field/property {memberInfo.Name}", e);
+                    }
+                }
+                parent = child;
             }
-            return false;
+            return parent;
         }
+
+//
+//        internal static bool Inject0(object instance, string[] fieldPath, string valueStr)
+//        {
+//            if (fieldPath.Length < 1)
+//            {
+//                return false;
+//            }
+//            if (fieldPath.Length > 1)
+//            {
+//
+//            }
+//        }
+//
+//        internal static bool InjectToField(object instance, string fieldName, string valueStr)
+//        {
+//            IEnumerable<MemberInfo> fieldWithAttribute = GetFieldWithAttribute(instance.GetType(), typeof(InjectAttribute));
+//            foreach (MemberInfo memberInfo in fieldWithAttribute)
+//            {
+//                var injectAttr = memberInfo.GetCustomAttribute<InjectAttribute>();
+//                if (injectAttr.Property == fieldName)
+//                {
+//                    SetValue(instance, memberInfo, valueStr);
+//                    return true;
+//                }
+//            }
+//            return false;
+//        }
     }
 }

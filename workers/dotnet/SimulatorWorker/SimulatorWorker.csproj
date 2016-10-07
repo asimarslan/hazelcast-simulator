@@ -62,6 +62,9 @@
   <ItemGroup>
     <Compile Include="DotNetty.Codecs\MessageToByteEncoder.cs" />
     <Compile Include="DotNetty.Transport.Channels\SimpleChannelInboundHandler.cs" />
+    <Compile Include="Hazelcast.Simulator.Metronome\EmptyMetronome.cs" />
+    <Compile Include="Hazelcast.Simulator.Metronome\IMetronome.cs" />
+    <Compile Include="Hazelcast.Simulator.Metronome\MetronomeType.cs" />
     <Compile Include="Hazelcast.Simulator.Probe\EmptyProbe.cs" />
     <Compile Include="Hazelcast.Simulator.Probe\HdrProbe.cs" />
     <Compile Include="Hazelcast.Simulator.Probe\IProbe.cs" />
@@ -91,6 +94,7 @@
     <Compile Include="Hazelcast.Simulator.Test\TestPhase.cs" />
     <Compile Include="Hazelcast.Simulator.Utils\AtomicBoolean.cs" />
     <Compile Include="Hazelcast.Simulator.Utils\BindingContainer.cs" />
+    <Compile Include="Hazelcast.Simulator.Utils\BindingException.cs" />
     <Compile Include="Hazelcast.Simulator.Utils\Constants.cs" />
     <Compile Include="Hazelcast.Simulator.Utils\DependencyInjectionUtil.cs" />
     <Compile Include="Hazelcast.Simulator.Utils\ReflectionUtil.cs" />

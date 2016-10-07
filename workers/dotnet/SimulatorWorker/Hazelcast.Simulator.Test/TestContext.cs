@@ -9,7 +9,8 @@ namespace Hazelcast.Simulator.Test
     {
         public const string LOCALHOST = "127.0.0.1";
 
-        private IHazelcastInstance targetInstance;
+        internal IHazelcastInstance TargetInstance { get; private set; }
+
         private readonly string testId;
         private readonly string publicIpAddress;
 
@@ -19,7 +20,7 @@ namespace Hazelcast.Simulator.Test
         public TestContext(string testId, IHazelcastInstance targetInstance = null, string publicIpAddress = LOCALHOST)
         {
             this.testId = testId;
-            this.targetInstance = targetInstance;
+            this.TargetInstance = targetInstance;
             this.publicIpAddress = publicIpAddress;
         }
 

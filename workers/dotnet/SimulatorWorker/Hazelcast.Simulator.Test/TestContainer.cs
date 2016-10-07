@@ -46,7 +46,7 @@ namespace Hazelcast.Simulator.Test
 
             this.testInstance = ReflectionUtil.CreateInstanceOfType(testCase.GetClassname());
 
-            this.bindingContainer = new BindingContainer(testCase, testContext);
+            this.bindingContainer = new BindingContainer(testContext, testCase);
 
             this.InjectDependencies();
 
@@ -55,13 +55,13 @@ namespace Hazelcast.Simulator.Test
 
         private void InjectDependencies()
         {
-            this.testInstance.GetType().GetMembers();
-
-            foreach (KeyValuePair<string, string> pair in this.testCase.Properties)
-            {
-                Inject(this.testInstance, pair.Key, pair.Value);
-            }
-            throw new NotImplementedException();
+//            this.testInstance.GetType().GetMembers();
+//
+//            foreach (KeyValuePair<string, string> pair in this.testCase.Properties)
+//            {
+//                Inject(this.testInstance, pair.Key, pair.Value);
+//            }
+            this.bindingContainer.Bind(this.testInstance);
         }
 
         public async Task Invoke(TestPhase testPhase)

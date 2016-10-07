@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Hazelcast.Simulator.Probe;
 using Hazelcast.Simulator.Test;
 
 namespace Hazelcast.Simulator.Utils
@@ -28,14 +29,41 @@ namespace Hazelcast.Simulator.Utils
             return Activator.CreateInstance(type);
         }
 
-        public static MemberInfo[] FindMemberInfo(Type type, string memberName)
+        public static MemberInfo FindMemberInfo(Type type, string memberName)
         {
+            //search fields/properties with Named attribute
             MemberInfo[] memberInfos = GetFieldWithAttribute(type, typeof(NamedAttribute)).ToArray();
-            if (memberInfos.Length == 0)
+            var result = new List<MemberInfo>();
+            foreach (MemberInfo memberInfo in memberInfos)
             {
-                memberInfos = type.GetMember(memberName, BindingFlags.Public | BindingFlags.Instance);
+                var namedAttr = memberInfo.GetCustomAttribute<NamedAttribute>();
+                if (namedAttr.Name == memberName)
+                {
+                    result.Add(memberInfo);
+                }
             }
-            return memberInfos;
+            MemberInfo memberInfoResult = GetFieldFromResult(result.ToArray(), memberName);
+            if (memberInfoResult != null)
+            {
+                return memberInfoResult;
+            }
+            //search fields/properties with MemberInfo name if Named Attribute is missing
+            memberInfos = type.GetMember(memberName, BindingFlags.Public | BindingFlags.Instance);
+            return GetFieldFromResult(memberInfos, memberName);
+        }
+
+        static MemberInfo GetFieldFromResult(MemberInfo[] memberInfos, string memberName)
+        {
+            if (memberInfos.Length == 1)
+            {
+                return memberInfos[0];
+            }
+
+            if (memberInfos.Length > 1)
+            {
+                throw new BindingException($"More than one field found with same name {memberName}");
+            }
+            return null;
         }
 
         public static IEnumerable<MemberInfo> GetFieldWithAttribute(Type type, Type attributeType)
@@ -59,6 +87,33 @@ namespace Hazelcast.Simulator.Utils
             }
         }
 
+        public static object GetValue(object instance, MemberInfo memberInfo)
+        {
+            switch (memberInfo.MemberType)
+            {
+                case MemberTypes.Field:
+                    return ((FieldInfo)memberInfo).GetValue(instance);
+                case MemberTypes.Property:
+                    return ((PropertyInfo)memberInfo).GetValue(instance);
+                default:
+                    throw new NotSupportedException();
+            }
+
+        }
+
+        public static Type GetFieldType(MemberInfo memberInfo)
+        {
+            switch (memberInfo.MemberType)
+            {
+                case MemberTypes.Field:
+                    return ((FieldInfo)memberInfo).FieldType;
+                case MemberTypes.Property:
+                    return ((PropertyInfo)memberInfo).PropertyType;
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+
         public static void SetValue(object instance, MemberInfo memberInfo, string valueStr)
         {
             switch (memberInfo.MemberType)
@@ -76,6 +131,32 @@ namespace Hazelcast.Simulator.Utils
                 default:
                     throw new NotSupportedException();
             }
+        }
+
+        public static bool IsProbeType(MemberInfo memberInfo)
+        {
+            return memberInfo != null && GetFieldType(memberInfo) == typeof(IProbe);
+        }
+
+        public static string GetProbeName(MemberInfo memberInfo)
+        {
+            if (memberInfo == null)
+            {
+                return null;
+            }
+            var namedAttribute = memberInfo.GetCustomAttribute<NamedAttribute>();
+            return namedAttribute?.Name ?? memberInfo.Name;
+        }
+
+        public static bool IsPartOfTotalThoughput(MemberInfo memberInfo)
+        {
+            if (memberInfo == null)
+            {
+                return false;
+            }
+            var attr = memberInfo.GetCustomAttribute<InjectProbeAttribute>();
+            return attr?.useForThroughput ?? false;
+
         }
     }
 }
