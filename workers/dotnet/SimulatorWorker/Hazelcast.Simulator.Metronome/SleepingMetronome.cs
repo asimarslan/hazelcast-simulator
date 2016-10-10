@@ -13,10 +13,18 @@
 // limitations under the License.
 namespace Hazelcast.Simulator.Metronome
 {
-    public enum MetronomeType
+    public class SleepingMetronome : IMetronome
     {
-        Nop,
-        BusySpinning,
-        Sleeping
+        private readonly long interval;
+
+        public SleepingMetronome(long interval=0)
+        {
+            this.interval = interval;
+        }
+
+        public long WaitForNext()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

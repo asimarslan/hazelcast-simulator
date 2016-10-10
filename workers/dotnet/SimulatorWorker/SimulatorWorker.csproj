@@ -64,7 +64,8 @@
     <Compile Include="DotNetty.Transport.Channels\SimpleChannelInboundHandler.cs" />
     <Compile Include="Hazelcast.Simulator.Metronome\EmptyMetronome.cs" />
     <Compile Include="Hazelcast.Simulator.Metronome\IMetronome.cs" />
-    <Compile Include="Hazelcast.Simulator.Metronome\MetronomeType.cs" />
+    <Compile Include="Hazelcast.Simulator.Metronome\MetronomeFactory.cs" />
+    <Compile Include="Hazelcast.Simulator.Metronome\SleepingMetronome.cs" />
     <Compile Include="Hazelcast.Simulator.Probe\EmptyProbe.cs" />
     <Compile Include="Hazelcast.Simulator.Probe\HdrProbe.cs" />
     <Compile Include="Hazelcast.Simulator.Probe\IProbe.cs" />

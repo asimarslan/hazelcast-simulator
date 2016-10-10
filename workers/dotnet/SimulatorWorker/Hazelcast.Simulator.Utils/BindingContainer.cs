@@ -15,6 +15,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Hazelcast.Core;
 using Hazelcast.Simulator.Metronome;
@@ -29,92 +30,49 @@ namespace Hazelcast.Simulator.Utils
     {
         private readonly ConcurrentDictionary<string, object> propertyScopeData = new ConcurrentDictionary<string, object>();
         private readonly ConcurrentDictionary<string, IProbe> probes = new ConcurrentDictionary<string, IProbe>();
-//        private readonly ConcurrentDictionary<Type, object> typeScopeData = new ConcurrentDictionary<Type, object>();
+        private readonly ISet<String> unusedProperties = new HashSet<string>();
 
         private readonly TestContext testContext;
+        private readonly TestCase testCase;
+        private readonly MetronomeFactory metronomeFactory;
 
         public BindingContainer(TestContext testContext, TestCase testCase)
         {
             //defaults
             this.testContext = testContext;
-            //            this.typeScopeData.TryAdd(typeof(ITestContext), testContext);
-            //            this.typeScopeData.TryAdd(typeof(IHazelcastInstance), testContext.TargetInstance);
-            //
-            //            foreach (KeyValuePair<string, string> pair in testCase.Properties)
-            //            {
-            //                this.propertyScopeData.TryAdd(pair.Key, pair.Value);
-            //            }
+            this.testCase = testCase;
+            this.metronomeFactory = new MetronomeFactory(testCase.Properties);
+            this.testCase.Properties.Keys.All(key => this.unusedProperties.Add(key));
         }
 
-//        public void Bind(object testInstance)
-//        {
-//            MemberInfo[] memberInfos = testInstance.GetType().GetMembers(BindingFlags.Public | BindingFlags.Instance);
-//            foreach (MemberInfo memberInfo in memberInfos)
-//            {
-//                if (memberInfo.MemberType != MemberTypes.Field || memberInfo.MemberType != MemberTypes.Property)
-//                {
-//                    continue;
-//                }
-//                if (memberInfo.IsDefined(typeof(InjectAttribute), true))
-//                {
-//                    var named = memberInfo.GetCustomAttribute<NamedAttribute>();
-//                    string name = named != null ? named.Name : memberInfo.Name;
-//                    object value;
-//                    if (this.propertyScopeData.TryGetValue(name, out value))
-//                    {
-//                        SetValue(testInstance, memberInfo, value);
-//                    }
-//                    else
-//                    {
-//                        var type = GetFieldType(memberInfo);
-//                        if (this.typeScopeData.TryGetValue(type, out value))
-//                        {
-//                            SetValue(testInstance, memberInfo, value);
-//                        }
-//                        else
-//                        {
-//                            value = Activator.CreateInstance(type);
-//                        }
-//                    }
-//                }
-//            }
-//
-//            //            Inject(testInstance, pair.Key, pair.Value);
-//        }
+        public void EnsureNoUnusedProperties()
+        {
+            if (this.unusedProperties.Count > 0)
+            {
+                throw new BindingException($"Some of the properities({string.Join(", ",this.unusedProperties)}) are not used on {this.testCase.GetClassname()}");
+            }
+        }
 
         public void Bind(object testInstance)
         {
             MemberInfo[] memberInfos = testInstance.GetType().GetMembers(BindingFlags.Public | BindingFlags.Instance);
             foreach (MemberInfo memberInfo in memberInfos)
             {
-                if (memberInfo.MemberType != MemberTypes.Field || memberInfo.MemberType != MemberTypes.Property)
+                if (memberInfo.MemberType != MemberTypes.Field && memberInfo.MemberType != MemberTypes.Property)
                 {
                     continue;
                 }
                 if (memberInfo.IsDefined(typeof(InjectAttribute), true))
                 {
-                    Inject11(testInstance, memberInfo);
-
-                    //                    object value;
-                    //                    var type = GetFieldType(memberInfo);
-                    //                    if (this.typeScopeData.TryGetValue(type, out value))
-                    //                    {
-                    //                        SetValue(testInstance, memberInfo, value);
-                    //                    }
-                    //                    else
-                    //                    {
-                    //                        value = Activator.CreateInstance(type);
-                    //                    }
+                    this.Inject(testInstance, memberInfo);
                 }
             }
 
-            //            foreach (KeyValuePair<string, object> pair in this.propertyScopeData)
-            //            {
-            //                Inject(testInstance, pair.Key, pair.Value);
-            //            }
+            ISet<string> injectProperties = InjectProperties(testInstance, this.testCase.Properties);
+            injectProperties.All(key => this.unusedProperties.Remove(key));
         }
 
-        private object Inject11(object testInstance, MemberInfo memberInfo)
+        private void Inject(object testInstance, MemberInfo memberInfo)
         {
             Type type = GetFieldType(memberInfo);
             if (type == typeof(IHazelcastInstance))
@@ -132,14 +90,17 @@ namespace Hazelcast.Simulator.Utils
             }
             else if (type == typeof(IMetronome))
             {
-
+                IMetronome metronome = this.metronomeFactory.CreateMetronome();
+                SetValue(testInstance, memberInfo, metronome);
             }
-            return null;
         }
 
         private IProbe GetOrCreateProbe(string probeName, bool isPartOfTotalThoughput)
         {
             return this.probes.GetOrAdd(probeName, name => new HdrProbe(isPartOfTotalThoughput));
         }
+
+        public ConcurrentDictionary<string, IProbe> GetProbes() => this.probes;
+
     }
 }

@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Collections.Generic;
 using Hazelcast.Simulator.Test;
 using NUnit.Framework;
 using static Hazelcast.Simulator.Utils.DependencyInjectionUtil;
+using TestContext = Hazelcast.Simulator.Test.TestContext;
 
 namespace Hazelcast.Simulator.Utils
 {
@@ -29,84 +31,96 @@ namespace Hazelcast.Simulator.Utils
         [TearDown]
         public void TearDown() { }
 
-//        [Test]
-//        public void TestInjectPublicNonStaticField()
-//        {
-//            const string strVal = "Value0";
-//            var obj = new Dependent();
-//            Inject(obj,"testStrField", strVal);
-//            Assert.AreEqual(obj.testStrField, strVal );
-//        }
-//
-//        [Test]
-//        public void TestInjectPublicNonStaticFieldWithStringValue()
-//        {
-//            const string strVal = "100";
-//            var obj = new Dependent();
-//            Inject(obj,"testLongField", strVal);
-//            Assert.AreEqual(obj.testLongField, long.Parse(strVal) );
-//        }
-//
-//        [Test]
-//        public void TestInjectPublicNonStaticProperty()
-//        {
-//            const int intVal = 99;
-//            var obj = new Dependent();
-//            Inject(obj,"TestIntProperty", intVal);
-//            Assert.AreEqual(obj.TestIntProperty, intVal );
-//        }
-//
-//        [Test]
-//        public void TestNotInjectPrivateNonStaticProperty()
-//        {
-//            const int intVal = 99;
-//            var obj = new Dependent();
-//            Assert.False(Inject(obj,"privateField", intVal));
-//            Assert.AreEqual(obj.GetPrivateFieldValue(), 1 );
-//        }
-//
-//        [Test]
-//        public void TestNotInjectPublicStaticField()
-//        {
-//            const int intVal = 99;
-//            var obj = new Dependent();
-//            Assert.False(Inject(obj,"staticField", intVal));
-//            Assert.AreEqual(Dependent.StaticField, 100 );
-//        }
+        [Test]
+        public void TestInjectPublicNonStaticField()
+        {
+            const string strVal = "Value0";
+            var obj = new Dependent();
+            InjectToPropertyPath(obj,"testStrField", strVal);
+            Assert.AreEqual(obj.testStrField, strVal );
+        }
 
+        [Test]
+        public void TestInjectPublicNonStaticFieldWithStringValue()
+        {
+            const string strVal = "90";
+            var obj = new Dependent();
+            InjectToPropertyPath(obj,"testLongField", strVal);
+            Assert.AreEqual(obj.testLongField, long.Parse(strVal) );
+        }
+
+        [Test]
+        public void TestInjectPublicNonStaticProperty()
+        {
+            const string strVal = "90";
+            var obj = new Dependent();
+            InjectToPropertyPath(obj,"TestIntProperty", strVal);
+            Assert.AreEqual(obj.TestIntProperty, int.Parse(strVal) );
+        }
+
+        [Test]
+        public void TestNotInjectPrivateNonStaticProperty()
+        {
+            const string strVal = "90";
+            var obj = new Dependent();
+            Assert.False(InjectToPropertyPath(obj,"privateField", strVal));
+            Assert.AreEqual(obj.GetPrivateFieldValue(), 1 );
+        }
+
+        [Test]
+        public void TestNotInjectPublicStaticField()
+        {
+            const string strVal = "90";
+            var obj = new Dependent();
+            Assert.False(InjectToPropertyPath(obj,"staticField", strVal));
+            Assert.AreEqual(Dependent.StaticField, 100 );
+        }
+
+        [Test]
+        public void TestInjectProperties()
+        {
+            var dict = new Dictionary<string, string>();
+            dict.Add("testStrField","Value0");
+            dict.Add("testLongField","99");
+            dict.Add("TestIntProperty","90");
+            var obj = new Dependent();
+            InjectProperties(obj, dict);
+
+            Assert.AreEqual(obj.testStrField, dict["testStrField"] );
+            Assert.AreEqual(obj.testLongField, long.Parse(dict["testLongField"]) );
+            Assert.AreEqual(obj.TestIntProperty, int.Parse(dict["TestIntProperty"]) );
+
+        }
+
+        [Test]
+        public void TestInjectChildLongField()
+        {
+            const string strVal = "1000";
+            var obj = new Dependent();
+            InjectToPropertyPath(obj,"child.childLongField", strVal);
+            Assert.AreEqual(obj.child.ChildLongField, long.Parse(strVal) );
+        }
+
+        [Test]
+        public void TestInjectGrandChildLongField()
+        {
+            const string strVal = "1000";
+            var obj = new Dependent();
+            InjectToPropertyPath(obj,"child.grandChild.childLongField", strVal);
+            Assert.AreEqual(obj.child.child.ChildLongField, long.Parse(strVal) );
+        }
+
+        [Test]
+        public void TestInjectGrandChildLongFieldMultiField()
+        {
+            const string strVal = "1000";
+            var obj = new Dependent();
+            InjectToPropertyPath(obj,"child.childLongField", strVal);
+            InjectToPropertyPath(obj,"child.grandChild.childLongField", strVal);
+            Assert.AreEqual(obj.child.ChildLongField, long.Parse(strVal) );
+            Assert.AreEqual(obj.child.child.ChildLongField, long.Parse(strVal) );
+        }
 
     }
-//
-//    public class Dependent
-//    {
-//        [Inject, Named("testStrField")]
-//        public string testStrField;
-//
-//        [Inject, Named("testLongField")]
-//        public long testLongField;
-//
-//        [Inject, Named("TestIntProperty")]
-//        public int TestIntProperty { get; set; }
-//
-//        [Inject, Named("privateField")]
-//        private long privateField=1;
-//
-//        [Inject, Named("staticField")]
-//        public static long StaticField=100;
-//
-//        [Named("child")]
-//        public Child child;
-//
-//        public long GetPrivateFieldValue() => this.privateField;
-//    }
-//
-//    public class Child
-//    {
-//        [Inject, Named("childLongField")]
-//        public long ChildLongField;
-//
-//        [Named("grandChild")]
-//        public Child child;
-//
-//    }
+
 }

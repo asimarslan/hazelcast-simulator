@@ -15,33 +15,33 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Hazelcast.Simulator.Test;
 using static Hazelcast.Simulator.Utils.ReflectionUtil;
 
 namespace Hazelcast.Simulator.Utils
 {
     public class DependencyInjectionUtil
     {
-        //
-        //        public static bool Inject(object instance, string fieldPath, object value)
-        //        {
-        //            var fieldWithAttribute = GetFieldWithAttribute(instance.GetType(), typeof(InjectAttribute));
-        //            foreach (MemberInfo memberInfo in fieldWithAttribute)
-        //            {
-        //                var injectAttr = memberInfo.GetCustomAttribute<InjectAttribute>();
-        //                if (injectAttr.Property == fieldPath)
-        //                {
-        //                    SetValue(instance, memberInfo, value);
-        //                    return true;
-        //                }
-        //            }
-        //            return false;
-        //        }
-        //
-        public static bool Inject(object instance, string property, string valueStr)
+        public static ISet<string> InjectProperties(object testInstance, IDictionary<string, string> properties)
         {
+            var usedProperties = new HashSet<string>();
+
+            foreach (KeyValuePair<string, string> pair in properties)
+            {
+                string fullPropertyPath = pair.Key.Trim();
+                string value = pair.Value.Trim();
+
+                if (InjectToPropertyPath(testInstance, fullPropertyPath, value))
+                {
+                    usedProperties.Add(pair.Key);
+                }
+            }
+            return usedProperties;
+        }
+
+        public static bool InjectToPropertyPath(object instance, string property, string valueStr)
+        {
+            string[] path = property.Trim().Split('.');
             valueStr = valueStr.Trim();
-            string[] path = property.Split('.');
 
             instance = FindTargetObject(instance, property, path);
             if (instance == null)
@@ -62,7 +62,7 @@ namespace Hazelcast.Simulator.Utils
             }
             catch (Exception e)
             {
-                throw new BindingException($"Failed to bind value {valueStr} to property {property} of type {GetFieldType(memberInfo)}");
+                throw new BindingException($"Failed to bind value {valueStr} to property {property} of type {GetFieldType(memberInfo)}", e);
             }
         }
 
@@ -96,7 +96,6 @@ namespace Hazelcast.Simulator.Utils
                     }
                     catch (Exception e)
                     {
-
                         throw new BindingException($"Failed to initialize the field/property {memberInfo.Name}", e);
                     }
                 }
@@ -105,32 +104,5 @@ namespace Hazelcast.Simulator.Utils
             return parent;
         }
 
-//
-//        internal static bool Inject0(object instance, string[] fieldPath, string valueStr)
-//        {
-//            if (fieldPath.Length < 1)
-//            {
-//                return false;
-//            }
-//            if (fieldPath.Length > 1)
-//            {
-//
-//            }
-//        }
-//
-//        internal static bool InjectToField(object instance, string fieldName, string valueStr)
-//        {
-//            IEnumerable<MemberInfo> fieldWithAttribute = GetFieldWithAttribute(instance.GetType(), typeof(InjectAttribute));
-//            foreach (MemberInfo memberInfo in fieldWithAttribute)
-//            {
-//                var injectAttr = memberInfo.GetCustomAttribute<InjectAttribute>();
-//                if (injectAttr.Property == fieldName)
-//                {
-//                    SetValue(instance, memberInfo, valueStr);
-//                    return true;
-//                }
-//            }
-//            return false;
-//        }
     }
 }

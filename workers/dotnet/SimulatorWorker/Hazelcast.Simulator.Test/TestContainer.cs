@@ -26,42 +26,23 @@ namespace Hazelcast.Simulator.Test
     {
         private readonly TestContext testContext;
         private readonly TestCase testCase;
-
         private BindingContainer bindingContainer;
-
-
-
         private TestPhase currentPhase;
-
         private readonly AtomicBoolean running = new AtomicBoolean(false);
-
         private IDictionary<TestPhase, Delegate> phaseDelegates = new Dictionary<TestPhase, Delegate>();
 
-        private object testInstance;
+        private readonly object testInstance;
 
         public TestContainer(TestContext testContext, TestCase testCase)
         {
             this.testContext = testContext;
             this.testCase = testCase;
-
             this.testInstance = ReflectionUtil.CreateInstanceOfType(testCase.GetClassname());
-
             this.bindingContainer = new BindingContainer(testContext, testCase);
 
-            this.InjectDependencies();
+            this.bindingContainer.Bind(this.testInstance);
 
             this.RegisterPhaseDelegates();
-        }
-
-        private void InjectDependencies()
-        {
-//            this.testInstance.GetType().GetMembers();
-//
-//            foreach (KeyValuePair<string, string> pair in this.testCase.Properties)
-//            {
-//                Inject(this.testInstance, pair.Key, pair.Value);
-//            }
-            this.bindingContainer.Bind(this.testInstance);
         }
 
         public async Task Invoke(TestPhase testPhase)

@@ -12,11 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Collections.Generic;
+using Hazelcast.Core;
+using Hazelcast.Simulator.Probe;
 using Hazelcast.Simulator.Test;
 using NUnit.Framework;
 using static Hazelcast.Simulator.Utils.DependencyInjectionUtil;
 using TestContext = Hazelcast.Simulator.Test.TestContext;
-
+using Moq;
 namespace Hazelcast.Simulator.Utils
 {
     [TestFixture]
@@ -25,13 +28,19 @@ namespace Hazelcast.Simulator.Utils
         private const string TestId = "The-Test-Id";
 
         private BindingContainer bindingContainer;
-        private object testInstance = null;
+        private Dependent testInstance;
+        private Mock<IHazelcastInstance> hzClient;
 
         [SetUp]
         public void Setup()
         {
-            var testContext = new TestContext(TestId);
-            var testCase = new TestCase(TestId);
+            this.hzClient = new Mock<IHazelcastInstance>();
+            var testContext = new TestContext(TestId, hzClient.Object);
+            var dict = new Dictionary<string, string>();
+            dict.Add("testStrField","Value0");
+            dict.Add("testLongField","99");
+            dict.Add("TestIntProperty","90");
+            var testCase = new TestCase(TestId, dict);
             this.bindingContainer = new BindingContainer(testContext, testCase);
             this.testInstance = new Dependent();
         }
@@ -45,8 +54,36 @@ namespace Hazelcast.Simulator.Utils
         public void TestBindingContainerInit()
         {
             this.bindingContainer.Bind(this.testInstance);
-
             Assert.IsNotNull(this.bindingContainer);
         }
+
+        [Test]
+        public void TestBindingHazelcast()
+        {
+            this.bindingContainer.Bind(this.testInstance);
+            Assert.IsNotNull(this.testInstance);
+            Assert.IsNotNull(this.testInstance.hazelcastClient);
+        }
+
+        [Test]
+        public void TestBindingTestContext()
+        {
+            this.bindingContainer.Bind(this.testInstance);
+            Assert.IsNotNull(this.testInstance);
+            Assert.IsNotNull(this.testInstance.testContext);
+        }
+
+        [Test]
+        public void TestBindingProbes()
+        {
+            this.bindingContainer.Bind(this.testInstance);
+            Assert.IsNotNull(this.testInstance.probe1);
+            Assert.IsNotNull(this.testInstance.probe2);
+            Assert.IsNotNull(this.testInstance.probe3);
+            Assert.AreEqual(this.bindingContainer.GetProbes().Count, 2);
+            Assert.AreEqual(this.testInstance.probe1.GetType(), typeof(HdrProbe));
+            Assert.AreEqual(this.testInstance.probe2.GetType(), typeof(HdrProbe));
+        }
+
     }
 }

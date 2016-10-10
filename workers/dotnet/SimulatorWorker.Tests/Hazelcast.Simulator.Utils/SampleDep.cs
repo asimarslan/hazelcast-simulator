@@ -11,6 +11,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+using Hazelcast.Core;
+using Hazelcast.Simulator.Probe;
 using Hazelcast.Simulator.Test;
 
 namespace Hazelcast.Simulator.Utils
@@ -34,6 +37,21 @@ namespace Hazelcast.Simulator.Utils
 
         [Named("child")]
         public Child child;
+
+        [Inject]
+        public IHazelcastInstance hazelcastClient;
+
+        [Inject]
+        public TestContext testContext;
+
+        [InjectProbe(true), Named("probe-1")]
+        public IProbe probe1;
+
+        [InjectProbe]
+        public IProbe probe2;
+
+        [InjectProbe, Named("probe-1")]
+        public IProbe probe3;
 
         public long GetPrivateFieldValue() => this.privateField;
     }

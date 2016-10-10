@@ -96,17 +96,17 @@ namespace Hazelcast.Simulator.Test
         }
     }
 
-    public class InjectMetronomeAttribute : InjectAttribute
-    {
-        public int IntervalMillis { get; set; }
-        public MetronomeType MetronomeType { get; set; }
-
-        public InjectMetronomeAttribute(int intervalMillis = 0, MetronomeType metronomeType= MetronomeType.Nop)
-        {
-            this.IntervalMillis = intervalMillis;
-            this.MetronomeType = metronomeType;
-        }
-    }
+//    public class InjectMetronomeAttribute : InjectAttribute
+//    {
+//        public int IntervalMillis { get; set; }
+//        public MetronomeType MetronomeType { get; set; }
+//
+//        public InjectMetronomeAttribute(int intervalMillis = 0, MetronomeType metronomeType= MetronomeType.Nop)
+//        {
+//            this.IntervalMillis = intervalMillis;
+//            this.MetronomeType = metronomeType;
+//        }
+//    }
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property )]
     public class NamedAttribute : Attribute
