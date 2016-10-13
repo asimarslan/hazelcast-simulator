@@ -12,13 +12,84 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Hazelcast.Core;
+using Hazelcast.Simulator.Utils;
+using Moq;
 using NUnit.Framework;
 
-namespace Hazelcast.Simulator.Protocol.Operations
+namespace Hazelcast.Simulator.Test
 {
     [TestFixture]
     public class TestContainerTest
     {
+        private const string TestId = "The-Test-Id";
 
+        private BindingContainer bindingContainer;
+        private TestSample testInstance;
+        private Mock<IHazelcastInstance> hzClient;
+
+        private TestContainer testContainer;
+
+        [SetUp]
+        public void Setup()
+        {
+            this.hzClient = new Mock<IHazelcastInstance>();
+            var testContext = new TestContext(TestId, this.hzClient.Object);
+            var dict = new Dictionary<string, string>();
+            var testCase = new TestCase(TestId, dict);
+
+            this.testInstance = new TestSample();
+            this.testContainer = new TestContainer(testContext, testCase, this.testInstance);
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+        }
+
+        [Test]
+        public void TestSetupPhase()
+        {
+            Assert.IsNotNull(this.testContainer);
+            Assert.IsNotNull(this.testContainer.TestInstance);
+        }
+
+        [Test]
+        public void TestSetupPhaseInvoke()
+        {
+            this.testContainer.Invoke(TestPhase.Setup);
+            Assert.AreEqual(2, this.testInstance.invokeCounts[TestPhase.Setup]);
+        }
+
+        [Test]
+        public void TestPhaseInvoke()
+        {
+            var taskList = new List<Task>();
+            foreach (TestPhase testPhase in Enum.GetValues(typeof(TestPhase)))
+            {
+                taskList.Add(this.testContainer.Invoke(testPhase));
+            }
+
+            Task.WaitAll(taskList.ToArray());
+
+            foreach (TestPhase testPhase in Enum.GetValues(typeof(TestPhase)))
+            {
+                switch (testPhase)
+                {
+                    case TestPhase.Setup:
+                        Assert.AreEqual(2, this.testInstance.invokeCounts[TestPhase.Setup]);
+                        break;
+                    case TestPhase.Warmup:
+                        Assert.AreEqual(0, this.testInstance.invokeCounts[TestPhase.Warmup]);
+                        break;
+                    default:
+                        Assert.AreEqual(1, this.testInstance.invokeCounts[testPhase], $"{testPhase} not invoked!");
+                        break;
+                }
+            }
+        }
     }
 }

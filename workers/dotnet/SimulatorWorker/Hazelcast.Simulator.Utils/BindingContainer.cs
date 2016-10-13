@@ -30,7 +30,7 @@ namespace Hazelcast.Simulator.Utils
     {
         private readonly ConcurrentDictionary<string, object> propertyScopeData = new ConcurrentDictionary<string, object>();
         private readonly ConcurrentDictionary<string, IProbe> probes = new ConcurrentDictionary<string, IProbe>();
-        private readonly ISet<String> unusedProperties = new HashSet<string>();
+        private readonly ISet<String> unusedProperties;
 
         private readonly TestContext testContext;
         private readonly TestCase testCase;
@@ -42,10 +42,11 @@ namespace Hazelcast.Simulator.Utils
             this.testContext = testContext;
             this.testCase = testCase;
             this.metronomeFactory = new MetronomeFactory(testCase.Properties);
-            this.testCase.Properties.Keys.All(key => this.unusedProperties.Add(key));
+            this.unusedProperties = new HashSet<string>(this.testCase.Properties.Keys.Where(key => key != "class"));
+
         }
 
-        public void EnsureNoUnusedProperties()
+        internal void EnsureNoUnusedProperties()
         {
             if (this.unusedProperties.Count > 0)
             {
@@ -70,28 +71,16 @@ namespace Hazelcast.Simulator.Utils
 
             ISet<string> injectProperties = InjectProperties(testInstance, this.testCase.Properties);
             injectProperties.All(key => this.unusedProperties.Remove(key));
+
+            this.EnsureNoUnusedProperties();
         }
 
-        private void Inject(object testInstance, MemberInfo memberInfo)
+        public void Inject(object testInstance, MemberInfo memberInfo)
         {
-            Type type = GetFieldType(memberInfo);
-            if (type == typeof(IHazelcastInstance))
+            object value = this.CreateOrGetValue(memberInfo);
+            if (value != null)
             {
-                SetValue(testInstance, memberInfo, this.testContext.TargetInstance);
-            }
-            else if (type == typeof(ITestContext))
-            {
-                SetValue(testInstance, memberInfo, this.testContext);
-            }
-            else if (type == typeof(IProbe))
-            {
-                IProbe probe = this.GetOrCreateProbe(GetProbeName(memberInfo), IsPartOfTotalThoughput(memberInfo));
-                SetValue(testInstance, memberInfo, probe);
-            }
-            else if (type == typeof(IMetronome))
-            {
-                IMetronome metronome = this.metronomeFactory.CreateMetronome();
-                SetValue(testInstance, memberInfo, metronome);
+                SetValue(testInstance, memberInfo, value);
             }
         }
 
@@ -102,5 +91,26 @@ namespace Hazelcast.Simulator.Utils
 
         public ConcurrentDictionary<string, IProbe> GetProbes() => this.probes;
 
+        public object CreateOrGetValue(MemberInfo memberInfo)
+        {
+            Type type = GetFieldType(memberInfo);
+            if (type == typeof(IHazelcastInstance))
+            {
+                return this.testContext.TargetInstance;
+            }
+            else if (type == typeof(ITestContext))
+            {
+                return this.testContext;
+            }
+            else if (type == typeof(IProbe))
+            {
+                return this.GetOrCreateProbe(GetProbeName(memberInfo), IsPartOfTotalThoughput(memberInfo));
+            }
+            else if (type == typeof(IMetronome))
+            {
+                return this.metronomeFactory.CreateMetronome();
+            }
+            return null;
+        }
     }
 }

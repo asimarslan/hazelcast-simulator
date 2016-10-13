@@ -89,6 +89,7 @@
     <Compile Include="Hazelcast.Simulator.Tests\SuccessTest.cs" />
     <Compile Include="Hazelcast.Simulator.Test\AbstractTest.cs" />
     <Compile Include="Hazelcast.Simulator.Test\Attributes.cs" />
+    <Compile Include="Hazelcast.Simulator.Test\IllegalTestException.cs" />
     <Compile Include="Hazelcast.Simulator.Test\ITestContext.cs" />
     <Compile Include="Hazelcast.Simulator.Test\TestCase.cs" />
     <Compile Include="Hazelcast.Simulator.Test\TestException.cs" />

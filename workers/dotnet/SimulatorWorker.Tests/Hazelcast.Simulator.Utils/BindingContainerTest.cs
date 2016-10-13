@@ -20,6 +20,7 @@ using NUnit.Framework;
 using static Hazelcast.Simulator.Utils.DependencyInjectionUtil;
 using TestContext = Hazelcast.Simulator.Test.TestContext;
 using Moq;
+
 namespace Hazelcast.Simulator.Utils
 {
     [TestFixture]

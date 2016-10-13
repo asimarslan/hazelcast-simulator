@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+using System.Collections.Generic;
 using Hazelcast.Core;
 using Hazelcast.Simulator.Probe;
 using Hazelcast.Simulator.Test;
@@ -30,10 +32,10 @@ namespace Hazelcast.Simulator.Utils
         public int TestIntProperty { get; set; }
 
         [Inject, Named("privateField")]
-        private long privateField=1;
+        private long privateField = 1;
 
         [Inject, Named("staticField")]
-        public static long StaticField=100;
+        public static long StaticField = 100;
 
         [Named("child")]
         public Child child;
@@ -42,7 +44,7 @@ namespace Hazelcast.Simulator.Utils
         public IHazelcastInstance hazelcastClient;
 
         [Inject]
-        public TestContext testContext;
+        public ITestContext testContext;
 
         [InjectProbe(true), Named("probe-1")]
         public IProbe probe1;
@@ -63,6 +65,54 @@ namespace Hazelcast.Simulator.Utils
 
         [Named("grandChild")]
         public Child child;
+    }
 
+    public class TestSample
+    {
+        public IDictionary<TestPhase, int> invokeCounts;
+
+        public TestSample()
+        {
+            this.invokeCounts = new Dictionary<TestPhase, int>();
+            foreach (TestPhase testPhase in Enum.GetValues(typeof(TestPhase)))
+            {
+                this.invokeCounts.Add(testPhase, 0);
+            }
+        }
+
+        [Setup]
+        public void Setup1() => this.IncrementPhaseInvokeCount(TestPhase.Setup);
+
+        [Setup]
+        public void Setup2() => this.IncrementPhaseInvokeCount(TestPhase.Setup);
+
+        [Teardown]
+        public void LocalTearDown() => this.IncrementPhaseInvokeCount(TestPhase.LocalTeardown);
+
+        [Teardown(true)]
+        public void GlobalTearDown() => this.IncrementPhaseInvokeCount(TestPhase.GlobalTeardown);
+
+        [Prepare]
+        public void LocalPrepare() => this.IncrementPhaseInvokeCount(TestPhase.LocalPrepare);
+
+        [Prepare(true)]
+        public void GlobalPrepare() => this.IncrementPhaseInvokeCount(TestPhase.GlobalPrepare);
+
+        [AfterWarmup]
+        public void LocalAfterWarmup() => this.IncrementPhaseInvokeCount(TestPhase.LocalAfterWarmup);
+
+        [AfterWarmup(true)]
+        public void GlobalAfterWarmup() => this.IncrementPhaseInvokeCount(TestPhase.GlobalAfterWarmup);
+
+        [Verify]
+        public void LocalVerify() => this.IncrementPhaseInvokeCount(TestPhase.LocalVerify);
+
+        [Verify(true)]
+        public void GlobalVerify() => this.IncrementPhaseInvokeCount(TestPhase.GlobalVerify);
+
+        [Run]
+        public void Run()=> this.IncrementPhaseInvokeCount(TestPhase.Run);
+
+        private void IncrementPhaseInvokeCount(TestPhase testPhase) => this.invokeCounts[testPhase] += 1;
     }
 }

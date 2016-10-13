@@ -45,6 +45,17 @@ namespace Hazelcast.Simulator.Test
     }
 
     [AttributeUsage(AttributeTargets.Method)]
+    public class AfterWarmupAttribute : Attribute
+    {
+        public bool Global { get; set; }
+
+        public AfterWarmupAttribute(bool global = false)
+        {
+            this.Global = global;
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Method)]
     public class RunAttribute : Attribute
     {
     }
