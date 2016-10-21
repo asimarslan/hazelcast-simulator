@@ -33,16 +33,16 @@ namespace Hazelcast.Simulator.Test
 		public void TestIsGlobal()
 		{
 			Assert.AreEqual(false, TestPhase.Setup.IsGlobal());
-			Assert.AreEqual(false, TestPhase.LocalPrepare.GetDescription());
-			Assert.AreEqual(true, TestPhase.GlobalPrepare.GetDescription());
-			Assert.AreEqual(false, TestPhase.Warmup.GetDescription());
-			Assert.AreEqual(false, TestPhase.LocalAfterWarmup.GetDescription());
-			Assert.AreEqual(true, TestPhase.GlobalAfterWarmup.GetDescription());
-			Assert.AreEqual(false, TestPhase.Run.GetDescription());
-			Assert.AreEqual(true, TestPhase.GlobalVerify.GetDescription());
-			Assert.AreEqual(false, TestPhase.LocalVerify.GetDescription());
-			Assert.AreEqual(true, TestPhase.GlobalTeardown.GetDescription());
-			Assert.AreEqual(false, TestPhase.LocalTeardown.GetDescription());
+			Assert.AreEqual(false, TestPhase.LocalPrepare.IsGlobal());
+			Assert.AreEqual(true, TestPhase.GlobalPrepare.IsGlobal());
+			Assert.AreEqual(false, TestPhase.Warmup.IsGlobal());
+			Assert.AreEqual(false, TestPhase.LocalAfterWarmup.IsGlobal());
+			Assert.AreEqual(true, TestPhase.GlobalAfterWarmup.IsGlobal());
+			Assert.AreEqual(false, TestPhase.Run.IsGlobal());
+			Assert.AreEqual(true, TestPhase.GlobalVerify.IsGlobal());
+			Assert.AreEqual(false, TestPhase.LocalVerify.IsGlobal());
+			Assert.AreEqual(true, TestPhase.GlobalTeardown.IsGlobal());
+			Assert.AreEqual(false, TestPhase.LocalTeardown.IsGlobal());
 		}
 	}
 }

@@ -40,7 +40,7 @@ namespace Hazelcast.Simulator.Protocol.Processors
             var simulatorOperation = JsonConvert.DeserializeObject(msg.OperationData, msg.OperationType.GetClassType())
                 as ISimulatorOperation;
 
-//            await this.ExecuteOperation(simulatorOperation);
+            await this.ExecuteOperation(simulatorOperation, msg);
         }
 
         private async Task ExecuteOperation(ISimulatorOperation simulatorOperation, SimulatorMessage msg)
