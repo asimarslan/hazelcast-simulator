@@ -8,14 +8,24 @@
 set -e
 
 # Printing the command being executed (useful for debugging)
-set -x
+#set -x
+
 
 # redirecting output/error to the right logfiles.
-#exec > worker.out
-#exec 2>worker.err
+exec > worker.out
+exec 2>worker.err
 
-#echo $LOG4j_CONFIG>log4j.xml
-#echo $HAZELCAST_CONFIG>hazelcast-client.xml
+echo $LOG4j_CONFIG>log4j.xml
+echo $HAZELCAST_CONFIG>hazelcast-client.xml
+
+echo ".Net client worker is starting ..."
+echo $SIMULATOR_HOME
+echo $WORKER_TYPE
+echo $WORKER_INDEX
+echo $HAZELCAST_CONFIG
+#echo env
+
+SIMULATOR_DOTNET_LIB="/Users/asimarslan/git/hazelcast-simulator/workers/dotnet/SimulatorWorker/bin/Release"
 
 #JVM_ARGS="-XX:OnOutOfMemoryError=\"touch;-9;worker.oome\" \
 #          -Dhazelcast.logging.type=log4j \
@@ -36,6 +46,9 @@ set -x
 
 #MAIN=com.hazelcast.simulator.worker.ClientWorker
 
+#DOTNET_PATH="$SIMULATOR_HOME"
+
 #java -classpath "$CLASSPATH" $JVM_ARGS $MAIN
 
-echo "Dot Net Client Start ..."
+
+mono "$SIMULATOR_DOTNET_LIB/SimulatorWorker.exe"

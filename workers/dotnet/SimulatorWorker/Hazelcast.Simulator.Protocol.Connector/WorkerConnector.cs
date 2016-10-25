@@ -33,12 +33,15 @@ namespace Hazelcast.Simulator.Protocol.Connector
 
         private readonly AtomicBoolean isStarted = new AtomicBoolean();
         private readonly int port;
+        private readonly IHazelcastInstance hazelcastInstance;
+        private readonly ClientWorker worker;
 
         private readonly IEventLoopGroup eventLoopGroup = new MultithreadEventLoopGroup();
 
         private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
         private readonly BlockingCollection<SimulatorMessage> messageQueue = new BlockingCollection<SimulatorMessage>();
+        private readonly ConcurrentDictionary<long, Response> responses = new ConcurrentDictionary<long, Response>();
 
         private IChannel channel;
 
@@ -48,6 +51,15 @@ namespace Hazelcast.Simulator.Protocol.Connector
             ClientWorker worker)
         {
             this.localAddress = localAddress;
+            this.port = port;
+            this.hazelcastInstance = hazelcastInstance;
+            this.worker = worker;
+        }
+
+        public WorkerConnector(int agentIndex, int workerIndex, int port, IHazelcastInstance hazelcastInstance,
+            ClientWorker worker)
+            : this(new SimulatorAddress(AddressLevel.WORKER, agentIndex, workerIndex, 0), port, hazelcastInstance, worker)
+        {
         }
 
         public async Task Start()
@@ -90,7 +102,7 @@ namespace Hazelcast.Simulator.Protocol.Connector
             pipeline.AddLast("messageConsumeHandler", new SimulatorMessageConsumeHandler(localAddress));
 //            pipeline.AddLast("testProtocolDecoder", new SimulatorProtocolDecoder(localAddress.getChild(0)));
 //            pipeline.AddLast("testMessageConsumeHandler", new MessageTestConsumeHandler(testProcessorManager, localAddress, getScheduledExecutor()));
-//            pipeline.AddLast("responseHandler", new ResponseHandler(localAddress, localAddress.getParent(), futureMap, addressIndex));
+            pipeline.AddLast("responseHandler", new ResponseHandler(localAddress, localAddress.GetParent(), this.SetReponse));
 //            pipeline.AddLast("exceptionHandler", new ExceptionHandler(serverConnector));
         }
 
@@ -110,6 +122,13 @@ namespace Hazelcast.Simulator.Protocol.Connector
             {
             }
             token.ThrowIfCancellationRequested();
+        }
+
+        private void SetReponse(Response response)
+        {
+            IAsyncResult
+            responses.TryGetValue(response.MessageId, out responseResult)
+
         }
     }
 }

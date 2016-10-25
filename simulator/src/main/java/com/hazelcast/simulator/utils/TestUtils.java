@@ -51,19 +51,22 @@ public final class TestUtils {
 
     public static File createTmpDirectory() {
         try {
-            File dir = File.createTempFile("temp", "tmp-" + UuidUtil.newUnsecureUuidString());
+            String path = "/tmp/dotnet/";
+            File dir = new File(path);
 
-            if (!dir.delete()) {
-                throw new UncheckedIOException("Failed to delete temp file '" + dir.getAbsolutePath() + "'");
-            }
-
+////            File dir = File.createTempFile("temp", "tmp-dotnet" /*+ UuidUtil.newUnsecureUuidString()*/);
+//
+//            if (!dir.delete()) {
+//                throw new UncheckedIOException("Failed to delete temp file '" + dir.getAbsolutePath() + "'");
+//            }
+//
             if (!dir.mkdir()) {
                 throw new UncheckedIOException("Failed to create temp directory '" + dir.getAbsolutePath() + "'");
             }
 
-            dir.deleteOnExit();
+//            dir.deleteOnExit();
             return dir;
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new UncheckedIOException(e);
         }
     }

@@ -50,7 +50,8 @@ public class CoordinatorTest {
 
     @BeforeClass
     public static void beforeClass() {
-        setupFakeEnvironment();
+        File file = setupFakeEnvironment();
+        System.out.println(file.toURI());
 
         hzConfig = FileUtils.fileAsText(new File(localResourceDirectory(), "hazelcast.xml"));
         hzClientConfig = FileUtils.fileAsText(new File(localResourceDirectory(), "client-hazelcast.xml"));
@@ -232,6 +233,23 @@ public class CoordinatorTest {
 
         // start client .net client
         coordinator.workerStart(new RcWorkerStartOperation().setHzConfig("dotnetclientconfig").setWorkerType("dotnetclient"));
+
+        TestSuite suite = newBasicTestSuite();
+
+        StubPromise promise = new StubPromise();
+        coordinator.testRun(new RcTestRunOperation(suite).setAsync(false), promise);
+
+        assertEquals(SUCCESS, promise.get());
+    }
+
+    @Test
+    public void testRunJavaClient() throws Exception {
+        // start worker.
+        coordinator.workerStart(new RcWorkerStartOperation().setHzConfig(hzConfig));
+
+        coordinator.workerStart(new RcWorkerStartOperation().setWorkerType("javaclient").setHzConfig(hzClientConfig));
+        // start client .net client
+//        coordinator.workerStart(new RcWorkerStartOperation().setWorkerType("javaclient"));
 
         TestSuite suite = newBasicTestSuite();
 //        TestSuite suite = new TestSuite().addTest(new TestCase());

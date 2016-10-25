@@ -1,17 +1,17 @@
 ﻿using System;
 using Hazelcast.Simulator.Protocol.Processors;
+using System.Threading.Tasks;
+using DotNetty.Transport.Channels;
+using Hazelcast.Simulator.Protocol.Connector;
+using Hazelcast.Simulator.Protocol.Core;
+using log4net;
 
 namespace Hazelcast.Simulator.Protocol.Handler
 {
-    using System.Threading.Tasks;
-    using DotNetty.Transport.Channels;
-    using Hazelcast.Simulator.Protocol.Connector;
-    using Hazelcast.Simulator.Protocol.Core;
-    using log4net;
 
     public class SimulatorMessageConsumeHandler : SimpleChannelInboundHandler<SimulatorMessage>
     {
-        private readonly ILog Logger = LogManager.GetLogger(typeof(WorkerConnector));
+        private readonly ILog Logger = LogManager.GetLogger(typeof(SimulatorMessageConsumeHandler));
 
         private readonly SimulatorAddress localAddress;
 
