@@ -12,43 +12,44 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Hazelcast.Simulator.Utils;
 
 namespace Hazelcast.Simulator.Test
 {
     public enum TestPhase
     {
-        [Value("setup", false)]
+        [Value("setup", false, "SETUP")]
         Setup,
 
-        [Value("local prepare", false)]
+        [Value("local prepare", false, "LOCAL_PREPARE")]
         LocalPrepare,
 
-        [Value("global prepare", true)]
+        [Value("global prepare", true, "GLOBAL_PREPARE")]
         GlobalPrepare,
 
-        [Value("warmup", false)]
+        [Value("warmup", false, "WARMUP")]
         Warmup,
 
-        [Value("local after warmup", false)]
+        [Value("local after warmup", false, "LOCAL_AFTER_WARMUP")]
         LocalAfterWarmup,
 
-        [Value("global after warmup", true)]
+        [Value("global after warmup", true, "GLOBAL_AFTER_WARMUP")]
         GlobalAfterWarmup,
 
-        [Value("run", false)]
+        [Value("run", false, "RUN")]
         Run,
 
-        [Value("global verify", true)]
+        [Value("global verify", true, "GLOBAL_VERIFY")]
         GlobalVerify,
 
-        [Value("local verify", false)]
+        [Value("local verify", false, "LOCAL_VERIFY")]
         LocalVerify,
 
-        [Value("global tear down", true)]
+        [Value("global tear down", true, "GLOBAL_TEARDOWN")]
         GlobalTeardown,
 
-        [Value("local tear down", false)]
+        [Value("local tear down", false, "LOCAL_TEARDOWN")]
         LocalTeardown
     }
 
@@ -64,6 +65,24 @@ namespace Hazelcast.Simulator.Test
         {
             var attr = ValueAttribute.GetAttr(testPhase);
             return attr.Value2 != null && (bool)attr.Value2;
+        }
+
+        public static string GetName(this TestPhase testPhase)
+        {
+            var attr = ValueAttribute.GetAttr(testPhase);
+            return attr.Value3 as string;
+        }
+
+        public static TestPhase ToTestPhase(this string testPhaseStr)
+        {
+            foreach (TestPhase testPhase in Enum.GetValues(typeof(TestPhase)))
+            {
+                if (testPhaseStr == GetName(testPhase))
+                {
+                    return testPhase;
+                }
+            }
+            throw new ArgumentException($"Argument {testPhaseStr} cannot be converted to TestPhase.");
         }
     }
 }

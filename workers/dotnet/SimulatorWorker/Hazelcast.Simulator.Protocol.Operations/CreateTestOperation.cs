@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Hazelcast.Simulator.Protocol.Connector;
 using Hazelcast.Simulator.Protocol.Core;
 using Hazelcast.Simulator.Protocol.Processors;
 using Hazelcast.Simulator.Test;
@@ -19,34 +18,42 @@ namespace Hazelcast.Simulator.Protocol.Operations
         private static readonly ILog Logger = LogManager.GetLogger(typeof(CreateTestOperation));
 
         [JsonProperty("testIndex")]
-        private readonly int testIndex;
+        public int TestIndex { get; }
 
         [JsonProperty("testId")]
-        private readonly string testId;
+        public string TestId { get; }
 
         [JsonProperty("properties")]
-        private readonly IDictionary<string, string> properties;
+        public IDictionary<string, string> Properties { get; }
 
         [JsonIgnore]
-        private readonly TestCase testCase;
+        public TestCase testCase { get; }
+
+        [JsonIgnore]
+        public string PublicIpAddress { get; set; }
+
+        public CreateTestOperation()
+        {
+        }
 
         public CreateTestOperation(int testIndex, TestCase testCase)
         {
-            this.testIndex = testIndex;
-            this.testId = testCase.Id;
-            this.properties = testCase.Properties;
-            this.testCase = new TestCase(this.testId, this.properties);
+            this.TestIndex = testIndex;
+            this.TestId = testCase.Id;
+            this.Properties = testCase.Properties;
+            this.testCase = new TestCase(this.TestId, this.Properties);
         }
 
-        public async Task Run(OperationContext ctx, SimulatorMessage msg)
+        public async Task<ResponseResult> Run(OperationContext ctx)
         {
-            Logger.Info(this.testCase.ToString());
+            Logger.Info($"Initializing test {this.testCase}");
 
-            TestContext testContext= null; //TODO fixme
-            if (!ctx.Tests.TryAdd(this.testIndex, new TestContainer(testContext, this.testCase)))
+            var testContext= new TestContext(this.TestId, ctx.HazelcastInstance, this.PublicIpAddress);
+            if (!ctx.Tests.TryAdd(this.TestIndex, new TestContainer(testContext, this.testCase)))
             {
-                throw new InvalidOperationException($"Can't init {this.testCase}, another test with testId {this.testId} already exists");
+                throw new InvalidOperationException($"Can't init {this.testCase}, another test with testId {this.TestId} already exists");
             }
+            return new ResponseResult(ResponseType.Success);
         }
     }
 }

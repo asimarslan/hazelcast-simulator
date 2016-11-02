@@ -37,6 +37,9 @@
     <Reference Include="Moq, Version=4.5.22.0, Culture=neutral, PublicKeyToken=69f491c39445e920">
       <HintPath>..\packages\Moq.4.5.22\lib\net45\Moq.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="nunit.framework, Version=3.5.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb">
       <HintPath>..\packages\NUnit.3.5.0\lib\net45\nunit.framework.dll</HintPath>
     </Reference>
@@ -50,13 +53,16 @@
     <Folder Include="Hazelcast.Simulator.Protocol.Operations\" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Hazelcast.Simulator.Protocol.Operations\OperationSerializationTest.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\OperationTypeTest.cs" />
     <Compile Include="Hazelcast.Simulator.Test\TestContainerTest.cs" />
     <Compile Include="Hazelcast.Simulator.Test\TestPhaseTest.cs" />
     <Compile Include="Hazelcast.Simulator.Utils\BindingContainerTest.cs" />
     <Compile Include="Hazelcast.Simulator.Utils\DependencyInjectionTest.cs" />
+    <Compile Include="Hazelcast.Simulator.Utils\ExceptionReporterTest.cs" />
     <Compile Include="Hazelcast.Simulator.Utils\ReflectionUtiTest.cs" />
     <Compile Include="Hazelcast.Simulator.Utils\SampleDep.cs" />
+    <Compile Include="Hazelcast.Simulator\TestEnvironmentUtils.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SimulatorWorker\SimulatorWorker.csproj">

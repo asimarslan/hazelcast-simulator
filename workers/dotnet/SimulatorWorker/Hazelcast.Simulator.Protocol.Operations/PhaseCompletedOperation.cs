@@ -15,25 +15,22 @@
 using System.Threading.Tasks;
 using Hazelcast.Simulator.Protocol.Core;
 using Hazelcast.Simulator.Protocol.Processors;
+using Hazelcast.Simulator.Test;
+using Newtonsoft.Json;
 
 namespace Hazelcast.Simulator.Protocol.Operations
 {
-    public class IntegrationTestOperation : ISimulatorOperation
+    public class PhaseCompletedOperation : ISimulatorOperation
     {
-        public enum Type
+        [JsonProperty("testPhase")]
+        private readonly string testPhaseStr;
+
+        public PhaseCompletedOperation(TestPhase testPhase)
         {
-            EQUALS,
-            NESTED_SYNC,
-            NESTED_ASYNC,
-            DEEP_NESTED_SYNC,
-            DEEP_NESTED_ASYNC
+            this.testPhaseStr = testPhase.GetName();
         }
 
-        ///Defines the <see ref="Type">Type</see>  of this operation.
-        public string IntegrationType { get; }
-
-        ///Defines the payload of this operation.
-        public string TestData { get; }
+        public TestPhase GetTestPhase() => this.testPhaseStr.ToTestPhase();
 
         public Task<ResponseResult> Run(OperationContext operationContext)
         {

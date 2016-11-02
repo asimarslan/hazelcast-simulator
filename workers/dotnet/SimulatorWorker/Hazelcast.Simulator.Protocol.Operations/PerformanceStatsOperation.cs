@@ -12,19 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.IO;
+using System.Threading.Tasks;
+using Hazelcast.Simulator.Protocol.Core;
+using Hazelcast.Simulator.Protocol.Processors;
 
-namespace Hazelcast.Simulator.Utils
+namespace Hazelcast.Simulator.Protocol.Operations
 {
-    public class FileUtils
+    public class PerformanceStatsOperation : ISimulatorOperation
     {
-        public static string GetUserDirectoryPath()
+        public Task<ResponseResult> Run(OperationContext operationContext)
         {
-            string userDirTest = Environment.GetEnvironmentVariable("user.dir.test");
-            return userDirTest ?? Environment.GetEnvironmentVariable("user.dir");
+            throw new System.NotImplementedException();
         }
-
-
     }
 }

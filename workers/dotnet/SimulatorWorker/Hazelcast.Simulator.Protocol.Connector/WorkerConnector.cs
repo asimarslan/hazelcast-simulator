@@ -21,15 +21,10 @@ namespace Hazelcast.Simulator.Protocol.Connector
         private const int DEFAULT_SHUTDOWN_QUIET_PERIOD = 0;
         private const int DEFAULT_SHUTDOWN_TIMEOUT = 15;
 
-        internal readonly ILog Logger = LogManager.GetLogger(typeof(WorkerConnector));
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(WorkerConnector));
 
-//        public IOperationProcessor Processor { get; private set; }
-
-        private readonly SimulatorAddress localAddress;
+        private readonly SimulatorAddress workerAddress;
         private readonly int addressIndex;
-
-//        private readonly ConnectionManager connectionManager;
-//        private readonly TestProcessorManager testProcessorManager;
 
         private readonly AtomicBoolean isStarted = new AtomicBoolean();
         private readonly int port;
@@ -41,51 +36,47 @@ namespace Hazelcast.Simulator.Protocol.Connector
         private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
         private readonly BlockingCollection<SimulatorMessage> messageQueue = new BlockingCollection<SimulatorMessage>();
-        private readonly ConcurrentDictionary<long, Response> responses = new ConcurrentDictionary<long, Response>();
+        private readonly ConcurrentDictionary<long, TaskCompletionSource<Response>> responseCompletionSources = new ConcurrentDictionary<long, TaskCompletionSource<Response>>();
 
         private IChannel channel;
 
         public void SetChannel(IChannel channel) => this.channel = channel;
 
-        public WorkerConnector(SimulatorAddress localAddress, int port, IHazelcastInstance hazelcastInstance,
-            ClientWorker worker)
+        public WorkerConnector(SimulatorAddress workerAddress, int port, IHazelcastInstance hazelcastInstance, ClientWorker worker)
         {
-            this.localAddress = localAddress;
+            this.workerAddress = workerAddress;
             this.port = port;
             this.hazelcastInstance = hazelcastInstance;
             this.worker = worker;
         }
 
-        public WorkerConnector(int agentIndex, int workerIndex, int port, IHazelcastInstance hazelcastInstance,
-            ClientWorker worker)
+        public WorkerConnector(int agentIndex, int workerIndex, int port, IHazelcastInstance hazelcastInstance, ClientWorker worker)
             : this(new SimulatorAddress(AddressLevel.WORKER, agentIndex, workerIndex, 0), port, hazelcastInstance, worker)
-        {
-        }
+        {}
 
         public async Task Start()
         {
-            if (!isStarted.CompareAndSet(false, true))
+            if (!this.isStarted.CompareAndSet(false, true))
             {
                 throw new SimulatorProtocolException("ServerConnector cannot be started twice or after shutdown!");
             }
             var bootstrap = new ServerBootstrap();
             bootstrap
-                .Group(eventLoopGroup)
+                .Group(this.eventLoopGroup)
                 .Channel<TcpServerSocketChannel>()
-                .LocalAddress(port)
-                .ChildHandler(new ActionChannelInitializer<ISocketChannel>(ConfigureServerPipeline));
+                .LocalAddress(this.port)
+                .ChildHandler(new ActionChannelInitializer<ISocketChannel>(this.ConfigureServerPipeline));
 
             var boundChannel = await bootstrap.BindAsync();
-            Logger.Info($"WorkerConnector {localAddress} listens on {boundChannel.LocalAddress}");
+            Logger.Info($"WorkerConnector {this.workerAddress} listens on {boundChannel.LocalAddress}");
 
             try
             {
-                await ProcessMessageQueue(cancellationTokenSource.Token).ConfigureAwait(false);
+                await this.ProcessMessageQueue(this.cancellationTokenSource.Token).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
-                await
-                    eventLoopGroup.ShutdownGracefullyAsync(TimeSpan.FromSeconds(DEFAULT_SHUTDOWN_QUIET_PERIOD),
+                await this.eventLoopGroup.ShutdownGracefullyAsync(TimeSpan.FromSeconds(DEFAULT_SHUTDOWN_QUIET_PERIOD),
                         TimeSpan.FromSeconds(DEFAULT_SHUTDOWN_TIMEOUT));
             }
         }
@@ -93,17 +84,20 @@ namespace Hazelcast.Simulator.Protocol.Connector
         private void ConfigureServerPipeline(ISocketChannel socketChannel)
         {
             var pipeline = socketChannel.Pipeline;
-            pipeline.AddLast("connectionValidationHandler", new ConnectionValidationHandler(SetChannel));
+            pipeline.AddLast("connectionValidationHandler", new ConnectionValidationHandler(this.SetChannel));
             //            pipeline.AddLast("connectionListenerHandler", new ConnectionListenerHandler(connectionManager));
-            pipeline.AddLast("responseEncoder", new ResponseEncoder(localAddress));
-            pipeline.AddLast("messageEncoder", new SimulatorMessageEncoder(localAddress, localAddress.GetParent()));
+
+            pipeline.AddLast("responseEncoder", new ResponseEncoder(this.workerAddress));
+            pipeline.AddLast("messageEncoder", new SimulatorMessageEncoder(this.workerAddress, this.workerAddress.GetParent()));
+
             pipeline.AddLast("frameDecoder", new SimulatorFrameDecoder());
-            pipeline.AddLast("protocolDecoder", new SimulatorProtocolDecoder(localAddress));
-            pipeline.AddLast("messageConsumeHandler", new SimulatorMessageConsumeHandler(localAddress));
-//            pipeline.AddLast("testProtocolDecoder", new SimulatorProtocolDecoder(localAddress.getChild(0)));
-//            pipeline.AddLast("testMessageConsumeHandler", new MessageTestConsumeHandler(testProcessorManager, localAddress, getScheduledExecutor()));
-            pipeline.AddLast("responseHandler", new ResponseHandler(localAddress, localAddress.GetParent(), this.SetReponse));
-//            pipeline.AddLast("exceptionHandler", new ExceptionHandler(serverConnector));
+            pipeline.AddLast("protocolDecoder", new SimulatorProtocolDecoder(this.workerAddress));
+
+            var op = new OperationProcessor(this.hazelcastInstance, this.workerAddress, this.worker);
+            pipeline.AddLast("messageConsumeHandler", new SimulatorMessageConsumeHandler(this.workerAddress, op));
+
+            pipeline.AddLast("responseHandler", new ResponseHandler(this.workerAddress, this.workerAddress.GetParent(), this.SetReponse));
+            pipeline.AddLast("exceptionHandler", new ExceptionHandler());
         }
 
         public void Shutdown()
@@ -111,9 +105,13 @@ namespace Hazelcast.Simulator.Protocol.Connector
             cancellationTokenSource.Cancel();
         }
 
-        public async Task<Response> Submit(SimulatorAddress destination, ISimulatorOperation operation)
+        public Task<Response> Submit(SimulatorAddress destination, ISimulatorOperation operation)
         {
-            return null;
+            //TODO FIXME
+            TaskCompletionSource<Response> tcs = new TaskCompletionSource<Response>();
+            long key = -1;
+            this.responseCompletionSources.TryAdd(key, tcs);
+            return tcs.Task;
         }
 
         private async Task ProcessMessageQueue(CancellationToken token)
@@ -126,9 +124,11 @@ namespace Hazelcast.Simulator.Protocol.Connector
 
         private void SetReponse(Response response)
         {
-            IAsyncResult
-            responses.TryGetValue(response.MessageId, out responseResult)
-
+            TaskCompletionSource<Response> resCompletionSource;
+            if (this.responseCompletionSources.TryRemove(response.MessageId, out resCompletionSource))
+            {
+                resCompletionSource.SetResult(response);
+            }
         }
     }
 }

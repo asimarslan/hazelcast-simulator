@@ -1,53 +1,73 @@
-﻿namespace Hazelcast.Simulator.Protocol.Core
+﻿using Hazelcast.Simulator.Protocol.Processors;
+using Hazelcast.Simulator.Protocol.Operations;
+
+namespace Hazelcast.Simulator.Protocol.Core
 {
-  public enum ResponseType
-  {
-    /**
-     * Is returned when the {@link SimulatorMessage} was correctly processed.
-     */
-    SUCCESS = 0,
+    public enum ResponseType
+    {
+        /// <summary>
+        /// Is returned when the {@link SimulatorMessage} was correctly processed.
+        /// </summary>
+        Success = 0,
 
-    /**
-     * Is returned when the addressed Coordinator was not found by an Agent component.
-     */
-    FAILURE_COORDINATOR_NOT_FOUND = 1,
+        /// <summary>
+        ///  RESERVED : NOT USED ON WORKER
+        /// </summary>
+        FailureCoordinatorNotFound = 1,
 
-    /**
-     * Is returned when the addressed Agent was not found by the Coordinator.
-     */
-    FAILURE_AGENT_NOT_FOUND = 2,
+        /// <summary>
+        ///  RESERVED : NOT USED ON WORKER
+        /// </summary>
+        FailureAgentNotFound = 2,
 
-    /**
-     * Is returned when the addressed Worker was not found by an Agent component.
-     */
-    FAILURE_WORKER_NOT_FOUND = 3,
+        /// <summary>
+        ///  RESERVED : NOT USED ON WORKER
+        /// </summary>
+        FailureWorkerNotFound = 3,
 
-    /**
-     * Is returned when the addressed Test was not found by a Worker component.
-     */
-    FAILURE_TEST_NOT_FOUND = 4,
+        /// <summary>
+        ///  Is returned when the addressed Test was not found by a Worker component.
+        /// </summary>
+        FailureTestNotFound = 4,
 
-    /**
-     * Is returned when an implementation of {@link hazelcast.simulator.protocol.processors.OperationProcessor}
-     * does not implement the transmitted {@link hazelcast.simulator.protocol.operation.SimulatorOperation}.
-     */
-    UNSUPPORTED_OPERATION_ON_THIS_PROCESSOR = 5,
+        /// <summary>
+        ///  Is returned when an implementation of <see cref="OperationProcessor"/>
+        ///  does not support the transmitted <see cref="ISimulatorOperation"/>.
+        /// </summary>
+        UnsupportedOperationOnThisProcessor = 5,
 
-    /**
-     * Is returned when an exception occurs during the execution of a
-     * {@link hazelcast.simulator.protocol.operation.SimulatorOperation}.
-     */
-    EXCEPTION_DURING_OPERATION_EXECUTION = 6,
+        /// <summary>
+        ///  Is returned when an exception occurs during the execution of a <see cref="ISimulatorOperation"/>
+        /// </summary>
+        ExceptionDuringOperationExecution = 6,
 
-    /**
-     * Is returned when a {@link ResponseFuture} was unblocked by a
-     * {@link hazelcast.simulator.protocol.operation.FailureOperation}.
-     */
-    UNBLOCKED_BY_FAILURE = 7,
+        /// <summary>
+        ///  RESERVED : NOT USED ON WORKER
+        /// </summary>
+        UnblockedByFailure = 7,
 
-    /**
-     * Is returned when a {@link ResponseFuture#get=} was interrupted.
-     */
-    INTERRUPTED = 8
-  }
+        /// <summary>
+        ///  RESERVED : NOT USED ON WORKER
+        /// </summary>
+        Interrupted = 8
+    }
+
+    public class ResponseResult
+    {
+        public static readonly ResponseResult Success = new ResponseResult(ResponseType.Success);
+
+        public ResponseType ResponseType;
+        public string Payload;
+
+        public ResponseResult(ResponseType responseType)
+            : this(responseType, null)
+        {
+        }
+
+        public ResponseResult(ResponseType responseType, string payload)
+        {
+            this.ResponseType = responseType;
+            this.Payload = payload;
+        }
+    }
 }

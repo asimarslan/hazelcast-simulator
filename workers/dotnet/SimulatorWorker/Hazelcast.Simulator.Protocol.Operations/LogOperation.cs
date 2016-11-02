@@ -24,7 +24,7 @@ namespace Hazelcast.Simulator.Protocol.Operations
         private readonly string level;
 
 
-        public Task Run(OperationContext operationContext, SimulatorMessage msg)
+        public Task<ResponseResult> Run(OperationContext operationContext)
         {
             throw new System.NotImplementedException();
         }

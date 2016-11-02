@@ -12,19 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.IO;
+using Hazelcast.Simulator.Protocol.Core;
 
-namespace Hazelcast.Simulator.Utils
+namespace Hazelcast.Simulator.Protocol.Operations
 {
-    public class FileUtils
+    public interface ISimulatorMessageAware
     {
-        public static string GetUserDirectoryPath()
-        {
-            string userDirTest = Environment.GetEnvironmentVariable("user.dir.test");
-            return userDirTest ?? Environment.GetEnvironmentVariable("user.dir");
-        }
-
-
+        void SetSimulatorMessage(SimulatorMessage simulatorMessage);
     }
 }

@@ -13,18 +13,20 @@
 // limitations under the License.
 
 using System;
-using System.IO;
+using DotNetty.Transport.Channels;
+using Hazelcast.Simulator.Utils;
+using log4net;
 
-namespace Hazelcast.Simulator.Utils
+namespace Hazelcast.Simulator.Protocol.Handler
 {
-    public class FileUtils
+    public class ExceptionHandler : ChannelHandlerAdapter
     {
-        public static string GetUserDirectoryPath()
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(ExceptionHandler));
+
+        public override void ExceptionCaught(IChannelHandlerContext context, Exception exception)
         {
-            string userDirTest = Environment.GetEnvironmentVariable("user.dir.test");
-            return userDirTest ?? Environment.GetEnvironmentVariable("user.dir");
+            this.Logger.Error($"Caught unhandled exception in Netty pipeline in channel {context.Channel}", exception);
+            ExceptionReporter.Report("NETTY-EXCEPTION", exception);
         }
-
-
     }
 }

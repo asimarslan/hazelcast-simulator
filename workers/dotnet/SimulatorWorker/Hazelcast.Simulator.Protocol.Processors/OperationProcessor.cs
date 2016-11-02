@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using System.Threading.Tasks;
-using DotNetty.Transport.Channels;
+using Hazelcast.Core;
 using Hazelcast.Simulator.Protocol.Core;
 using Hazelcast.Simulator.Protocol.Operations;
+using Hazelcast.Simulator.Worker;
 using Newtonsoft.Json;
 
 namespace Hazelcast.Simulator.Protocol.Processors
@@ -24,35 +24,30 @@ namespace Hazelcast.Simulator.Protocol.Processors
     public class OperationProcessor
     {
         private readonly OperationContext operationContext;
+        private readonly ClientWorker worker;
 
-        public OperationProcessor()
+        public OperationProcessor(IHazelcastInstance hazelcastInstance, SimulatorAddress workerAddress, ClientWorker worker)
         {
-//            this.operationContext = new OperationContext();
+            this.operationContext = new OperationContext(hazelcastInstance, workerAddress);
+            this.worker = worker;
         }
 
-        public void SubmitAsync(SimulatorMessage simulatorMessage)
+        public Task<ResponseResult> SubmitAsync(SimulatorMessage simulatorMessage)
         {
-            Task.Run(async () => await this.ProcessMessage(simulatorMessage));
+            return Task.Run(async () => { return await this.ProcessMessage(simulatorMessage); });
         }
 
-        protected async Task ProcessMessage(SimulatorMessage msg)
+        private async Task<ResponseResult> ProcessMessage(SimulatorMessage msg)
         {
             var simulatorOperation = JsonConvert.DeserializeObject(msg.OperationData, msg.OperationType.GetClassType())
                 as ISimulatorOperation;
-
-            await this.ExecuteOperation(simulatorOperation, msg);
+            (simulatorOperation as ISimulatorMessageAware)?.SetSimulatorMessage(msg);
+            return await this.ExecuteOperation(simulatorOperation);
         }
 
-        private async Task ExecuteOperation(ISimulatorOperation simulatorOperation, SimulatorMessage msg)
+        private async Task<ResponseResult> ExecuteOperation(ISimulatorOperation simulatorOperation)
         {
-//            InitOperation(simulatorOperation);
-//            await simulatorOperation.Run(this.operationContext, TODO);
+            return await simulatorOperation.Run(this.operationContext);
         }
-
-//        private void InitOperation(ISimulatorOperation simulatorOperation)
-//        {
-//            simulatorOperation.Init();
-
-//        }
     }
 }

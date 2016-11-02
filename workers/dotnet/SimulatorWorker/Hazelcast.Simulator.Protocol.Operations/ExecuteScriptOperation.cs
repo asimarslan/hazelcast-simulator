@@ -13,7 +13,7 @@ namespace Hazelcast.Simulator.Protocol.Operations
         [JsonProperty("fireAndForget")]
         private readonly bool fireAndForget;
 
-        public Task Run(OperationContext operationContext, SimulatorMessage msg)
+        public Task<ResponseResult> Run(OperationContext operationContext)
         {
             throw new System.NotImplementedException();
         }

@@ -27,18 +27,19 @@ namespace Hazelcast.Simulator.Test
     public class TestContainer
     {
         private readonly TestContext testContext;
-        private readonly TestCase testCase;
+
         private BindingContainer bindingContainer;
         private TestPhase currentPhase;
         private readonly AtomicBoolean running = new AtomicBoolean(false);
         private IDictionary<TestPhase, Action> phaseDelegates = new Dictionary<TestPhase, Action>();
 
+        public TestCase TestCase { get; }
         public object TestInstance { get; }
 
         public TestContainer(TestContext testContext, TestCase testCase, object testInstance = null)
         {
             this.testContext = testContext;
-            this.testCase = testCase;
+            this.TestCase = testCase;
             this.TestInstance = testInstance ?? ReflectionUtil.CreateInstanceOfType(testCase.GetClassname());
             this.bindingContainer = new BindingContainer(testContext, testCase);
 

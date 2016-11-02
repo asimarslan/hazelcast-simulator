@@ -23,7 +23,7 @@ namespace Hazelcast.Simulator.Protocol.Handler
 {
     public class ResponseHandler: SimpleChannelInboundHandler<Response>
     {
-        private readonly ILog Logger = LogManager.GetLogger(typeof(ResponseHandler));
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(ResponseHandler));
 
         private readonly SimulatorAddress localAddress;
         private readonly SimulatorAddress remoteAddress;

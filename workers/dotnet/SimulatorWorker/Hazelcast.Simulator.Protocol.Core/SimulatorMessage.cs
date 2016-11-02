@@ -17,11 +17,11 @@ namespace Hazelcast.Simulator.Protocol.Core
         public SimulatorMessage(SimulatorAddress destination, SimulatorAddress source, long messageId,
             OperationType operationType, string operationData)
         {
-            Destination = destination;
-            Source = source;
-            MessageId = messageId;
-            OperationType = operationType;
-            OperationData = operationData;
+            this.Destination = destination;
+            this.Source = source;
+            this.MessageId = messageId;
+            this.OperationType = operationType;
+            this.OperationData = operationData;
         }
 
         public override string ToString() =>

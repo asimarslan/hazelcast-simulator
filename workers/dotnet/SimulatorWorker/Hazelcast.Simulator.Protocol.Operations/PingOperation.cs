@@ -12,7 +12,7 @@ namespace Hazelcast.Simulator.Protocol.Operations
 	 */
 	public class PingOperation : ISimulatorOperation
 	{
-	    public Task Run(OperationContext operationContext, SimulatorMessage msg)
+	    public Task<ResponseResult> Run(OperationContext operationContext)
 	    {
 	        throw new System.NotImplementedException();
 	    }

@@ -17,7 +17,9 @@ namespace Hazelcast.Simulator.Worker
         static readonly ILog log = LogManager.GetLogger(typeof(ClientWorker));
 
         private readonly string workerType;
-        private readonly string publicAddress;
+
+        public string PublicIpAddress { get; }
+
         private readonly int agentIndex;
         private readonly int workerIndex;
         private readonly int workerPort;
@@ -26,18 +28,17 @@ namespace Hazelcast.Simulator.Worker
         private readonly int workerPerformanceMonitorIntervalSeconds;
         private readonly IHazelcastInstance hazelcastInstance;
 
-
         private readonly WorkerConnector workerConnector;
 
         public ClientWorker()
         {
         }
 
-        private ClientWorker(string workerType, string publicAddress, int agentIndex, int workerIndex, int workerPort,
+        private ClientWorker(string workerType, string publicIpAddress, int agentIndex, int workerIndex, int workerPort,
             string hzConfigFile, bool autoCreateHzInstance, int workerPerformanceMonitorIntervalSeconds)
         {
             this.workerType = workerType;
-            this.publicAddress = publicAddress;
+            this.PublicIpAddress = publicIpAddress;
             this.agentIndex = agentIndex;
             this.workerIndex = workerIndex;
             this.workerPort = workerPort;
@@ -47,18 +48,19 @@ namespace Hazelcast.Simulator.Worker
 
             this.hazelcastInstance = this.GetHazelcastInstance();
 
-            this.workerConnector = new WorkerConnector(agentIndex, workerIndex,this.workerPort,this.hazelcastInstance, this);
+            this.workerConnector = new WorkerConnector(agentIndex, workerIndex, this.workerPort, this.hazelcastInstance, this);
             this.SignalStartToAgent();
         }
 
         private IHazelcastInstance GetHazelcastInstance()
         {
             IHazelcastInstance instance = null;
-            if (this.autoCreateHzInstance) {
+            if (this.autoCreateHzInstance)
+            {
                 log.Info($"Creating {this.workerType} HazelcastInstance");
-//                instance = createClientHazelcastInstance(hzConfigFile);
-//                logHeader("Successfully created " + type + " HazelcastInstance");
-//                warmupPartitions(instance);
+                //                instance = createClientHazelcastInstance(hzConfigFile);
+                //                logHeader("Successfully created " + type + " HazelcastInstance");
+                //                warmupPartitions(instance);
             }
             return instance;
         }
@@ -68,26 +70,24 @@ namespace Hazelcast.Simulator.Worker
             log.Info($"Starting .Net Worker pid:{Process.GetCurrentProcess().Id}");
             log.Info($"Starting .Net Worker pid:{Process.GetCurrentProcess().Id}");
 
-            Environment.GetEnvironmentVariable("workerId");
-            Environment.GetEnvironmentVariable("publicAddress");
-            Environment.GetEnvironmentVariable("workerType");
-
-            string workerId = Environment.GetEnvironmentVariable("workerId");
+//            string workerId = Environment.GetEnvironmentVariable("workerId");
             string workerType = Environment.GetEnvironmentVariable("workerType");
 
             string publicAddress = Environment.GetEnvironmentVariable("publicAddress");
-            int agentIndex = int.Parse(Environment.GetEnvironmentVariable("agentIndex"));
-            int workerIndex = int.Parse(Environment.GetEnvironmentVariable("workerIndex"));
-            int workerPort = int.Parse(Environment.GetEnvironmentVariable("workerPort"));
+
+            int agentIndex;
+            int.TryParse(Environment.GetEnvironmentVariable("agentIndex"), out agentIndex);
+
+            int workerIndex;
+            int.TryParse(Environment.GetEnvironmentVariable("workerIndex"), out workerIndex);
+
+            int workerPort;
+            int.TryParse(Environment.GetEnvironmentVariable("workerPort"), out workerPort);
+
             string hzConfigFile = Environment.GetEnvironmentVariable("hzConfigFile");
-            bool autoCreateHzInstance = true;
-            try
-            {
-                autoCreateHzInstance = bool.Parse(Environment.GetEnvironmentVariable("autoCreateHzInstance"));
-            }
-            catch (Exception)
-            {
-            }
+
+            bool autoCreateHzInstance;
+            bool.TryParse(Environment.GetEnvironmentVariable("autoCreateHzInstance"), out autoCreateHzInstance);
             int workerPerformanceMonitorIntervalSeconds = int.Parse(Environment.GetEnvironmentVariable("workerPerformanceMonitorIntervalSeconds"));
 
             ClientWorker worker = new ClientWorker(workerType, publicAddress, agentIndex, workerIndex, workerPort, hzConfigFile,
@@ -98,18 +98,16 @@ namespace Hazelcast.Simulator.Worker
 
         private void SignalStartToAgent()
         {
-            string address = GetHazelcastAddress(this.workerType, publicAddress, hazelcastInstance);
+            string address = GetHazelcastAddress(this.workerType, this.PublicIpAddress, this.hazelcastInstance);
             var path = $"{GetUserDirectoryPath()}/worker.address";
             Console.WriteLine($"worker.address: {path}");
             File.WriteAllText(path, address);
         }
 
-
         public async Task Start()
         {
             await this.workerConnector.Start();
         }
-
 
         public static void Main(string[] args)
         {
@@ -117,6 +115,5 @@ namespace Hazelcast.Simulator.Worker
             log.Info($"Starting .Net Worker pid:{Process.GetCurrentProcess().Id}");
             Task.Run(async () => await StartWorker());
         }
-
     }
 }

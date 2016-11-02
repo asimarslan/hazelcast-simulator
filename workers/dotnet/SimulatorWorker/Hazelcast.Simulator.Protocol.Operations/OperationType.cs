@@ -11,7 +11,13 @@ namespace Hazelcast.Simulator.Protocol.Operations
 	    [Value(typeof(LogOperation))]
 	    Log=1,
 
-		[Value(typeof(PingOperation))]
+	    [Value(typeof(PhaseCompletedOperation))]
+	    PhaseCompleted=1001,
+
+	    [Value(typeof(PerformanceStatsOperation))]
+	    PerformanceState=1002,
+
+	    [Value(typeof(PingOperation))]
 		Ping = 4000,
 
 		[Value(typeof(TerminateWorkerOperation))]
