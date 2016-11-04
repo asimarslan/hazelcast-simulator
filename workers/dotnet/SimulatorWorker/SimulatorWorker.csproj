@@ -85,7 +85,9 @@
     <Compile Include="Hazelcast.Simulator.Protocol.Handler\SimulatorMessageEncoder.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Handler\SimulatorProtocolDecoder.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\ExecuteScriptOperation.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Operations\IConnectorAware.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\IntegrationTestOperation.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Operations\IntegrationType.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\ISimulatorMessageAware.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\LogOperation.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\PerformanceStatsOperation.cs" />

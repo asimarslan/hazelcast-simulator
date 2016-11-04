@@ -28,7 +28,7 @@ namespace Hazelcast.Simulator.Worker
         private readonly int workerPerformanceMonitorIntervalSeconds;
         private readonly IHazelcastInstance hazelcastInstance;
 
-        private readonly WorkerConnector workerConnector;
+        public WorkerConnector Connector { get; }
 
         public ClientWorker()
         {
@@ -48,7 +48,7 @@ namespace Hazelcast.Simulator.Worker
 
             this.hazelcastInstance = this.GetHazelcastInstance();
 
-            this.workerConnector = new WorkerConnector(agentIndex, workerIndex, this.workerPort, this.hazelcastInstance, this);
+            this.Connector = new WorkerConnector(agentIndex, workerIndex, this.workerPort, this.hazelcastInstance, this);
             this.SignalStartToAgent();
         }
 
@@ -106,7 +106,29 @@ namespace Hazelcast.Simulator.Worker
 
         public async Task Start()
         {
-            await this.workerConnector.Start();
+            await this.Connector.Start();
+        }
+
+        public void Shutdown()
+        {
+            if (this.hazelcastInstance != null) {
+                log.Info("Stopping HazelcastInstance...");
+                this.hazelcastInstance.Shutdown();
+            }
+
+            //TODO PERf monitor
+//            if (performanceMonitor != null) {
+//                log.Info("Shutting down WorkerPerformanceMonitor");
+//                performanceMonitor.shutdown();
+//            }
+
+            if (this.Connector != null) {
+                log.Info("Stopping WorkerConnector...");
+                this.Connector.Shutdown();
+            }
+
+//            OperationTypeCounter.printStatistics(Level.DEBUG);
+            Environment.Exit(0);
         }
 
         public static void Main(string[] args)

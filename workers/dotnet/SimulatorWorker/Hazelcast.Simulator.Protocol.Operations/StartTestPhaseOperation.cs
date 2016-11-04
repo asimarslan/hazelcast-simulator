@@ -7,6 +7,9 @@ using Newtonsoft.Json;
 
 namespace Hazelcast.Simulator.Protocol.Operations
 {
+    /// <summary>
+    /// Starts a <see cref="TestPhase"/> of the addressed Simulator Test.
+    /// </summary>
 	public class StartTestPhaseOperation:ISimulatorOperation
 	{
 	    [JsonProperty("testPhase")]

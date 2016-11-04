@@ -12,26 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Threading.Tasks;
-using Hazelcast.Simulator.Protocol.Core;
-using Hazelcast.Simulator.Protocol.Processors;
+using Hazelcast.Simulator.Protocol.Connector;
 
 namespace Hazelcast.Simulator.Protocol.Operations
 {
     /// <summary>
-    /// Executes tasks for integration tests of the Simulator Protocol.
+    /// Operations implementing this interface will access the <see cref="WorkerConnector"/>
     /// </summary>
-    public class IntegrationTestOperation : ISimulatorOperation
+    public interface IConnectorAware
     {
-        ///Defines the <see ref="Type">Type</see>  of this operation.
-        public string IntegrationType { get; }
-
-        ///Defines the payload of this operation.
-        public string TestData { get; }
-
-        public Task<ResponseResult> Run(OperationContext operationContext)
-        {
-            throw new System.NotImplementedException();
-        }
+        void SetConnector(WorkerConnector connector);
     }
 }

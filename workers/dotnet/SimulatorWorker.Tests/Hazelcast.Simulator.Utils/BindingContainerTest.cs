@@ -36,7 +36,7 @@ namespace Hazelcast.Simulator.Utils
         public void Setup()
         {
             this.hzClient = new Mock<IHazelcastInstance>();
-            var testContext = new TestContext(TestId, hzClient.Object);
+            var testContext = new TestContext(TestId, this.hzClient.Object);
             var dict = new Dictionary<string, string>();
             dict.Add("testStrField","Value0");
             dict.Add("testLongField","99");

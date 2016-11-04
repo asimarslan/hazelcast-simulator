@@ -3,6 +3,9 @@ using Hazelcast.Simulator.Utils;
 
 namespace Hazelcast.Simulator.Protocol.Operations
 {
+    /// <summary>
+    /// Operation types defined by simlulator.
+    /// </summary>
 	public enum OperationType
 	{
 	    [Value(typeof(IntegrationTestOperation))]

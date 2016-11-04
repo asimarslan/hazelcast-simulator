@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Hazelcast.Simulator.Protocol.Connector;
 using Hazelcast.Simulator.Protocol.Core;
 using Hazelcast.Simulator.Protocol.Processors;
 using Hazelcast.Simulator.Test;
@@ -9,11 +10,10 @@ using Newtonsoft.Json;
 
 namespace Hazelcast.Simulator.Protocol.Operations
 {
-
     /// <summary>
     /// Creates a Simulator Test based on an index, a testId and a property map.
     //</summary>
-    public class CreateTestOperation : ISimulatorOperation
+    public class CreateTestOperation : ISimulatorOperation, IConnectorAware
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(CreateTestOperation));
 
@@ -32,6 +32,10 @@ namespace Hazelcast.Simulator.Protocol.Operations
         [JsonIgnore]
         public string PublicIpAddress { get; set; }
 
+        [JsonIgnore]
+        private WorkerConnector connector;
+
+
         public CreateTestOperation()
         {
         }
@@ -48,12 +52,14 @@ namespace Hazelcast.Simulator.Protocol.Operations
         {
             Logger.Info($"Initializing test {this.testCase}");
 
-            var testContext= new TestContext(this.TestId, ctx.HazelcastInstance, this.PublicIpAddress);
+            var testContext= new TestContext(this.TestId, ctx.HazelcastInstance, this.PublicIpAddress, this.connector);
             if (!ctx.Tests.TryAdd(this.TestIndex, new TestContainer(testContext, this.testCase)))
             {
                 throw new InvalidOperationException($"Can't init {this.testCase}, another test with testId {this.TestId} already exists");
             }
             return new ResponseResult(ResponseType.Success);
         }
+
+        public void SetConnector(WorkerConnector connector) => this.connector = connector;
     }
 }

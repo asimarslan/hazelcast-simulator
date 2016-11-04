@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Text;
 using DotNetty.Buffers;
 using Hazelcast.Simulator.Protocol.Operations;
@@ -36,20 +37,24 @@ namespace Hazelcast.Simulator.Protocol.Core
         {
             var frameLength = buffer.ReadInt();
             var dataLength = frameLength - HEADER_SIZE;
-
             if (buffer.ReadInt() != MAGIC_BYTES)
             {
                 throw new InvalidDataException("Invalid magic bytes for SimulatorMessage");
             }
-
             var destination = buffer.DecodeSimulatorAddress();
             var source = buffer.DecodeSimulatorAddress();
-
             var messageId = buffer.ReadLong();
-            var operationType = (OperationType) buffer.ReadInt();
-
+            var operationTypeId = buffer.ReadInt();
+            OperationType operationType;
+            try
+            {
+                operationType = (OperationType) operationTypeId;
+            }
+            catch (Exception)
+            {
+                throw new InvalidDataException($"Invalid operation type id:{operationTypeId}");
+            }
             var operationData = buffer.ReadSlice(dataLength).ToString(Encoding.UTF8);
-
             return new SimulatorMessage(destination, source, messageId, operationType, operationData);
         }
 

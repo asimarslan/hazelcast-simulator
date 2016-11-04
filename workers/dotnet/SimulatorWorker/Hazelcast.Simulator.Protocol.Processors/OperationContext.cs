@@ -5,6 +5,9 @@ using Hazelcast.Simulator.Test;
 
 namespace Hazelcast.Simulator.Protocol.Processors
 {
+    /// <summary>
+    /// A stateful context for executing simulator operations.
+    /// </summary>
     public class OperationContext
     {
         public IHazelcastInstance HazelcastInstance { get;}

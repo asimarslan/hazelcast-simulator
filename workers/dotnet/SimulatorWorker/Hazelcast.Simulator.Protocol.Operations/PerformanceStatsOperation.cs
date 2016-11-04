@@ -18,6 +18,10 @@ using Hazelcast.Simulator.Protocol.Processors;
 
 namespace Hazelcast.Simulator.Protocol.Operations
 {
+    /// <summary>
+    /// Sends a {@link PerformanceStats} per running Simulator Test to the Coordinator, which contains the last
+    /// snapshot of performance numbers from that test.
+    /// </summary>
     public class PerformanceStatsOperation : ISimulatorOperation
     {
         public Task<ResponseResult> Run(OperationContext operationContext)

@@ -18,8 +18,8 @@ namespace Hazelcast.Simulator.Protocol.Connector
 {
     public class WorkerConnector
     {
-        private const int DEFAULT_SHUTDOWN_QUIET_PERIOD = 0;
-        private const int DEFAULT_SHUTDOWN_TIMEOUT = 15;
+        private const int DefaultShutdownQuietPeriod = 0;
+        private const int DefaultShutdownTimeout = 15;
 
         private static readonly ILog Logger = LogManager.GetLogger(typeof(WorkerConnector));
 
@@ -76,8 +76,8 @@ namespace Hazelcast.Simulator.Protocol.Connector
             }
             catch (OperationCanceledException)
             {
-                await this.eventLoopGroup.ShutdownGracefullyAsync(TimeSpan.FromSeconds(DEFAULT_SHUTDOWN_QUIET_PERIOD),
-                        TimeSpan.FromSeconds(DEFAULT_SHUTDOWN_TIMEOUT));
+                await this.eventLoopGroup.ShutdownGracefullyAsync(TimeSpan.FromSeconds(DefaultShutdownQuietPeriod),
+                        TimeSpan.FromSeconds(DefaultShutdownTimeout));
             }
         }
 
@@ -102,7 +102,7 @@ namespace Hazelcast.Simulator.Protocol.Connector
 
         public void Shutdown()
         {
-            cancellationTokenSource.Cancel();
+            this.cancellationTokenSource.Cancel();
         }
 
         public Task<Response> Submit(SimulatorAddress destination, ISimulatorOperation operation)
@@ -130,5 +130,22 @@ namespace Hazelcast.Simulator.Protocol.Connector
                 resCompletionSource.SetResult(response);
             }
         }
+
+        public int GetMessageQueueSize() => this.messageQueue.Count;
+
+//        private ResponseFuture writeAsyncToParents(SimulatorMessage message) {
+//            long messageId = message.getMessageId();
+//            String futureKey = createFutureKey(message.getSource(), messageId, addressIndex);
+//            ResponseFuture future = createInstance(futureMap, futureKey);
+//            if (LOGGER.isTraceEnabled()) {
+//                LOGGER.trace(format("[%d] %s created ResponseFuture %s", messageId, localAddress, futureKey));
+//            }
+//            OperationTypeCounter.sent(message.getOperationType());
+//            getChannelGroup().writeAndFlush(message);
+//
+//            return future;
+//        }
+
+
     }
 }

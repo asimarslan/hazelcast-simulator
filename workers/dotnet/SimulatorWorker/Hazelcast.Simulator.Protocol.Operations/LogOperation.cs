@@ -1,6 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Hazelcast.Simulator.Protocol.Core;
 using Hazelcast.Simulator.Protocol.Processors;
+using log4net.Core;
 using Newtonsoft.Json;
 
 namespace Hazelcast.Simulator.Protocol.Operations
@@ -23,10 +25,20 @@ namespace Hazelcast.Simulator.Protocol.Operations
         [JsonProperty("level")]
         private readonly string level;
 
+        public LogOperation(string message) :this(message, Level.Info)
+        {
+        }
+
+        public LogOperation(string message, Level level)
+        {
+            this.message = message;
+            this.level = level.ToString();
+        }
 
         public Task<ResponseResult> Run(OperationContext operationContext)
         {
-            throw new System.NotImplementedException();
+            // log operation does not executon on worker
+            throw new NotSupportedException();
         }
     }
 }

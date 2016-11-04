@@ -16,6 +16,9 @@ using Hazelcast.Simulator.Protocol.Core;
 
 namespace Hazelcast.Simulator.Protocol.Operations
 {
+    /// <summary>
+    /// Operations that require the original <see cref="SimulatorMessage"/> will implement this interface
+    /// </summary>
     public interface ISimulatorMessageAware
     {
         void SetSimulatorMessage(SimulatorMessage simulatorMessage);

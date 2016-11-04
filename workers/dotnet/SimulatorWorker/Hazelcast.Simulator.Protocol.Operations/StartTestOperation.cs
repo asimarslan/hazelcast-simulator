@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Hazelcast.Simulator.Protocol.Connector;
 using Hazelcast.Simulator.Protocol.Core;
 using Hazelcast.Simulator.Protocol.Processors;
 using Hazelcast.Simulator.Test;
@@ -9,11 +10,10 @@ using Newtonsoft.Json;
 
 namespace Hazelcast.Simulator.Protocol.Operations
 {
-    /**
-     * Starts the TestPhase.RUN phase of a Simulator Test.
-     */
-
-    public class StartTestOperation : ISimulatorOperation, ISimulatorMessageAware
+    ///<summary>
+    /// Starts the <see cref="TestPhase.Run"/> phase of a Simulator Test.
+    ///</summary>
+    public class StartTestOperation : ISimulatorOperation, ISimulatorMessageAware, IConnectorAware
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(CreateTestOperation));
 
@@ -29,7 +29,12 @@ namespace Hazelcast.Simulator.Protocol.Operations
         [JsonIgnore]
         private SimulatorMessage msg;
 
+        [JsonIgnore]
+        private WorkerConnector connector;
+
         public void SetSimulatorMessage(SimulatorMessage simulatorMessage) => this.msg = simulatorMessage;
+
+        public void SetConnector(WorkerConnector connector) => this.connector = connector;
 
         public bool MatchesTargetWorkers(SimulatorAddress workerAddress) => this.targetWorkers.Count == 0 || this.targetWorkers.Contains(workerAddress.ToString());
 
@@ -58,7 +63,7 @@ namespace Hazelcast.Simulator.Protocol.Operations
         private bool SkipRunPhase(TestContainer testContainer)
         {
             //TODO: validate targetType
-//            if(! this.targetType in ())
+            //            if(! this.targetType in ())
             if (!this.MatchesTargetWorkers(this.msg.Destination.GetParent()))
             {
                 Logger.Info($"Skipping test (Worker is not on target list) {testContainer.TestCase.Id}");
@@ -70,7 +75,8 @@ namespace Hazelcast.Simulator.Protocol.Operations
         private async Task SendPhaseCompletedOperation(TestPhase testPhase)
         {
             var operation = new PhaseCompletedOperation(testPhase);
-        }
 
+            this.connector.Submit(SimulatorAddress.COORDINATOR, operation);
+        }
     }
 }

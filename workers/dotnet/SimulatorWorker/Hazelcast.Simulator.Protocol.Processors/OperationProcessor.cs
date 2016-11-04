@@ -33,21 +33,20 @@ namespace Hazelcast.Simulator.Protocol.Processors
         }
 
         public Task<ResponseResult> SubmitAsync(SimulatorMessage simulatorMessage)
-        {
-            return Task.Run(async () => { return await this.ProcessMessage(simulatorMessage); });
-        }
+            => Task.Run(async () => await this.ProcessMessage(simulatorMessage));
 
         private async Task<ResponseResult> ProcessMessage(SimulatorMessage msg)
         {
-            var simulatorOperation = JsonConvert.DeserializeObject(msg.OperationData, msg.OperationType.GetClassType())
-                as ISimulatorOperation;
-            (simulatorOperation as ISimulatorMessageAware)?.SetSimulatorMessage(msg);
-            return await this.ExecuteOperation(simulatorOperation);
-        }
+            if (msg.OperationType == OperationType.TerminateWorker)
+            {
+                //SHUTDOWN requested
+                this.worker.Shutdown();
+            }
 
-        private async Task<ResponseResult> ExecuteOperation(ISimulatorOperation simulatorOperation)
-        {
-            return await simulatorOperation.Run(this.operationContext);
+            var simulatorOperation = JsonConvert.DeserializeObject(msg.OperationData, msg.OperationType.GetClassType());
+            (simulatorOperation as ISimulatorMessageAware)?.SetSimulatorMessage(msg);
+            (simulatorOperation as IConnectorAware)?.SetConnector(this.worker.Connector);
+            return await ((ISimulatorOperation)simulatorOperation).Run(this.operationContext);
         }
     }
 }

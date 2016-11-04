@@ -1,6 +1,7 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using Hazelcast.Core;
+using Hazelcast.Simulator.Protocol.Connector;
+using Hazelcast.Simulator.Protocol.Operations;
 using static Hazelcast.Simulator.Protocol.Core.SimulatorAddress;
 
 namespace Hazelcast.Simulator.Test
@@ -13,15 +14,18 @@ namespace Hazelcast.Simulator.Test
 
         private readonly string testId;
         private readonly string publicIpAddress;
+        private readonly WorkerConnector connector;
 
         private volatile bool stopped;
         private bool warmingUp;
 
-        public TestContext(string testId, IHazelcastInstance targetInstance = null, string publicIpAddress = LOCALHOST)
+        public TestContext(string testId, IHazelcastInstance targetInstance = null, string publicIpAddress = LOCALHOST,
+            WorkerConnector connector = null)
         {
             this.testId = testId;
             this.TargetInstance = targetInstance;
             this.publicIpAddress = publicIpAddress;
+            this.connector = connector;
         }
 
         public bool IsWarmingUp() => this.warmingUp;
@@ -34,10 +38,7 @@ namespace Hazelcast.Simulator.Test
 
         public void Stop() => this.stopped = true;
 
-        public void EchoCoordinator(string msg)
-        {
-            //	        connector.Invoke(COORDINATOR, new LogOperation(message));
-        }
+        public void EchoCoordinator(string msg) => this.connector.Submit(COORDINATOR, new LogOperation(msg));
 
         public void BeforeWarmup() => this.warmingUp = true;
 
