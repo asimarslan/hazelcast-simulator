@@ -44,6 +44,13 @@ namespace Hazelcast.Simulator.Test
 			Assert.AreEqual(true, TestPhase.GlobalTeardown.IsGlobal());
 			Assert.AreEqual(false, TestPhase.LocalTeardown.IsGlobal());
 		}
+
+
+	    [Test]
+	    public void TestLastPhase()
+	    {
+	        Assert.AreEqual(TestPhase.LocalTeardown, TestPhases.GetLastTestPhase());
+	    }
 	}
 }
 

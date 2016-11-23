@@ -51,23 +51,4 @@ namespace Hazelcast.Simulator.Protocol.Core
         /// </summary>
         Interrupted = 8
     }
-
-    public class ResponseResult
-    {
-        public static readonly ResponseResult Success = new ResponseResult(ResponseType.Success);
-
-        public ResponseType ResponseType;
-        public string Payload;
-
-        public ResponseResult(ResponseType responseType)
-            : this(responseType, null)
-        {
-        }
-
-        public ResponseResult(ResponseType responseType, string payload)
-        {
-            this.ResponseType = responseType;
-            this.Payload = payload;
-        }
-    }
 }

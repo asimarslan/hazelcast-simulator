@@ -68,7 +68,6 @@ namespace Hazelcast.Simulator.Worker
         public static async Task StartWorker()
         {
             log.Info($"Starting .Net Worker pid:{Process.GetCurrentProcess().Id}");
-            log.Info($"Starting .Net Worker pid:{Process.GetCurrentProcess().Id}");
 
 //            string workerId = Environment.GetEnvironmentVariable("workerId");
             string workerType = Environment.GetEnvironmentVariable("workerType");

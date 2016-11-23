@@ -71,7 +71,7 @@ public class MessageConsumeHandler extends SimpleChannelInboundHandler<Simulator
                     Promise promise = new Promise() {
                         @Override
                         public void answer(ResponseType responseType, String payload) {
-                            Response response = new Response(messageId, msg.getSource())
+                            Response response = new Response(msg)
                                     .addPart(localAddress, responseType, payload);
                             ctx.writeAndFlush(response);
                         }

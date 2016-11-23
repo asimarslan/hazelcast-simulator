@@ -96,7 +96,7 @@ namespace Hazelcast.Simulator.Utils
             Type type = GetFieldType(memberInfo);
             if (type == typeof(IHazelcastInstance))
             {
-                return this.testContext.TargetInstance;
+                return this.testContext.HazelcastClient;
             }
             else if (type == typeof(ITestContext))
             {

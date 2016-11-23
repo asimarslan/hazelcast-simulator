@@ -22,17 +22,36 @@ namespace Hazelcast.Simulator.Protocol.Handler
 
         protected override void ChannelRead0(IChannelHandlerContext ctx, SimulatorMessage msg)
         {
+            if (msg.Destination.AddressLevel == AddressLevel.WORKER)
+            {
+                //Simulator operations for worker:
+                HandleWorkerOperation(ctx, msg);
+            }
+            else if (msg.Destination.AddressLevel == AddressLevel.TEST)
+            {
+                //Simulator operations for test containers:
+                HandleTestOperation(ctx, msg);
+            }
+            else
+            {
+                //TODO WRONG ADDRESS LEVEL HOW TO HANDLE IT???
+                Logger.Error($"A wrong AddressLevel: {this.localAddress.AddressLevel} is received by .Net Worker: {this.localAddress} - {msg}");
+            }
+        }
+
+        private void HandleWorkerOperation(IChannelHandlerContext ctx, SimulatorMessage msg)
+        {
             if (Logger.IsDebugEnabled)
             {
                 Logger.Debug($"[{msg.MessageId}] SimulatorMessageConsumeHandler -- {this.localAddress} - {this.localAddress.AddressLevel} - {msg}");
             }
+
             this.operationProcessor.SubmitAsync(msg).ContinueWith(task =>
             {
                 var response = new Response(msg.MessageId, msg.Source);
                 if (task.Exception == null)
                 {
-                    ResponseResult responseResult = task.Result;
-                    response.AddPart(this.localAddress, responseResult.ResponseType, responseResult.Payload);
+                    response.AddPart(this.localAddress, task.Result);
                 }
                 else
                 {
@@ -40,6 +59,15 @@ namespace Hazelcast.Simulator.Protocol.Handler
                 }
                 ctx.WriteAndFlushAsync(response);
             });
+        }
+
+        private void HandleTestOperation(IChannelHandlerContext ctx, SimulatorMessage msg)
+        {
+            if (Logger.IsDebugEnabled)
+            {
+                Logger.Debug($"[{msg.MessageId}] SimulatorMessageConsumeHandler -- {this.localAddress} - {this.localAddress.AddressLevel} - {msg}");
+            }
+
         }
     }
 }

@@ -35,7 +35,7 @@ namespace Hazelcast.Simulator.Protocol.Operations
             this.level = level.ToString();
         }
 
-        public Task<ResponseResult> Run(OperationContext operationContext)
+        public Task<ResponseType> Run(OperationContext operationContext)
         {
             // log operation does not executon on worker
             throw new NotSupportedException();

@@ -15,7 +15,7 @@ namespace Hazelcast.Simulator.Protocol.Operations
 	    /// </summary>
 	    /// <param name="operationContext">operation context provide the worker resources that an operation need.</param>
 	    /// <returns></returns>
-	    Task<ResponseResult> Run(OperationContext operationContext);
+	    Task<ResponseType> Run(OperationContext operationContext);
 	}
 }
 

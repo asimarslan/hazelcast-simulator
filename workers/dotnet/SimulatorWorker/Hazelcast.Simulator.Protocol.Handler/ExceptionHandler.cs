@@ -25,7 +25,7 @@ namespace Hazelcast.Simulator.Protocol.Handler
 
         public override void ExceptionCaught(IChannelHandlerContext context, Exception exception)
         {
-            this.Logger.Error($"Caught unhandled exception in Netty pipeline in channel {context.Channel}", exception);
+            Logger.Error($"Caught unhandled exception in Netty pipeline in channel {context.Channel}", exception);
             ExceptionReporter.Report("NETTY-EXCEPTION", exception);
         }
     }

@@ -23,7 +23,7 @@ namespace Hazelcast.Simulator.Protocol.Operations
 	    [Value(typeof(PingOperation))]
 		Ping = 4000,
 
-		[Value(typeof(TerminateWorkerOperation))]
+	    //does not need an operation
 		TerminateWorker = 4001,
 
 		[Value(typeof(CreateTestOperation))]

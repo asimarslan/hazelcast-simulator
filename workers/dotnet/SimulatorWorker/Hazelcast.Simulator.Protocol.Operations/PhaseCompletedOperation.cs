@@ -24,7 +24,7 @@ namespace Hazelcast.Simulator.Protocol.Operations
     /// <summary>
     /// Signals the Coordinator which <see cref="TestPhase"/> of a Simulator Test is completed.
     /// </summary>
-    public class PhaseCompletedOperation : ISimulatorOperation
+    public class PhaseCompletedOperation //: ISimulatorOperation
     {
         [JsonProperty("testPhase")]
         private readonly string testPhase;
@@ -34,9 +34,5 @@ namespace Hazelcast.Simulator.Protocol.Operations
             this.testPhase = testPhase.GetName();
         }
 
-        public Task<ResponseResult> Run(OperationContext operationContext)
-        {
-            throw new NotSupportedException();
-        }
     }
 }

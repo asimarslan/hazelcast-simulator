@@ -27,7 +27,7 @@ namespace Hazelcast.Simulator.Protocol.Core
             response.Destination.EncodeByteBuf(buffer);
 
             buffer.WriteInt(parts.Count);
-            foreach (KeyValuePair<SimulatorAddress, Part> pair in parts)
+            foreach (KeyValuePair<SimulatorAddress, Response.Part> pair in parts)
             {
                 pair.Key.EncodeByteBuf(buffer);
                 var part = pair.Value;

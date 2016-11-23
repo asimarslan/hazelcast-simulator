@@ -11,41 +11,40 @@ namespace Hazelcast.Simulator.Protocol.Core
 
         public Response(long messageId, SimulatorAddress destination)
         {
-            MessageId = messageId;
-            Destination = destination;
+            this.MessageId = messageId;
+            this.Destination = destination;
         }
 
-        public int Size()
-        {
-            return Parts.Count;
-        }
+        public int Size() => this.Parts.Count;
 
-        public override string ToString()
-        {
-            return $"[Response: MessageId={MessageId}, Destination={Destination}]";
-        }
+        public override string ToString() => $"[Response: MessageId={this.MessageId}, Destination={this.Destination}]";
 
-        public Response AddPart(SimulatorAddress address, ResponseType responseType, string payload)
+        public Response AddPart(SimulatorAddress sourceAddress, ResponseType responseType, string payload)
         {
-            Parts.Add(address, new Part(responseType, payload));
+            this.AddPart(new Part(sourceAddress, responseType, payload));
             return this;
         }
-    }
 
-    public class Part
-    {
-        public ResponseType ResponseType { get; }
-        public string Payload { get; }
-
-        public Part(ResponseType responseType, string payload)
+        public Response AddPart(Part part)
         {
-            ResponseType = responseType;
-            Payload = payload;
+            this.Parts.Add(part.SourceAddress, part);
+            return this;
         }
 
-        public override string ToString()
+        public class Part
         {
-            return $"Part[type={ResponseType}, payload={Payload}";
+            public SimulatorAddress SourceAddress { get; }
+            public ResponseType ResponseType { get; }
+            public string Payload { get; }
+
+            public Part(SimulatorAddress sourceAddress, ResponseType responseType, string payload)
+            {
+                this.SourceAddress = sourceAddress;
+                this.ResponseType = responseType;
+                this.Payload = payload;
+            }
+
+            public override string ToString() => $"Part[type={this.ResponseType}, payload={this.Payload}";
         }
     }
 }

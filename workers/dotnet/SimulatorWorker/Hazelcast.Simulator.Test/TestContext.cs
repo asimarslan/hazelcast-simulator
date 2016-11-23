@@ -10,21 +10,18 @@ namespace Hazelcast.Simulator.Test
     {
         public const string LOCALHOST = "127.0.0.1";
 
-        internal IHazelcastInstance TargetInstance { get; private set; }
+        internal IHazelcastInstance HazelcastClient { get; private set; }
 
         private readonly string testId;
-        private readonly string publicIpAddress;
         private readonly WorkerConnector connector;
 
         private volatile bool stopped;
         private bool warmingUp;
 
-        public TestContext(string testId, IHazelcastInstance targetInstance = null, string publicIpAddress = LOCALHOST,
-            WorkerConnector connector = null)
+        public TestContext(string testId, IHazelcastInstance hazelcastClient = null, WorkerConnector connector = null)
         {
             this.testId = testId;
-            this.TargetInstance = targetInstance;
-            this.publicIpAddress = publicIpAddress;
+            this.HazelcastClient = hazelcastClient;
             this.connector = connector;
         }
 
@@ -32,7 +29,7 @@ namespace Hazelcast.Simulator.Test
 
         public string GetTestId() => this.testId;
 
-        public string GetPublicIpAddress() => this.publicIpAddress;
+        public string GetPublicIpAddress() =>  this.connector.PublicIpAddress;
 
         public bool IsStopped() => this.stopped;
 

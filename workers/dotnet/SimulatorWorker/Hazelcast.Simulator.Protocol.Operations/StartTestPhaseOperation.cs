@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Hazelcast.Simulator.Protocol.Core;
 using Hazelcast.Simulator.Protocol.Processors;
 using Hazelcast.Simulator.Test;
+using log4net;
 using Newtonsoft.Json;
 
 namespace Hazelcast.Simulator.Protocol.Operations
@@ -10,22 +11,35 @@ namespace Hazelcast.Simulator.Protocol.Operations
     /// <summary>
     /// Starts a <see cref="TestPhase"/> of the addressed Simulator Test.
     /// </summary>
-	public class StartTestPhaseOperation:ISimulatorOperation
-	{
-	    [JsonProperty("testPhase")]
-	    private readonly string testPhaseStr;
+    public class StartTestPhaseOperation : AbstractStartOperation
+    {
+        [JsonProperty("testPhase")]
+        private readonly string testPhaseStr;
 
-	    public StartTestPhaseOperation(TestPhase testPhase)
-	    {
-	        this.testPhaseStr = testPhase.GetName();
-	    }
+        public StartTestPhaseOperation(TestPhase testPhase)
+        {
+            this.testPhaseStr = testPhase.GetName();
+        }
 
-	    public TestPhase GetTestPhase() => this.testPhaseStr.ToTestPhase();
+        protected override async Task<ResponseType> RunInternal(OperationContext operationContext, TestContainer testContainer)
+        {
+            var testPhase = this.GetTestPhase();
+            try
+            {
+                Logger.Info($"Starting test {testContainer.TestCase.TestId}");
+                await testContainer.Invoke(testPhase);
+            }
+            finally
+            {
+                if (testPhase == TestPhases.GetLastTestPhase())
+                {
+                    operationContext.Tests.TryRemove(this.msg.Destination.TestIndex, out testContainer);
+                }
+            }
+            return ResponseType.Success;
+        }
 
-	    public Task<ResponseResult> Run(OperationContext operationContext)
-	    {
-	        throw new System.NotImplementedException();
-	    }
-	}
+        protected override TestPhase GetTestPhase() => this.testPhaseStr.ToTestPhase();
+
+    }
 }
-

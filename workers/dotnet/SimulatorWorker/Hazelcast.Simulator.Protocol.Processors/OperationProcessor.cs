@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Hazelcast.Core;
 using Hazelcast.Simulator.Protocol.Core;
 using Hazelcast.Simulator.Protocol.Operations;
+using Hazelcast.Simulator.Test;
 using Hazelcast.Simulator.Worker;
 using Newtonsoft.Json;
 
@@ -32,10 +34,10 @@ namespace Hazelcast.Simulator.Protocol.Processors
             this.worker = worker;
         }
 
-        public Task<ResponseResult> SubmitAsync(SimulatorMessage simulatorMessage)
+        public Task<Response.Part[]> SubmitAsync(SimulatorMessage simulatorMessage)
             => Task.Run(async () => await this.ProcessMessage(simulatorMessage));
 
-        private async Task<ResponseResult> ProcessMessage(SimulatorMessage msg)
+        private async Task<Response.Part[]> ProcessMessage(SimulatorMessage msg)
         {
             if (msg.OperationType == OperationType.TerminateWorker)
             {
@@ -46,7 +48,33 @@ namespace Hazelcast.Simulator.Protocol.Processors
             var simulatorOperation = JsonConvert.DeserializeObject(msg.OperationData, msg.OperationType.GetClassType());
             (simulatorOperation as ISimulatorMessageAware)?.SetSimulatorMessage(msg);
             (simulatorOperation as IConnectorAware)?.SetConnector(this.worker.Connector);
-            return await ((ISimulatorOperation)simulatorOperation).Run(this.operationContext);
+
+            if (msg.Destination.TestIndex == 0)
+            {
+                //process On All Tests
+                var taskList = new List<Task<Response.Part>>();
+                foreach (KeyValuePair<int,TestContainer> pair in this.operationContext.Tests)
+                {
+                    var testIndex = pair.Key;
+                    var container = pair.Value;
+                    taskList.Add(((ISimulatorOperation)simulatorOperation).Run(this.operationContext));
+
+                }
+                return await Task.WhenAll(taskList);
+            }
+            else
+            {
+                //process On single Test
+                return await Task.WhenAll(this.RunOperation((ISimulatorOperation)simulatorOperation));
+            }
+
         }
+
+        private Task<Response.Part> RunOperation(ISimulatorOperation simulatorOperation)
+        {
+            var responseType = simulatorOperation.Run(this.operationContext);
+
+        }
+
     }
 }

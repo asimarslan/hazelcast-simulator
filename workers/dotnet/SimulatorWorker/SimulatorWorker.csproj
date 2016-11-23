@@ -36,6 +36,9 @@
     <Reference Include="DotNetty.Codecs, Version=0.3.2.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\packages\DotNetty.Codecs.0.3.2\lib\net45\DotNetty.Codecs.dll</HintPath>
     </Reference>
+    <Reference Include="Hazelcast.Net, Version=3.7.2.21721, Culture=neutral, PublicKeyToken=696d29173d68bfe5">
+      <HintPath>..\packages\Hazelcast.Net.3.7.2-beta1\lib\net40\Hazelcast.Net.dll</HintPath>
+    </Reference>
     <Reference Include="HdrHistogram, Version=1.0.0.0, Culture=neutral, PublicKeyToken=56a8eed952212876">
       <HintPath>..\packages\HdrHistogram.1.14.0\lib\net45\HdrHistogram.dll</HintPath>
     </Reference>
@@ -55,9 +58,6 @@
     </Reference>
     <Reference Include="DotNetty.Transport">
       <HintPath>..\packages\DotNetty.Transport.0.3.2\lib\net45\DotNetty.Transport.dll</HintPath>
-    </Reference>
-    <Reference Include="Hazelcast.Net">
-      <HintPath>..\packages\Hazelcast.Net.3.6.4.0\lib\net40\Hazelcast.Net.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -84,6 +84,10 @@
     <Compile Include="Hazelcast.Simulator.Protocol.Handler\SimulatorMessageConsumeHandler.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Handler\SimulatorMessageEncoder.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Handler\SimulatorProtocolDecoder.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Operations\AbstractOperation.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Operations\AbstractStartOperation.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Operations\AbstractTestOperation.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Operations\AbstractWorkerOperation.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\ExecuteScriptOperation.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\IConnectorAware.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\IntegrationTestOperation.cs" />
@@ -124,12 +128,10 @@
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\StartTestPhaseOperation.cs" />
     <Compile Include="Hazelcast.Simulator.Utils\ValueAttribute.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\PingOperation.cs" />
-    <Compile Include="Hazelcast.Simulator.Protocol.Operations\TerminateWorkerOperation.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\CreateTestOperation.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\StartTestOperation.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\StopTestOperation.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Core\ConnectionManager.cs" />
-    <Compile Include="Hazelcast.Simulator.Protocol.Core\TestProcessorManager.cs" />
     <Compile Include="Hazelcast.Simulator.Test\TestContainer.cs" />
     <Compile Include="Hazelcast.Simulator.Test\TestContext.cs" />
   </ItemGroup>
@@ -139,6 +141,8 @@
   <ItemGroup>
     <Folder Include="DotNetty.Codecs" />
     <Folder Include="DotNetty.Transport.Channels" />
+    <Folder Include="Hazelcast.Simulator.Protocol.Core" />
+    <Folder Include="Hazelcast.Simulator.Protocol.Operations" />
     <Folder Include="Hazelcast.Simulator.Protocol.Processors" />
     <Folder Include="Hazelcast.Simulator.Tests" />
     <Folder Include="Hazelcast.Simulator.Worker" />

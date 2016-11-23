@@ -13,7 +13,7 @@ namespace Hazelcast.Simulator.Protocol.Operations
     ///<summary>
     /// Starts the <see cref="TestPhase.Run"/> phase of a Simulator Test.
     ///</summary>
-    public class StartTestOperation : ISimulatorOperation, ISimulatorMessageAware, IConnectorAware
+    public class StartTestOperation : AbstractStartOperation
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(CreateTestOperation));
 
@@ -26,57 +26,43 @@ namespace Hazelcast.Simulator.Protocol.Operations
         [JsonProperty("warmup")]
         private readonly bool warmup;
 
-        [JsonIgnore]
-        private SimulatorMessage msg;
-
-        [JsonIgnore]
-        private WorkerConnector connector;
-
-        public void SetSimulatorMessage(SimulatorMessage simulatorMessage) => this.msg = simulatorMessage;
-
-        public void SetConnector(WorkerConnector connector) => this.connector = connector;
-
-        public bool MatchesTargetWorkers(SimulatorAddress workerAddress) => this.targetWorkers.Count == 0 || this.targetWorkers.Contains(workerAddress.ToString());
-
-        public async Task<ResponseResult> Run(OperationContext operationContext)
+        protected override async Task<ResponseType> RunInternal(OperationContext operationContext, TestContainer testContainer)
         {
-            TestContainer testContainer;
-            if (!operationContext.Tests.TryGetValue(msg.Destination.TestIndex, out testContainer))
-            {
-                throw new InvalidOperationException($"Test not created yet with testIndex:{msg.Destination.TestIndex}");
-            }
-            TestPhase testPhase = this.warmup ? TestPhase.Warmup : TestPhase.Run;
-
+            var testPhase = this.GetTestPhase();
             if (this.SkipRunPhase(testContainer))
             {
-                Logger.Info($"Skipping test {testContainer.TestCase.Id}");
+                Logger.Info($"Skipping test {testContainer.TestCase.TestId}");
                 await this.SendPhaseCompletedOperation(testPhase);
             }
             else
             {
-                Logger.Info($"Starting test {testContainer.TestCase.Id}");
+                Logger.Info($"Starting test {testContainer.TestCase.TestId}");
                 await testContainer.Invoke(testPhase);
             }
-            return ResponseResult.Success;
+            return ResponseType.Success;
         }
+
+        protected override TestPhase GetTestPhase() => this.warmup ? TestPhase.Warmup : TestPhase.Run;
 
         private bool SkipRunPhase(TestContainer testContainer)
         {
-            //TODO: validate targetType
-            //            if(! this.targetType in ())
-            if (!this.MatchesTargetWorkers(this.msg.Destination.GetParent()))
+            if (!this.MatchesTargetType())
             {
-                Logger.Info($"Skipping test (Worker is not on target list) {testContainer.TestCase.Id}");
+                Logger.Info($"Skipping test ({this.targetType} Worker does not match .Net Client) {testContainer.TestCase.TestId}");
+                return true;
+            }
+            if (!this.MatchesTargetWorkers(testAddresss.GetParent()))
+            {
+                Logger.Info($"Skipping test (Worker is not on target list) {testContainer.TestCase.TestId}");
                 return true;
             }
             return false;
         }
 
-        private async Task SendPhaseCompletedOperation(TestPhase testPhase)
-        {
-            var operation = new PhaseCompletedOperation(testPhase);
+        private bool MatchesTargetWorkers(SimulatorAddress workerAddress)
+            => this.targetWorkers.Count == 0 || this.targetWorkers.Contains(workerAddress.ToString());
 
-            this.connector.Submit(SimulatorAddress.COORDINATOR, operation);
-        }
+        private bool MatchesTargetType() => this.targetType == "ALL" || this.targetType == "CLIENT";
+
     }
 }

@@ -23,13 +23,13 @@ namespace Hazelcast.Simulator.Test
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(TestCase));
 
-        public string Id { get; set; }
+        public string TestId { get; set; }
 
         public IDictionary<string, string> Properties { get; }
 
-        public TestCase(string testId, IDictionary<string, string> properties = null)
+        public TestCase(string testTestId, IDictionary<string, string> properties = null)
         {
-            this.Id = testId;
+            this.TestId = testTestId;
             this.Properties = properties?? new Dictionary<string, string>();
         }
 
@@ -53,7 +53,7 @@ namespace Hazelcast.Simulator.Test
         public override string ToString()
         {
             var sb = new StringBuilder("TestCase{");
-            sb.Append(NEW_LINE).Append("    ").Append("id=").Append(this.Id);
+            sb.Append(NEW_LINE).Append("    ").Append("id=").Append(this.TestId);
             sb.Append(',').Append(NEW_LINE).Append("    ").Append("class=").Append(this.GetClassname());
 
             var keys = new List<string>(this.Properties.Keys);

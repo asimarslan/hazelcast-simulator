@@ -79,6 +79,18 @@ namespace Hazelcast.Simulator.Protocol.Core
             }
         }
 
+        public SimulatorAddress GetChild(int childIndex) {
+            if (AddressLevel == AddressLevel.WORKER)
+            {
+                return new SimulatorAddress(AddressLevel.TEST, AgentIndex, WorkerIndex, childIndex);
+            }
+            if (AddressLevel == AddressLevel.TEST)
+            {
+                throw new ArgumentException("Test has no child!");
+            }
+            throw new ArgumentException("Unsupported address level for ");
+        }
+
         public SimulatorAddress GetParent()
         {
             switch (AddressLevel)

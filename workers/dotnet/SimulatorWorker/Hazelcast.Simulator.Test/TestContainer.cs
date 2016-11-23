@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetty.Common.Utilities;
+using Hazelcast.Simulator.Protocol.Core;
 using Hazelcast.Simulator.Utils;
 using static Hazelcast.Simulator.Utils.DependencyInjectionUtil;
 using static Hazelcast.Simulator.Utils.ReflectionUtil;
@@ -26,20 +27,22 @@ namespace Hazelcast.Simulator.Test
 
     public class TestContainer
     {
-        private readonly TestContext testContext;
 
         private BindingContainer bindingContainer;
         private TestPhase currentPhase;
         private readonly AtomicBoolean running = new AtomicBoolean(false);
-        private IDictionary<TestPhase, Action> phaseDelegates = new Dictionary<TestPhase, Action>();
+        private readonly IDictionary<TestPhase, Action> phaseDelegates = new Dictionary<TestPhase, Action>();
 
+        public TestContext TestContext { get; }
         public TestCase TestCase { get; }
         public object TestInstance { get; }
+        public SimulatorAddress TestAddress { get; }
 
-        public TestContainer(TestContext testContext, TestCase testCase, object testInstance = null)
+        public TestContainer(TestContext testContext, TestCase testCase, SimulatorAddress testAddress, object testInstance = null)
         {
-            this.testContext = testContext;
+            this.TestContext = testContext;
             this.TestCase = testCase;
+            this.TestAddress = testAddress;
             this.TestInstance = testInstance ?? ReflectionUtil.CreateInstanceOfType(testCase.GetClassname());
             this.bindingContainer = new BindingContainer(testContext, testCase);
 
@@ -51,19 +54,31 @@ namespace Hazelcast.Simulator.Test
 
         public async Task Invoke(TestPhase testPhase)
         {
-//            if (!this.running.CompareAndSet(false, true))
-//            {
-//                throw new InvalidOperationException($"Test:{this.testContext.GetTestId()} is still running phase:{this.currentPhase}");
-//            }
-//            this.currentPhase = testPhase;
+            if (!this.running.CompareAndSet(false, true))
+            {
+                throw new InvalidOperationException($"Test:{this.TestContext.GetTestId()} is still running phase:{this.currentPhase}");
+            }
+            try
+            {
+                await this.InvokeInternal(testPhase);
+            }
+            finally
+            {
+                this.running.GetAndSet(false);
+            }
+        }
+
+        private async Task InvokeInternal(TestPhase testPhase)
+        {
+            this.currentPhase = testPhase;
 
             if (testPhase == TestPhase.Warmup)
             {
-                this.testContext.BeforeWarmup();
+                this.TestContext.BeforeWarmup();
             }
             else if (testPhase == TestPhase.LocalAfterWarmup)
             {
-                this.testContext.AfterWarmup();
+                this.TestContext.AfterWarmup();
             }
 
             Action phaseDelegate = this.phaseDelegates[testPhase];
@@ -79,7 +94,7 @@ namespace Hazelcast.Simulator.Test
             this.RegisterPhase(TestPhase.GlobalPrepare, typeof(PrepareAttribute), attr => (attr as PrepareAttribute).Global);
 
             //TODO WARMUP :we need this step in TimeStepRunner !!!
-            this.phaseDelegates.Add(TestPhase.Warmup, () => {});
+            this.phaseDelegates.Add(TestPhase.Warmup, () => {/*ignore*/});
 
             this.RegisterPhase(TestPhase.LocalAfterWarmup, typeof(AfterWarmupAttribute), attr => !(attr as AfterWarmupAttribute).Global);
             this.RegisterPhase(TestPhase.GlobalAfterWarmup, typeof(AfterWarmupAttribute), attr => (attr as AfterWarmupAttribute).Global);

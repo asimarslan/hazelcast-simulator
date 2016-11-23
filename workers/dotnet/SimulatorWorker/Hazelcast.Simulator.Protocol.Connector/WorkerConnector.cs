@@ -23,7 +23,7 @@ namespace Hazelcast.Simulator.Protocol.Connector
 
         private static readonly ILog Logger = LogManager.GetLogger(typeof(WorkerConnector));
 
-        private readonly SimulatorAddress workerAddress;
+        public SimulatorAddress WorkerAddress;
         private readonly int addressIndex;
 
         private readonly AtomicBoolean isStarted = new AtomicBoolean();
@@ -40,11 +40,13 @@ namespace Hazelcast.Simulator.Protocol.Connector
 
         private IChannel channel;
 
+        public string PublicIpAddress => this.worker.PublicIpAddress;
+
         public void SetChannel(IChannel channel) => this.channel = channel;
 
         public WorkerConnector(SimulatorAddress workerAddress, int port, IHazelcastInstance hazelcastInstance, ClientWorker worker)
         {
-            this.workerAddress = workerAddress;
+            this.WorkerAddress = workerAddress;
             this.port = port;
             this.hazelcastInstance = hazelcastInstance;
             this.worker = worker;
@@ -68,7 +70,7 @@ namespace Hazelcast.Simulator.Protocol.Connector
                 .ChildHandler(new ActionChannelInitializer<ISocketChannel>(this.ConfigureServerPipeline));
 
             var boundChannel = await bootstrap.BindAsync();
-            Logger.Info($"WorkerConnector {this.workerAddress} listens on {boundChannel.LocalAddress}");
+            Logger.Info($"WorkerConnector {this.WorkerAddress} listens on {boundChannel.LocalAddress}");
 
             try
             {
@@ -87,16 +89,18 @@ namespace Hazelcast.Simulator.Protocol.Connector
             pipeline.AddLast("connectionValidationHandler", new ConnectionValidationHandler(this.SetChannel));
             //            pipeline.AddLast("connectionListenerHandler", new ConnectionListenerHandler(connectionManager));
 
-            pipeline.AddLast("responseEncoder", new ResponseEncoder(this.workerAddress));
-            pipeline.AddLast("messageEncoder", new SimulatorMessageEncoder(this.workerAddress, this.workerAddress.GetParent()));
+            pipeline.AddLast("responseEncoder", new ResponseEncoder(this.WorkerAddress));
+            pipeline.AddLast("messageEncoder", new SimulatorMessageEncoder(this.WorkerAddress,
+                this.WorkerAddress.GetParent()));
 
             pipeline.AddLast("frameDecoder", new SimulatorFrameDecoder());
-            pipeline.AddLast("protocolDecoder", new SimulatorProtocolDecoder(this.workerAddress));
+            pipeline.AddLast("protocolDecoder", new SimulatorProtocolDecoder(this.WorkerAddress));
 
-            var op = new OperationProcessor(this.hazelcastInstance, this.workerAddress, this.worker);
-            pipeline.AddLast("messageConsumeHandler", new SimulatorMessageConsumeHandler(this.workerAddress, op));
+            pipeline.AddLast("messageConsumeHandler", new SimulatorMessageConsumeHandler(this.WorkerAddress,
+                new OperationProcessor(this.hazelcastInstance, this.WorkerAddress, this.worker)));
 
-            pipeline.AddLast("responseHandler", new ResponseHandler(this.workerAddress, this.workerAddress.GetParent(), this.SetReponse));
+            pipeline.AddLast("responseHandler", new ResponseHandler(this.WorkerAddress, this.WorkerAddress.GetParent(),
+                this.SetReponse));
             pipeline.AddLast("exceptionHandler", new ExceptionHandler());
         }
 
@@ -110,7 +114,10 @@ namespace Hazelcast.Simulator.Protocol.Connector
             //TODO FIXME
             TaskCompletionSource<Response> tcs = new TaskCompletionSource<Response>();
             long key = -1;
-            this.responseCompletionSources.TryAdd(key, tcs);
+            if (this.responseCompletionSources.TryAdd(key, tcs))
+            {
+
+            }
             return tcs.Task;
         }
 
@@ -124,10 +131,10 @@ namespace Hazelcast.Simulator.Protocol.Connector
 
         private void SetReponse(Response response)
         {
-            TaskCompletionSource<Response> resCompletionSource;
-            if (this.responseCompletionSources.TryRemove(response.MessageId, out resCompletionSource))
+            TaskCompletionSource<Response> responseCompletionSource;
+            if (this.responseCompletionSources.TryRemove(response.MessageId, out responseCompletionSource))
             {
-                resCompletionSource.SetResult(response);
+                responseCompletionSource.SetResult(response);
             }
         }
 

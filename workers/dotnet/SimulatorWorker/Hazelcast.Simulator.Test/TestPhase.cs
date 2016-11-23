@@ -84,5 +84,11 @@ namespace Hazelcast.Simulator.Test
             }
             throw new ArgumentException($"Argument {testPhaseStr} cannot be converted to TestPhase.");
         }
+
+        public static TestPhase GetLastTestPhase()
+        {
+            Array values = Enum.GetValues(typeof(TestPhase));
+            return (TestPhase)values.GetValue(values.GetUpperBound(0));
+        }
     }
 }

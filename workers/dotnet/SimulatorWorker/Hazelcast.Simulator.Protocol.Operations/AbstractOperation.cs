@@ -13,16 +13,24 @@
 // limitations under the License.
 
 using System.Threading.Tasks;
+using Hazelcast.Simulator.Protocol.Connector;
 using Hazelcast.Simulator.Protocol.Core;
 using Hazelcast.Simulator.Protocol.Processors;
+using Newtonsoft.Json;
 
 namespace Hazelcast.Simulator.Protocol.Operations
 {
-    /// <summary>
-    /// Sends a {@link PerformanceStats} per running Simulator Test to the Coordinator, which contains the last
-    /// snapshot of performance numbers from that test.
-    /// </summary>
-    public class PerformanceStatsOperation //: ISimulatorOperation
+    public class AbstractOperation :ISimulatorOperation
     {
+        [JsonIgnore]
+        public SimulatorAddress TargetAddress { get; set; }
+
+        [JsonIgnore]
+        public WorkerConnector Connector { get; set; }
+
+        public Task<ResponseType> Run(OperationContext operationContext)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
