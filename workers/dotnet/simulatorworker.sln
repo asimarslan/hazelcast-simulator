@@ -1,11 +1,9 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimulatorWorker", "SimulatorWorker\SimulatorWorker.csproj", "{2B235B7D-30DD-4620-A9F3-BE90A53C1297}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimulatorWorker.Tests", "SimulatorWorker.Tests\SimulatorWorker.Tests.csproj", "{66EE7394-AB30-47A7-8F08-668C581ED246}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNettyDemo", "DotNettyDemo\DotNettyDemo.csproj", "{6425FFA8-C5E3-4E9D-90A7-34D303E1C5A9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,9 +19,5 @@ Global
 		{66EE7394-AB30-47A7-8F08-668C581ED246}.Debug|x86.Build.0 = Debug|Any CPU
 		{66EE7394-AB30-47A7-8F08-668C581ED246}.Release|x86.ActiveCfg = Release|Any CPU
 		{66EE7394-AB30-47A7-8F08-668C581ED246}.Release|x86.Build.0 = Release|Any CPU
-		{6425FFA8-C5E3-4E9D-90A7-34D303E1C5A9}.Debug|x86.ActiveCfg = Debug|x86
-		{6425FFA8-C5E3-4E9D-90A7-34D303E1C5A9}.Debug|x86.Build.0 = Debug|x86
-		{6425FFA8-C5E3-4E9D-90A7-34D303E1C5A9}.Release|x86.ActiveCfg = Release|x86
-		{6425FFA8-C5E3-4E9D-90A7-34D303E1C5A9}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 EndGlobal
