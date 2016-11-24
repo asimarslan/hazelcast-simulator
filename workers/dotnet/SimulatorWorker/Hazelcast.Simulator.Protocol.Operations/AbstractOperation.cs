@@ -13,24 +13,26 @@
 // limitations under the License.
 
 using System.Threading.Tasks;
-using Hazelcast.Simulator.Protocol.Connector;
 using Hazelcast.Simulator.Protocol.Core;
 using Hazelcast.Simulator.Protocol.Processors;
 using Newtonsoft.Json;
 
 namespace Hazelcast.Simulator.Protocol.Operations
 {
-    public class AbstractOperation :ISimulatorOperation
+    public abstract class AbstractOperation : ISimulatorOperation
     {
         [JsonIgnore]
-        public SimulatorAddress TargetAddress { get; set; }
+        protected SimulatorAddress sourceAddress;
 
-        [JsonIgnore]
-        public WorkerConnector Connector { get; set; }
+        public void SetSourceAddress(SimulatorAddress source) => this.sourceAddress = source;
 
-        public Task<ResponseType> Run(OperationContext operationContext)
+        public async Task<Response.Part> Run(OperationContext operationContext, SimulatorAddress targetAddress)
         {
-            throw new System.NotImplementedException();
+            var responseType = await this.RunInternal(operationContext, targetAddress);
+            return new Response.Part(targetAddress, responseType);
         }
+
+        /// targetAddress: worker address for worker operations, test address for test operations
+        public abstract Task<ResponseType> RunInternal(OperationContext operationContext, SimulatorAddress targetAddress);
     }
 }

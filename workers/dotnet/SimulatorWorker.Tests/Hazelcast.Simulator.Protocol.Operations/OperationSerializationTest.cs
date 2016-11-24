@@ -17,40 +17,29 @@ using System.Collections.Generic;
 using Hazelcast.Simulator.Test;
 using Newtonsoft.Json;
 using NUnit.Framework;
+using static Hazelcast.Simulator.Utils.ReflectionUtil;
 
 namespace Hazelcast.Simulator.Protocol.Operations
 {
     [TestFixture]
     public class OperationSerializationTest
     {
-        [SetUp]
-        public void Setup()
-        {
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-        }
-
         [Test]
         public void TestCreateTestOperation()
         {
             var properties = new Dictionary<string, string>();
             properties.Add("key0", "value0");
             properties.Add("key1", "value1");
-            var op = new CreateTestOperation(99, new TestCase("", properties));
+            var op = new CreateTestOperation(99, new TestCase("testIdx", properties));
             string json = JsonConvert.SerializeObject(op);
             var operationType = OperationType.CreateTest;
-            var simulatorOperation = (CreateTestOperation)JsonConvert.DeserializeObject(json, operationType.GetClassType());
+            Type type = operationType.GetClassType();
+            var sop = (CreateTestOperation)JsonConvert.DeserializeObject(json, type);
 
-            Assert.AreEqual(op.TestIndex, simulatorOperation.TestIndex);
-            Assert.AreEqual(op.TestId, simulatorOperation.TestId);
-            Assert.AreEqual(op.Properties, simulatorOperation.Properties);
-            Assert.Null(simulatorOperation.PublicIpAddress);
-            Assert.Null(simulatorOperation.testCase);
+            Assert.AreEqual(ReadInstanceFieldValue<int>(sop, type, "testIndex"), 99);
+            Assert.AreEqual(ReadInstanceFieldValue<string>(sop, type, "testId"), "testIdx");
+            Assert.AreEqual(ReadInstanceFieldValue<IDictionary<string,string>>(sop, type, "properties"), properties);
         }
-
-
     }
+
 }

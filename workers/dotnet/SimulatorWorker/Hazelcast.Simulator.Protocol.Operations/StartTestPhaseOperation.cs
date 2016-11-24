@@ -21,7 +21,7 @@ namespace Hazelcast.Simulator.Protocol.Operations
             this.testPhaseStr = testPhase.GetName();
         }
 
-        protected override async Task<ResponseType> RunInternal(OperationContext operationContext, TestContainer testContainer)
+        protected override async Task<ResponseType> StartPhase(OperationContext operationContext, TestContainer testContainer)
         {
             var testPhase = this.GetTestPhase();
             try
@@ -33,7 +33,7 @@ namespace Hazelcast.Simulator.Protocol.Operations
             {
                 if (testPhase == TestPhases.GetLastTestPhase())
                 {
-                    operationContext.Tests.TryRemove(this.msg.Destination.TestIndex, out testContainer);
+                    operationContext.Tests.TryRemove(testContainer.TestAddress.TestIndex, out testContainer);
                 }
             }
             return ResponseType.Success;

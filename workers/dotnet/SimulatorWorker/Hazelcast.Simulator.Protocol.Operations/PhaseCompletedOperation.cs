@@ -12,10 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Threading.Tasks;
-using Hazelcast.Simulator.Protocol.Core;
-using Hazelcast.Simulator.Protocol.Processors;
 using Hazelcast.Simulator.Test;
 using Newtonsoft.Json;
 
@@ -24,7 +20,7 @@ namespace Hazelcast.Simulator.Protocol.Operations
     /// <summary>
     /// Signals the Coordinator which <see cref="TestPhase"/> of a Simulator Test is completed.
     /// </summary>
-    public class PhaseCompletedOperation //: ISimulatorOperation
+    public class PhaseCompletedOperation : AbstractCoordinatorOperation
     {
         [JsonProperty("testPhase")]
         private readonly string testPhase;
@@ -33,6 +29,5 @@ namespace Hazelcast.Simulator.Protocol.Operations
         {
             this.testPhase = testPhase.GetName();
         }
-
     }
 }

@@ -12,15 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Hazelcast.Simulator.Protocol.Connector;
+using System;
+using System.Threading.Tasks;
+using Hazelcast.Simulator.Protocol.Core;
+using Hazelcast.Simulator.Protocol.Processors;
 
 namespace Hazelcast.Simulator.Protocol.Operations
 {
-    /// <summary>
-    /// Operations implementing this interface will access the <see cref="WorkerConnector"/>
-    /// </summary>
-    public interface IConnectorAware
+    public class AbstractCoordinatorOperation : AbstractOperation
     {
-        void SetConnector(WorkerConnector connector);
+        public override Task<ResponseType> RunInternal(OperationContext operationContext, SimulatorAddress targetAddress)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

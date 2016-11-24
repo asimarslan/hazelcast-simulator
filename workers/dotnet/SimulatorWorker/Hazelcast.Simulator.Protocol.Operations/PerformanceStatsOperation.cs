@@ -12,17 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Threading.Tasks;
-using Hazelcast.Simulator.Protocol.Core;
-using Hazelcast.Simulator.Protocol.Processors;
-
 namespace Hazelcast.Simulator.Protocol.Operations
 {
     /// <summary>
     /// Sends a {@link PerformanceStats} per running Simulator Test to the Coordinator, which contains the last
     /// snapshot of performance numbers from that test.
     /// </summary>
-    public class PerformanceStatsOperation //: ISimulatorOperation
+    public class PerformanceStatsOperation : AbstractCoordinatorOperation
     {
     }
 }

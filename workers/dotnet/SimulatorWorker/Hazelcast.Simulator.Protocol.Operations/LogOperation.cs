@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Hazelcast.Simulator.Protocol.Core;
 using Hazelcast.Simulator.Protocol.Processors;
+using log4net;
 using log4net.Core;
 using Newtonsoft.Json;
 
@@ -10,8 +11,9 @@ namespace Hazelcast.Simulator.Protocol.Operations
     /// <summary>
     /// Writes the message with the requested log level to the local logging framework.
     /// </summary>
-    public class LogOperation :ISimulatorOperation
+    public class LogOperation :AbstractWorkerOperation
     {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(LogOperation));
 
         /// <summary>
         /// Defines the message which should be logged.
@@ -35,10 +37,12 @@ namespace Hazelcast.Simulator.Protocol.Operations
             this.level = level.ToString();
         }
 
-        public Task<ResponseType> Run(OperationContext operationContext)
+        public override async Task<ResponseType> RunInternal(OperationContext operationContext, SimulatorAddress targetAddress)
         {
-            // log operation does not executon on worker
-            throw new NotSupportedException();
+            Logger.Logger.Log(typeof(LogOperation), this.GetLevel(), $"[{this.sourceAddress}] {this.message}", null);
+            return ResponseType.Success;
         }
+
+        private Level GetLevel() => LogManager.GetRepository().LevelMap[this.level];
     }
 }

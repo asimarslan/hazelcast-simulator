@@ -84,15 +84,14 @@
     <Compile Include="Hazelcast.Simulator.Protocol.Handler\SimulatorMessageConsumeHandler.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Handler\SimulatorMessageEncoder.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Handler\SimulatorProtocolDecoder.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Operations\AbstractCoordinatorOperation.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\AbstractOperation.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\AbstractStartOperation.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\AbstractTestOperation.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\AbstractWorkerOperation.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\ExecuteScriptOperation.cs" />
-    <Compile Include="Hazelcast.Simulator.Protocol.Operations\IConnectorAware.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\IntegrationTestOperation.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\IntegrationType.cs" />
-    <Compile Include="Hazelcast.Simulator.Protocol.Operations\ISimulatorMessageAware.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\LogOperation.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\PerformanceStatsOperation.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\PhaseCompletedOperation.cs" />

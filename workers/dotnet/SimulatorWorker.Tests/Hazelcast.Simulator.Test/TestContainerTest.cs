@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Hazelcast.Core;
+using Hazelcast.Simulator.Protocol.Core;
 using Hazelcast.Simulator.Utils;
 using Moq;
 using NUnit.Framework;
@@ -40,9 +41,10 @@ namespace Hazelcast.Simulator.Test
             var testContext = new TestContext(TestId, this.hzClient.Object);
             var dict = new Dictionary<string, string>();
             var testCase = new TestCase(TestId, dict);
+            var testAddress = new SimulatorAddress(AddressLevel.TEST, 1, 1, 1);
 
             this.testInstance = new TestSample();
-            this.testContainer = new TestContainer(testContext, testCase, this.testInstance);
+            this.testContainer = new TestContainer(testContext, testCase, testAddress, this.testInstance);
         }
 
         [TearDown]

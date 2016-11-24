@@ -49,9 +49,12 @@ namespace Hazelcast.Simulator.Protocol.Handler
             this.operationProcessor.SubmitAsync(msg).ContinueWith(task =>
             {
                 var response = new Response(msg.MessageId, msg.Source);
-                if (task.Exception == null)
+                if (!task.IsFaulted)
                 {
-                    response.AddPart(this.localAddress, task.Result);
+                    foreach (var part in task.Result)
+                    {
+                        response.AddPart(part);
+                    }
                 }
                 else
                 {

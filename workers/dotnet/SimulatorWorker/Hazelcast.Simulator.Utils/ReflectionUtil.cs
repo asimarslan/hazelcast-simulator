@@ -163,7 +163,15 @@ namespace Hazelcast.Simulator.Utils
             }
             var attr = memberInfo.GetCustomAttribute<InjectProbeAttribute>();
             return attr?.useForThroughput ?? false;
-
         }
+
+        public static T ReadInstanceFieldValue<T>(object instance, Type type, string fieldName)
+        {
+            BindingFlags bindFlags = BindingFlags.Instance | BindingFlags.NonPublic| BindingFlags.Public;
+            FieldInfo field = type.GetField(fieldName, bindFlags);
+            return (T)field.GetValue(instance);
+        }
+
+
     }
 }

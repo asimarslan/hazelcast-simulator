@@ -13,7 +13,7 @@
 // limitations under the License.
 namespace Hazelcast.Simulator.Protocol.Operations
 {
-    public class AbstractTestOperation : AbstractOperation
+    public abstract class AbstractTestOperation : AbstractOperation
     {
 
     }

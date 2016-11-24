@@ -20,43 +20,32 @@ using Hazelcast.Simulator.Protocol.Processors;
 using Hazelcast.Simulator.Test;
 using Hazelcast.Simulator.Utils;
 using log4net;
-using Newtonsoft.Json;
 
 namespace Hazelcast.Simulator.Protocol.Operations
 {
-    public abstract class AbstractStartOperation: ISimulatorOperation, ISimulatorMessageAware, IConnectorAware
+    public abstract class AbstractStartOperation: AbstractTestOperation
     {
         protected static readonly ILog Logger = LogManager.GetLogger(typeof(AbstractStartOperation));
 
-        [JsonIgnore]
-        protected SimulatorMessage msg;
-
-        [JsonIgnore]
-        protected WorkerConnector connector;
-
-        public void SetSimulatorMessage(SimulatorMessage simulatorMessage) => this.msg = simulatorMessage;
-
-        public void SetConnector(WorkerConnector connector) => this.connector = connector;
-
-        public async Task<ResponseType> Run(OperationContext operationContext)
+        public override async Task<ResponseType> RunInternal(OperationContext operationContext, SimulatorAddress targetAddress)
         {
             TestContainer testContainer;
-            if (!operationContext.Tests.TryGetValue(this.msg.Destination.TestIndex, out testContainer))
+            if (!operationContext.Tests.TryGetValue(targetAddress.TestIndex, out testContainer))
             {
-                throw new InvalidOperationException($"Test not created yet with testIndex:{msg.Destination.TestIndex}");
+                throw new InvalidOperationException($"Test not created yet with testIndex:{targetAddress.TestIndex}");
             }
             TestPhase testPhase = this.GetTestPhase();
             try
             {
                 try
                 {
-                    return await this.RunInternal(operationContext, testContainer);
+                    return await this.StartPhase(operationContext, testContainer);
                 }
                 finally
                 {
                     if (testPhase == TestPhases.GetLastTestPhase())
                     {
-                        operationContext.Tests.TryRemove(this.msg.Destination.TestIndex, out testContainer);
+                        operationContext.Tests.TryRemove(targetAddress.TestIndex, out testContainer);
                     }
                 }
             }
@@ -68,18 +57,18 @@ namespace Hazelcast.Simulator.Protocol.Operations
             }
             finally
             {
-                await this.SendPhaseCompletedOperation(testPhase);
+                await this.SendPhaseCompletedOperation(operationContext.Connector, testPhase);
             }
-            return null;
+            return ResponseType.Success;
         }
 
-        protected async Task SendPhaseCompletedOperation(TestPhase testPhase)
+        protected async Task SendPhaseCompletedOperation(WorkerConnector connector, TestPhase testPhase)
         {
             var operation = new PhaseCompletedOperation(testPhase);
-            await this.connector.Submit(SimulatorAddress.COORDINATOR, operation);
+            await connector.Submit(this.sourceAddress, SimulatorAddress.COORDINATOR, operation);
         }
 
-        protected abstract Task<ResponseType> RunInternal(OperationContext operationContext, TestContainer testContainer);
+        protected abstract Task<ResponseType> StartPhase(OperationContext operationContext, TestContainer testContainer);
 
         protected abstract TestPhase GetTestPhase();
     }

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Hazelcast.Core;
@@ -19,7 +20,6 @@ using Hazelcast.Simulator.Protocol.Core;
 using Hazelcast.Simulator.Protocol.Operations;
 using Hazelcast.Simulator.Test;
 using Hazelcast.Simulator.Worker;
-using Newtonsoft.Json;
 
 namespace Hazelcast.Simulator.Protocol.Processors
 {
@@ -30,7 +30,7 @@ namespace Hazelcast.Simulator.Protocol.Processors
 
         public OperationProcessor(IHazelcastInstance hazelcastInstance, SimulatorAddress workerAddress, ClientWorker worker)
         {
-            this.operationContext = new OperationContext(hazelcastInstance, workerAddress);
+            this.operationContext = new OperationContext(hazelcastInstance, workerAddress, worker.Connector);
             this.worker = worker;
         }
 
@@ -44,37 +44,57 @@ namespace Hazelcast.Simulator.Protocol.Processors
                 //SHUTDOWN requested
                 this.worker.Shutdown();
             }
+            if (msg.Destination.AddressLevel == AddressLevel.WORKER)
+            {
+                return await this.RunMessageAtWorkerAddressLevel(msg);
+            }
+            if (msg.Destination.AddressLevel == AddressLevel.TEST)
+            {
+                return await this.RunMessageAtTestAddressLevel(msg);
+            }
+            throw new NotSupportedException($"Not supported address level at .Net worker {msg.Destination.AddressLevel}");
+        }
 
-            var simulatorOperation = JsonConvert.DeserializeObject(msg.OperationData, msg.OperationType.GetClassType());
-            (simulatorOperation as ISimulatorMessageAware)?.SetSimulatorMessage(msg);
-            (simulatorOperation as IConnectorAware)?.SetConnector(this.worker.Connector);
-
+        private async Task<Response.Part[]> RunMessageAtTestAddressLevel(SimulatorMessage msg)
+        {
+            var simulatorOperation = msg.ToOperation();
             if (msg.Destination.TestIndex == 0)
             {
                 //process On All Tests
                 var taskList = new List<Task<Response.Part>>();
-                foreach (KeyValuePair<int,TestContainer> pair in this.operationContext.Tests)
+                foreach (var container in this.operationContext.Tests.Values)
                 {
-                    var testIndex = pair.Key;
-                    var container = pair.Value;
-                    taskList.Add(((ISimulatorOperation)simulatorOperation).Run(this.operationContext));
-
+                    taskList.Add(simulatorOperation.Run(this.operationContext, container.TestAddress));
                 }
                 return await Task.WhenAll(taskList);
             }
             else
             {
-                //process On single Test
-                return await Task.WhenAll(this.RunOperation((ISimulatorOperation)simulatorOperation));
+                TestContainer tc;
+                if (this.operationContext.Tests.TryGetValue(msg.Destination.TestIndex, out tc))
+                {
+                    //process On single Test
+                    return new[] { await simulatorOperation.Run(this.operationContext, tc.TestAddress) };
+                }
+                else
+                {
+                    if (msg.OperationType == OperationType.StopTest)
+                    {
+                        return new[] { new Response.Part(this.worker.Connector.WorkerAddress, ResponseType.Success, null) };
+                    }
+                    else
+                    {
+                        return new[] { new Response.Part(this.worker.Connector.WorkerAddress, ResponseType.FailureTestNotFound, null) };
+                    }
+                }
             }
-
         }
 
-        private Task<Response.Part> RunOperation(ISimulatorOperation simulatorOperation)
+        private async Task<Response.Part[]> RunMessageAtWorkerAddressLevel(SimulatorMessage msg)
         {
-            var responseType = simulatorOperation.Run(this.operationContext);
-
+            var simulatorOperation = msg.ToOperation();
+            Response.Part part = await simulatorOperation.Run(this.operationContext, this.worker.Connector.WorkerAddress);
+            return new[] { part };
         }
-
     }
 }

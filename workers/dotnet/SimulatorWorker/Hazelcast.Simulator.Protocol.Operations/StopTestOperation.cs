@@ -10,7 +10,7 @@ namespace Hazelcast.Simulator.Protocol.Operations
     /// <summary>
     /// Stops the <see cref="TestPhase.Run"/> phase of a Simulator Test.
     /// </summary>
-	public class StopTestOperation : ISimulatorOperation
+	public class StopTestOperation : AbstractTestOperation
 	{
 	    [JsonIgnore]
 	    private SimulatorMessage msg;
@@ -23,7 +23,16 @@ namespace Hazelcast.Simulator.Protocol.Operations
 	        if (operationContext.Tests.TryGetValue(msg.Destination.TestIndex, out testContainer))
 	        {
 	            testContainer.TestContext.Stop();
-//	            throw new InvalidOperationException($"Test not created yet with testIndex:{msg.Destination.TestIndex}");
+	        }
+	        return ResponseType.Success;
+	    }
+
+	    public override async Task<ResponseType> RunInternal(OperationContext operationContext, SimulatorAddress targetAddress)
+	    {
+	        TestContainer testContainer;
+	        if (operationContext.Tests.TryGetValue(targetAddress.TestIndex, out testContainer))
+	        {
+	            testContainer.TestContext.Stop();
 	        }
 	        return ResponseType.Success;
 	    }

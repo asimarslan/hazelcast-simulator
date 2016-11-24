@@ -1,5 +1,4 @@
-﻿using System;
-using Hazelcast.Core;
+﻿using Hazelcast.Core;
 using Hazelcast.Simulator.Protocol.Connector;
 using Hazelcast.Simulator.Protocol.Operations;
 using static Hazelcast.Simulator.Protocol.Core.SimulatorAddress;
@@ -29,13 +28,14 @@ namespace Hazelcast.Simulator.Test
 
         public string GetTestId() => this.testId;
 
-        public string GetPublicIpAddress() =>  this.connector.PublicIpAddress;
+        public string GetPublicIpAddress() => this.connector.PublicIpAddress;
 
         public bool IsStopped() => this.stopped;
 
         public void Stop() => this.stopped = true;
 
-        public void EchoCoordinator(string msg) => this.connector.Submit(COORDINATOR, new LogOperation(msg));
+        public void EchoCoordinator(string msg) => this.connector.Submit(this.connector.WorkerAddress,
+            COORDINATOR, new LogOperation(msg));
 
         public void BeforeWarmup() => this.warmingUp = true;
 

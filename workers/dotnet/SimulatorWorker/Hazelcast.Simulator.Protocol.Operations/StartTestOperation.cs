@@ -26,13 +26,13 @@ namespace Hazelcast.Simulator.Protocol.Operations
         [JsonProperty("warmup")]
         private readonly bool warmup;
 
-        protected override async Task<ResponseType> RunInternal(OperationContext operationContext, TestContainer testContainer)
+        protected override async Task<ResponseType> StartPhase(OperationContext operationContext, TestContainer testContainer)
         {
             var testPhase = this.GetTestPhase();
             if (this.SkipRunPhase(testContainer))
             {
                 Logger.Info($"Skipping test {testContainer.TestCase.TestId}");
-                await this.SendPhaseCompletedOperation(testPhase);
+                await this.SendPhaseCompletedOperation(operationContext.Connector, testPhase);
             }
             else
             {
@@ -51,7 +51,7 @@ namespace Hazelcast.Simulator.Protocol.Operations
                 Logger.Info($"Skipping test ({this.targetType} Worker does not match .Net Client) {testContainer.TestCase.TestId}");
                 return true;
             }
-            if (!this.MatchesTargetWorkers(testAddresss.GetParent()))
+            if (!this.MatchesTargetWorkers(testContainer.TestAddress.GetParent()))
             {
                 Logger.Info($"Skipping test (Worker is not on target list) {testContainer.TestCase.TestId}");
                 return true;

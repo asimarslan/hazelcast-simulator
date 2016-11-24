@@ -20,7 +20,6 @@ namespace Hazelcast.Simulator.Protocol.Operations
 			Assert.AreEqual(typeof(IntegrationTestOperation), OperationType.IntegerationTest.GetClassType());
 			Assert.AreEqual(typeof(LogOperation), OperationType.Log.GetClassType());
 			Assert.AreEqual(typeof(PingOperation), OperationType.Ping.GetClassType());
-			Assert.AreEqual(typeof(TerminateWorkerOperation), OperationType.TerminateWorker.GetClassType());
 			Assert.AreEqual(typeof(CreateTestOperation), OperationType.CreateTest.GetClassType());
 			Assert.AreEqual(typeof(ExecuteScriptOperation), OperationType.ExecuteScript.GetClassType());
 			Assert.AreEqual(typeof(StartTestPhaseOperation), OperationType.StartTestPhase.GetClassType());

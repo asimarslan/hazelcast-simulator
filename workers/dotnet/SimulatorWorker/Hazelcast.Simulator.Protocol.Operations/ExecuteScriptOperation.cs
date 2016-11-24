@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace Hazelcast.Simulator.Protocol.Operations
 {
-    public class ExecuteScriptOperation :ISimulatorOperation
+    public class ExecuteScriptOperation : AbstractWorkerOperation
     {
         [JsonProperty("command")]
         public readonly string command;
@@ -13,7 +13,7 @@ namespace Hazelcast.Simulator.Protocol.Operations
         [JsonProperty("fireAndForget")]
         private readonly bool fireAndForget;
 
-        public Task<ResponseType> Run(OperationContext operationContext)
+        public override async Task<ResponseType> RunInternal(OperationContext operationContext, SimulatorAddress targetAddress)
         {
             throw new System.NotImplementedException();
         }

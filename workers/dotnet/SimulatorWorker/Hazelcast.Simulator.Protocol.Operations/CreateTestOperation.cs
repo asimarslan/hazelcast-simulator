@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Hazelcast.Simulator.Protocol.Connector;
 using Hazelcast.Simulator.Protocol.Core;
 using Hazelcast.Simulator.Protocol.Processors;
 using Hazelcast.Simulator.Test;
@@ -18,43 +17,39 @@ namespace Hazelcast.Simulator.Protocol.Operations
         private static readonly ILog Logger = LogManager.GetLogger(typeof(CreateTestOperation));
 
         [JsonProperty("testIndex")]
-        public int TestIndex { get; }
+        private readonly int testIndex;
 
         [JsonProperty("testId")]
-        public string TestId { get; }
+        private readonly string testId;
 
         [JsonProperty("properties")]
-        public IDictionary<string, string> Properties { get; }
-
-//        [JsonIgnore]
-//        private WorkerConnector connector;
-
+        private readonly IDictionary<string, string> properties;
 
         public CreateTestOperation()
         {
         }
 
-//        public CreateTestOperation(int testIndex, TestCase testCase)
-//        {
-//            this.TestIndex = testIndex;
-//            this.TestId = testCase.TestId;
-//            this.Properties = testCase.Properties;
-//            this.testCase = new TestCase(this.TestId, this.Properties);
-//        }
-
-        public async Task<Response.Part> Run(OperationContext ctx)
+        public CreateTestOperation(int testIndex, TestCase testCase)
         {
-            var testCase = new TestCase(this.TestId, this.Properties);
-            Logger.Info($"Initializing test {testCase}");
-
-            var testContext= new TestContext(this.TestId, ctx.HazelcastInstance, this.Connector);
-            var testContainer = new TestContainer(testContext, testCase, this.Connector.WorkerAddress.GetChild(TestIndex));
-            if (!ctx.Tests.TryAdd(this.TestIndex, testContainer))
-            {
-                throw new InvalidOperationException($"Can't init {testCase}, another test with testId {this.TestId} already exists");
-            }
-            return new Response.Part(this.TargetAddress, ResponseType.Success, null);
+            this.testIndex = testIndex;
+            this.testId = testCase.TestId;
+            this.properties = testCase.Properties;
         }
 
+        public override async Task<ResponseType> RunInternal(OperationContext ctx, SimulatorAddress targetAddress)
+        {
+            var testCase = new TestCase(this.testId, this.properties);
+            Logger.Info($"Initializing test {testCase}");
+
+            var testContext = new TestContext(this.testId, ctx.HazelcastInstance, ctx.Connector);
+            var testAddress = ctx.WorkerAddress.GetChild(this.testIndex);
+            var testContainer = new TestContainer(testContext, testCase, testAddress);
+            if (!ctx.Tests.TryAdd(this.testIndex, testContainer))
+            {
+                throw new InvalidOperationException(
+                    $"Can't init {testCase}, another test with testId:{this.testId} already exists");
+            }
+            return ResponseType.Success;
+        }
     }
 }

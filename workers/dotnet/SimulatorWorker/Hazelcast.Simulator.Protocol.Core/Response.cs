@@ -37,7 +37,7 @@ namespace Hazelcast.Simulator.Protocol.Core
             public ResponseType ResponseType { get; }
             public string Payload { get; }
 
-            public Part(SimulatorAddress sourceAddress, ResponseType responseType, string payload)
+            public Part(SimulatorAddress sourceAddress, ResponseType responseType, string payload=null)
             {
                 this.SourceAddress = sourceAddress;
                 this.ResponseType = responseType;

@@ -15,19 +15,20 @@
 using System.Threading.Tasks;
 using Hazelcast.Simulator.Protocol.Core;
 using Hazelcast.Simulator.Protocol.Processors;
+using Newtonsoft.Json;
 
 namespace Hazelcast.Simulator.Protocol.Operations
 {
     /// <summary>
     /// Executes tasks for integration tests of the Simulator Protocol.
     /// </summary>
-    public class IntegrationTestOperation : ISimulatorOperation
+    public class IntegrationTestOperation //: ISimulatorOperation
     {
-        ///Defines the <see ref="Type">Type</see>  of this operation.
-        public string IntegrationType { get; }
+        [JsonProperty("type")]
+        public readonly string integrationType;
 
-        ///Defines the payload of this operation.
-        public string TestData { get; }
+        [JsonProperty("testData")]
+        public readonly string testData;
 
         public Task<ResponseType> Run(OperationContext operationContext)
         {
