@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Hazelcast.Simulator.Protocol.Processors;
 using DotNetty.Transport.Channels;
 using Hazelcast.Simulator.Protocol.Core;
@@ -22,15 +23,10 @@ namespace Hazelcast.Simulator.Protocol.Handler
 
         protected override void ChannelRead0(IChannelHandlerContext ctx, SimulatorMessage msg)
         {
-            if (msg.Destination.AddressLevel == AddressLevel.WORKER)
+            if (msg.Destination.AddressLevel == AddressLevel.WORKER
+                || msg.Destination.AddressLevel == AddressLevel.TEST)
             {
-                //Simulator operations for worker:
-                HandleWorkerOperation(ctx, msg);
-            }
-            else if (msg.Destination.AddressLevel == AddressLevel.TEST)
-            {
-                //Simulator operations for test containers:
-                HandleTestOperation(ctx, msg);
+                this.HandleSimulatorMessage(ctx, msg);
             }
             else
             {
@@ -39,11 +35,12 @@ namespace Hazelcast.Simulator.Protocol.Handler
             }
         }
 
-        private void HandleWorkerOperation(IChannelHandlerContext ctx, SimulatorMessage msg)
+        private void HandleSimulatorMessage(IChannelHandlerContext ctx, SimulatorMessage msg)
         {
             if (Logger.IsDebugEnabled)
             {
-                Logger.Debug($"[{msg.MessageId}] SimulatorMessageConsumeHandler -- {this.localAddress} - {this.localAddress.AddressLevel} - {msg}");
+                Logger.Debug($"[{msg.MessageId}] SimulatorMessageConsumeHandler -- {this.localAddress} - " +
+                    $"{this.localAddress.AddressLevel} - {msg}");
             }
 
             this.operationProcessor.SubmitAsync(msg).ContinueWith(task =>
@@ -58,19 +55,11 @@ namespace Hazelcast.Simulator.Protocol.Handler
                 }
                 else
                 {
-                    response.AddPart(this.localAddress, ResponseType.ExceptionDuringOperationExecution, task.Exception.Message);
+                    response.AddPart(this.localAddress, ResponseType.ExceptionDuringOperationExecution,
+                        task.Exception?.Message);
                 }
                 ctx.WriteAndFlushAsync(response);
             });
-        }
-
-        private void HandleTestOperation(IChannelHandlerContext ctx, SimulatorMessage msg)
-        {
-            if (Logger.IsDebugEnabled)
-            {
-                Logger.Debug($"[{msg.MessageId}] SimulatorMessageConsumeHandler -- {this.localAddress} - {this.localAddress.AddressLevel} - {msg}");
-            }
-
         }
     }
 }

@@ -54,7 +54,8 @@ namespace Hazelcast.Simulator.Protocol.Connector
 
         public WorkerConnector(int agentIndex, int workerIndex, int port, IHazelcastInstance hazelcastInstance, ClientWorker worker)
             : this(new SimulatorAddress(AddressLevel.WORKER, agentIndex, workerIndex, 0), port, hazelcastInstance, worker)
-        {}
+        {
+        }
 
         public async Task Start()
         {
@@ -79,7 +80,7 @@ namespace Hazelcast.Simulator.Protocol.Connector
             catch (OperationCanceledException)
             {
                 await this.eventLoopGroup.ShutdownGracefullyAsync(TimeSpan.FromSeconds(DefaultShutdownQuietPeriod),
-                        TimeSpan.FromSeconds(DefaultShutdownTimeout));
+                    TimeSpan.FromSeconds(DefaultShutdownTimeout));
             }
         }
 
@@ -99,15 +100,11 @@ namespace Hazelcast.Simulator.Protocol.Connector
             pipeline.AddLast("messageConsumeHandler", new SimulatorMessageConsumeHandler(this.WorkerAddress,
                 new OperationProcessor(this.hazelcastInstance, this.WorkerAddress, this.worker)));
 
-            pipeline.AddLast("responseHandler", new ResponseHandler(this.WorkerAddress, this.WorkerAddress.GetParent(),
-                this.SetReponse));
+            pipeline.AddLast("responseHandler", new ResponseHandler(this.HandleReponse));
             pipeline.AddLast("exceptionHandler", new ExceptionHandler());
         }
 
-        public void Shutdown()
-        {
-            this.cancellationTokenSource.Cancel();
-        }
+        public void Shutdown() => this.cancellationTokenSource.Cancel();
 
         public Task<Response> Submit(SimulatorAddress source, SimulatorAddress destination, ISimulatorOperation operation)
         {
@@ -116,7 +113,6 @@ namespace Hazelcast.Simulator.Protocol.Connector
             long key = -1;
             if (this.responseCompletionSources.TryAdd(key, tcs))
             {
-
             }
             return tcs.Task;
         }
@@ -129,30 +125,43 @@ namespace Hazelcast.Simulator.Protocol.Connector
             token.ThrowIfCancellationRequested();
         }
 
-        private void SetReponse(Response response)
+        private void HandleReponse(Response response)
         {
+            if (Logger.IsDebugEnabled)
+            {
+                Logger.Debug($"[{response.MessageId}] ResponseHandler -- {this.WorkerAddress} <- " +
+                    $"{this.WorkerAddress.GetParent()} received {response}");
+            }
+
+            if (response.MessageId == 0)
+            {
+                return;
+            }
             TaskCompletionSource<Response> responseCompletionSource;
             if (this.responseCompletionSources.TryRemove(response.MessageId, out responseCompletionSource))
             {
                 responseCompletionSource.SetResult(response);
             }
+            else
+            {
+                Logger.Error($"[{response.MessageId}] ResponseHandler -- {this.WorkerAddress} <- " +
+                    $"{this.WorkerAddress.GetParent()} , No corresponding request found for received {response},");
+            }
         }
 
         public int GetMessageQueueSize() => this.messageQueue.Count;
 
-//        private ResponseFuture writeAsyncToParents(SimulatorMessage message) {
-//            long messageId = message.getMessageId();
-//            String futureKey = createFutureKey(message.getSource(), messageId, addressIndex);
-//            ResponseFuture future = createInstance(futureMap, futureKey);
-//            if (LOGGER.isTraceEnabled()) {
-//                LOGGER.trace(format("[%d] %s created ResponseFuture %s", messageId, localAddress, futureKey));
-//            }
-//            OperationTypeCounter.sent(message.getOperationType());
-//            getChannelGroup().writeAndFlush(message);
-//
-//            return future;
-//        }
-
-
+        //        private ResponseFuture writeAsyncToParents(SimulatorMessage message) {
+        //            long messageId = message.getMessageId();
+        //            String futureKey = createFutureKey(message.getSource(), messageId, addressIndex);
+        //            ResponseFuture future = createInstance(futureMap, futureKey);
+        //            if (LOGGER.isTraceEnabled()) {
+        //                LOGGER.trace(format("[%d] %s created ResponseFuture %s", messageId, localAddress, futureKey));
+        //            }
+        //            OperationTypeCounter.sent(message.getOperationType());
+        //            getChannelGroup().writeAndFlush(message);
+        //
+        //            return future;
+        //        }
     }
 }

@@ -11,43 +11,23 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 using System;
-using Hazelcast.Simulator.Protocol.Processors;
-using System.Threading.Tasks;
 using DotNetty.Transport.Channels;
-using Hazelcast.Simulator.Protocol.Connector;
 using Hazelcast.Simulator.Protocol.Core;
-using log4net;
 
 namespace Hazelcast.Simulator.Protocol.Handler
 {
-    public class ResponseHandler: SimpleChannelInboundHandler<Response>
+    public class ResponseHandler : SimpleChannelInboundHandler<Response>
     {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(ResponseHandler));
+        private readonly Action<Response> responseCallback;
 
-        private readonly SimulatorAddress localAddress;
-        private readonly SimulatorAddress remoteAddress;
-        private readonly Action<Response>  setResponse;
-
-        public ResponseHandler(SimulatorAddress localAddress, SimulatorAddress remoteAddress, Action<Response> setResponse  )
+        public ResponseHandler(Action<Response> responseCallback)
         {
-            this.localAddress = localAddress;
-            this.remoteAddress = remoteAddress;
-            this.setResponse = setResponse;
+            this.responseCallback = responseCallback;
         }
 
         protected override void ChannelRead0(IChannelHandlerContext ctx, Response response)
-        {
-            if (Logger.IsDebugEnabled)
-            {
-                Logger.Debug($"[{response.MessageId}] ResponseHandler -- {this.localAddress} <- {this.remoteAddress} received {response}");
-            }
-            if (response.MessageId == 0)
-            {
-                return;
-            }
-
-            this.setResponse(response);
-        }
+            => this.responseCallback(response);
     }
 }
