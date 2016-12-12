@@ -13,6 +13,7 @@ using Hazelcast.Simulator.Utils;
 using Hazelcast.Simulator.Worker;
 using log4net;
 using Hazelcast.Simulator.Protocol.Handler;
+using Newtonsoft.Json;
 
 namespace Hazelcast.Simulator.Protocol.Connector
 {
@@ -25,6 +26,7 @@ namespace Hazelcast.Simulator.Protocol.Connector
 
         public SimulatorAddress WorkerAddress;
         private readonly int addressIndex;
+        private long currentMessageId = 1;
 
         private readonly AtomicBoolean isStarted = new AtomicBoolean();
         private readonly int port;
@@ -33,10 +35,11 @@ namespace Hazelcast.Simulator.Protocol.Connector
 
         private readonly IEventLoopGroup eventLoopGroup = new MultithreadEventLoopGroup();
 
-        private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+//        private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
-        private readonly BlockingCollection<SimulatorMessage> messageQueue = new BlockingCollection<SimulatorMessage>();
-        private readonly ConcurrentDictionary<long, TaskCompletionSource<Response>> responseCompletionSources = new ConcurrentDictionary<long, TaskCompletionSource<Response>>();
+//        private readonly BlockingCollection<SimulatorMessage> messageQueue = new BlockingCollection<SimulatorMessage>();
+        private readonly ConcurrentDictionary<string, TaskCompletionSource<Response>> responseCompletionSources =
+            new ConcurrentDictionary<string, TaskCompletionSource<Response>>();
 
         private IChannel channel;
 
@@ -73,15 +76,15 @@ namespace Hazelcast.Simulator.Protocol.Connector
             var boundChannel = await bootstrap.BindAsync();
             Logger.Info($"WorkerConnector {this.WorkerAddress} listens on {boundChannel.LocalAddress}");
 
-            try
-            {
-                await this.ProcessMessageQueue(this.cancellationTokenSource.Token).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException)
-            {
-                await this.eventLoopGroup.ShutdownGracefullyAsync(TimeSpan.FromSeconds(DefaultShutdownQuietPeriod),
-                    TimeSpan.FromSeconds(DefaultShutdownTimeout));
-            }
+//            try
+//            {
+//                await this.ProcessMessageQueue(this.cancellationTokenSource.Token).ConfigureAwait(false);
+//            }
+//            catch (OperationCanceledException)
+//            {
+//                await this.eventLoopGroup.ShutdownGracefullyAsync(TimeSpan.FromSeconds(DefaultShutdownQuietPeriod),
+//                    TimeSpan.FromSeconds(DefaultShutdownTimeout));
+//            }
         }
 
         private void ConfigureServerPipeline(ISocketChannel socketChannel)
@@ -104,26 +107,40 @@ namespace Hazelcast.Simulator.Protocol.Connector
             pipeline.AddLast("exceptionHandler", new ExceptionHandler());
         }
 
-        public void Shutdown() => this.cancellationTokenSource.Cancel();
+        public void Shutdown()
+        {
+            if (!this.isStarted.CompareAndSet(true, false)) {
+                throw new SimulatorProtocolException("ServerConnector cannot be shutdown twice or if not been started!");
+            }
+
+            this.channel?.CloseAsync().Wait();
+
+            this.eventLoopGroup.ShutdownGracefullyAsync(TimeSpan.FromSeconds(DefaultShutdownQuietPeriod),
+                TimeSpan.FromSeconds(DefaultShutdownTimeout)).Wait();
+        }
 
         public Task<Response> Submit(SimulatorAddress source, SimulatorAddress destination, ISimulatorOperation operation)
         {
             //TODO FIXME
             TaskCompletionSource<Response> tcs = new TaskCompletionSource<Response>();
-            long key = -1;
+            long messageId = Interlocked.Increment(ref this.currentMessageId);
+            string json = JsonConvert.SerializeObject(operation);
+            var message = new SimulatorMessage(destination, source, messageId, operation.GetOperationType(), json);
+            string key = source.CreateResponseKey(messageId, 0);
             if (this.responseCompletionSources.TryAdd(key, tcs))
             {
+                this.channel.WriteAndFlushAsync(message);
             }
             return tcs.Task;
         }
 
-        private async Task ProcessMessageQueue(CancellationToken token)
-        {
-            while (!token.IsCancellationRequested && !messageQueue.IsAddingCompleted)
-            {
-            }
-            token.ThrowIfCancellationRequested();
-        }
+//        private async Task ProcessMessageQueue(CancellationToken token)
+//        {
+//            while (!token.IsCancellationRequested && !messageQueue.IsAddingCompleted)
+//            {
+//            }
+//            token.ThrowIfCancellationRequested();
+//        }
 
         private void HandleReponse(Response response)
         {
@@ -138,7 +155,8 @@ namespace Hazelcast.Simulator.Protocol.Connector
                 return;
             }
             TaskCompletionSource<Response> responseCompletionSource;
-            if (this.responseCompletionSources.TryRemove(response.MessageId, out responseCompletionSource))
+            string key = response.Destination.CreateResponseKey(response.MessageId, this.addressIndex);
+            if (this.responseCompletionSources.TryRemove(key, out responseCompletionSource))
             {
                 responseCompletionSource.SetResult(response);
             }
@@ -149,19 +167,6 @@ namespace Hazelcast.Simulator.Protocol.Connector
             }
         }
 
-        public int GetMessageQueueSize() => this.messageQueue.Count;
-
-        //        private ResponseFuture writeAsyncToParents(SimulatorMessage message) {
-        //            long messageId = message.getMessageId();
-        //            String futureKey = createFutureKey(message.getSource(), messageId, addressIndex);
-        //            ResponseFuture future = createInstance(futureMap, futureKey);
-        //            if (LOGGER.isTraceEnabled()) {
-        //                LOGGER.trace(format("[%d] %s created ResponseFuture %s", messageId, localAddress, futureKey));
-        //            }
-        //            OperationTypeCounter.sent(message.getOperationType());
-        //            getChannelGroup().writeAndFlush(message);
-        //
-        //            return future;
-        //        }
+//        public int GetMessageQueueSize() => this.messageQueue.Count;
     }
 }

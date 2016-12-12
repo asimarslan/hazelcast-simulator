@@ -18,7 +18,7 @@ namespace Hazelcast.Simulator.Protocol.Operations
         {
             if (Logger.IsDebugEnabled)
             {
-                Logger.Debug($"Pinged by {this.sourceAddress} (queue size: {ctx.Connector.GetMessageQueueSize()})...");
+                Logger.Debug($"Pinged by {this.sourceAddress} ...");
             }
             return ResponseType.Success;
         }

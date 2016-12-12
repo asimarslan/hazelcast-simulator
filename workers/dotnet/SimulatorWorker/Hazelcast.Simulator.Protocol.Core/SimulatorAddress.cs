@@ -159,5 +159,10 @@ namespace Hazelcast.Simulator.Protocol.Core
                 sb.Append(name).Append(index != 0 ? index.ToString() : "*");
             }
         }
+
+        public string CreateResponseKey(long messageId, int remoteAddressIndex) {
+            return this.ToString() + '-' + messageId + '-' + remoteAddressIndex;
+        }
+
     }
 }
