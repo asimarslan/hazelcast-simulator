@@ -19,32 +19,16 @@ namespace Hazelcast.Simulator.Protocol.Handler
             this.setChannel = setChannel;
         }
 
+        //TODO Do we really need MAGIC_BYTE Validation as each message is validated later on
         public override void ChannelActive(IChannelHandlerContext context)
         {
+//            if (Logger.IsDebugEnabled)
+//            {
+//            }
+                Logger.Info($"Channel create from {context.Channel.RemoteAddress}");
             context.Channel.CloseCompletion.ContinueWith(task => { setChannel(null); });
             setChannel(context.Channel);
         }
 
-        //TODO Do we really need MAGIC_BYTE Validation as each message is validated later on
-//        public override void ChannelRead(IChannelHandlerContext context, object obj)
-//        {
-//            var buf = obj as IByteBuffer;
-//            if (buf == null || buf.ReadableBytes < MinimumByteBufferSize)
-//            {
-//                return;
-//            }
-//
-//            if (!buf.IsSimulatorMessage() && !buf.IsResponse())
-//            {
-//                Logger.Warn($"Invalid connection from {context.Channel.RemoteAddress} (no magic bytes found)");
-//                context.Close();
-//                return;
-//            }
-//
-//            // the connection is valid so we remove this handler and forward the buffer to the pipeline
-//            LOGGER.info(format("Valid connection from %s (magic bytes found)", ctx.channel().remoteAddress()));
-//            ctx.pipeline().remove(this);
-//            ctx.fireChannelRead(obj);
-//        }
     }
 }

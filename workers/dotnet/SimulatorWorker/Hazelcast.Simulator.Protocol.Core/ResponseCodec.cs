@@ -22,7 +22,7 @@ namespace Hazelcast.Simulator.Protocol.Core
             buffer.WriteInt(0);
             var start = buffer.WriterIndex;
 
-            buffer.WriteInt(MAGIC_BYTES);
+            buffer.WriteUnsignedInt(MAGIC_BYTES);
             buffer.WriteLong(response.MessageId);
             response.Destination.EncodeByteBuf(buffer);
 
@@ -54,7 +54,7 @@ namespace Hazelcast.Simulator.Protocol.Core
         {
             buffer.ReadInt(); //frameLength
 
-            if (buffer.ReadInt() != MAGIC_BYTES)
+            if (buffer.ReadUnsignedInt() != MAGIC_BYTES)
             {
                 throw new ArgumentException("Invalid magic bytes for Response");
             }

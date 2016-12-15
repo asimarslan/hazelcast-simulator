@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Hazelcast.Client;
 using Hazelcast.Core;
 
 namespace Hazelcast.Simulator.Utils
@@ -20,7 +21,20 @@ namespace Hazelcast.Simulator.Utils
     {
         public static string GetHazelcastAddress(string workerType, string publicAddress, IHazelcastInstance hazelcastInstance)
         {
+            if (hazelcastInstance != null)
+            {
+                var socketAddress = hazelcastInstance.GetLocalEndpoint().GetSocketAddress();
+                if (socketAddress != null)
+                {
+                    return $"{socketAddress.Address}:{socketAddress.Port}";
+                }
+            }
             return $"client:{publicAddress}";
+        }
+
+        public static IHazelcastInstance CreateClientHazelcastInstance(string hzConfigFile)
+        {
+            return HazelcastClient.NewHazelcastClient(hzConfigFile);
         }
     }
 }

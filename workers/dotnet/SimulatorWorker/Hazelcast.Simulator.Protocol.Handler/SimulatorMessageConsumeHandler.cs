@@ -58,7 +58,7 @@ namespace Hazelcast.Simulator.Protocol.Handler
                     response.AddPart(this.localAddress, ResponseType.ExceptionDuringOperationExecution,
                         task.Exception?.Message);
                 }
-                ctx.WriteAndFlushAsync(response);
+                ctx.WriteAndFlushAsync(response).Wait();
             });
         }
     }

@@ -17,6 +17,7 @@
         public override Task WriteAsync(IChannelHandlerContext ctx, object msg)
         {
             IByteBuffer buffer = null;
+            Task result;
             try
             {
                 if (this.AcceptOutboundMessage(msg))
@@ -34,13 +35,14 @@
 
                     if (buffer.IsReadable())
                     {
-                        return ctx.WriteAsync(msg);
+                        result = ctx.WriteAsync(buffer);
                     }
                     else
                     {
                         buffer.Release();
-                        return ctx.WriteAsync(Unpooled.Empty);
+                        result = ctx.WriteAsync(Unpooled.Empty);
                     }
+                    buffer = null;
                 }
                 else
                 {
@@ -59,6 +61,7 @@
             {
                 buffer?.Release();
             }
+            return result;
         }
 
         /// <summary>

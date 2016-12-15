@@ -198,7 +198,7 @@ public class WorkerProcessLauncher {
         }
 
         String address = fileAsText(file);
-        deleteQuiet(file);
+//        deleteQuiet(file);
 
         return address;
     }

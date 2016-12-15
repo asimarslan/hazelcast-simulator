@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<log4net>
+    <appender name='RollingFile' type='log4net.Appender.RollingFileAppender'>
+        <file value='${workerHome}/worker.log'/>
+        <appendToFile value='true' />
+        <maximumFileSize value='1gb' />
+        <maxSizeRollBackups value='5' />
+        <threshold value='ALL' />
+        <layout type='log4net.Layout.PatternLayout'>
+            <conversionPattern value='%-5p %d [%t] %c: %m%n' />
+        </layout>
+    </appender>
+    <root>
+        <level value='ALL' />
+        <appender-ref ref='RollingFile' />
+    </root>
+</log4net>

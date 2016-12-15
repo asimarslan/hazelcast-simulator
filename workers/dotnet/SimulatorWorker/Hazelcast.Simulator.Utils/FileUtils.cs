@@ -13,18 +13,36 @@
 // limitations under the License.
 
 using System;
-using System.IO;
+using System.Collections.Generic;
 
 namespace Hazelcast.Simulator.Utils
 {
     public class FileUtils
     {
+        private static Dictionary<string, string> arguments;
+
         public static string GetUserDirectoryPath()
         {
-            string userDirTest = Environment.GetEnvironmentVariable("user.dir.test");
-            return userDirTest ?? Environment.GetEnvironmentVariable("user.dir");
+            string workerHome = Environment.GetEnvironmentVariable("WORKER_HOME");
+            return string.IsNullOrEmpty(workerHome) ? GetParameterDictionary()["workerHome"] : workerHome;
         }
 
+        public static Dictionary<string, string> GetParameterDictionary()
+        {
+            if (arguments != null)
+                return arguments;
+            arguments = new Dictionary<string, string>();
 
+            foreach (string argument in Environment.GetCommandLineArgs())
+            {
+                string[] splitted = argument.Split('=');
+
+                if (splitted.Length == 2)
+                {
+                    arguments[splitted[0]] = splitted[1];
+                }
+            }
+            return arguments;
+        }
     }
 }

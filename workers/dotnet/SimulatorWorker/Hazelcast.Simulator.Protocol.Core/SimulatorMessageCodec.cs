@@ -37,7 +37,8 @@ namespace Hazelcast.Simulator.Protocol.Core
         {
             var frameLength = buffer.ReadInt();
             var dataLength = frameLength - HEADER_SIZE;
-            if (buffer.ReadInt() != MAGIC_BYTES)
+            var magicBytes = buffer.ReadUnsignedInt();
+            if (magicBytes != MAGIC_BYTES)
             {
                 throw new InvalidDataException("Invalid magic bytes for SimulatorMessage");
             }
@@ -60,7 +61,7 @@ namespace Hazelcast.Simulator.Protocol.Core
 
         public static bool IsSimulatorMessage(this IByteBuffer buffer)
         {
-            return buffer.GetInt(OFFSET_MAGIC_BYTES) == MAGIC_BYTES;
+            return buffer.GetUnsignedInt(OFFSET_MAGIC_BYTES) == MAGIC_BYTES;
         }
 
         public static long GetSimulatorMessageId(this IByteBuffer buffer)

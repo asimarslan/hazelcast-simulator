@@ -24,6 +24,7 @@ import java.util.concurrent.Future;
 
 import static com.hazelcast.simulator.utils.CommonUtils.rethrow;
 import static com.hazelcast.simulator.utils.CommonUtils.sleepMillisThrowException;
+import static com.hazelcast.simulator.utils.FileUtils.deleteQuiet;
 import static com.hazelcast.simulator.utils.FileUtils.getUserDir;
 import static com.hazelcast.simulator.utils.Preconditions.checkNotNull;
 import static java.lang.String.format;
@@ -53,6 +54,8 @@ public final class TestUtils {
         try {
             String path = "/tmp/dotnet/";
             File dir = new File(path);
+
+            deleteQuiet(dir);
 
 ////            File dir = File.createTempFile("temp", "tmp-dotnet" /*+ UuidUtil.newUnsecureUuidString()*/);
 //

@@ -8,47 +8,41 @@
 set -e
 
 # Printing the command being executed (useful for debugging)
-#set -x
+set -x
 
 
 # redirecting output/error to the right logfiles.
 exec > worker.out
 exec 2>worker.err
 
-echo $LOG4j_CONFIG>log4j.xml
-echo $HAZELCAST_CONFIG>hazelcast-client.xml
 
 echo ".Net client worker is starting ..."
 echo $SIMULATOR_HOME
 echo $WORKER_TYPE
 echo $WORKER_INDEX
 echo $HAZELCAST_CONFIG
-#echo env
 
-SIMULATOR_DOTNET_LIB="/Users/asimarslan/git/hazelcast-simulator/workers/dotnet/SimulatorWorker/bin/Release"
-
-#JVM_ARGS="-XX:OnOutOfMemoryError=\"touch;-9;worker.oome\" \
-#          -Dhazelcast.logging.type=log4j \
-#          -Dlog4j.configuration=file:log4j.xml \
-#          -DSIMULATOR_HOME=$SIMULATOR_HOME \
-#          -DpublicAddress=$PUBLIC_ADDRESS \
-#          -DagentIndex=$AGENT_INDEX \
-#          -DworkerType=$WORKER_TYPE \
-#          -DworkerId=$WORKER_ID \
-#          -DworkerIndex=$WORKER_INDEX \
-#          -DworkerPort=$WORKER_PORT \
-#          -DworkerPerformanceMonitorIntervalSeconds=$WORKER_PERFORMANCE_MONITOR_INTERVAL_SECONDS \
-#          -DautoCreateHzInstance=$AUTOCREATE_HAZELCAST_INSTANCE \
-#          -DhzConfigFile=hazelcast-client.xml"
-
-# Include the member/client-worker jvm options
-#JVM_ARGS="$JVM_OPTIONS $JVM_ARGS"
-
-#MAIN=com.hazelcast.simulator.worker.ClientWorker
+SIMULATOR_DOTNET_LIB="/Users/asimarslan/git/hazelcast-simulator/workers/dotnet/SimulatorWorker/bin/Debug"
 
 #DOTNET_PATH="$SIMULATOR_HOME"
 
-#java -classpath "$CLASSPATH" $JVM_ARGS $MAIN
+#hazelcast.logging.type="log4j"
+#log4j.configuration="file:log4j.xml"
+SIMULATOR_HOME=$SIMULATOR_HOME
+workerHome="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+echo $(eval "echo \"$LOG4j_CONFIG\"")>log4net.xml
+echo $HAZELCAST_CONFIG>hazelcast-client.xml
 
-mono "$SIMULATOR_DOTNET_LIB/SimulatorWorker.exe"
+WORKER_ARGS="publicAddress=$PUBLIC_ADDRESS \
+            agentIndex=$AGENT_INDEX \
+            workerType=$WORKER_TYPE \
+            workerId=$WORKER_ID \
+            workerIndex=$WORKER_INDEX \
+            workerPort=$WORKER_PORT \
+            workerPerformanceMonitorIntervalSeconds=$WORKER_PERFORMANCE_MONITOR_INTERVAL_SECONDS \
+            autoCreateHzInstance=$AUTOCREATE_HAZELCAST_INSTANCE \
+            hzConfigFile=hazelcast-client.xml \
+            workerHome=$workerHome"
+
+mono --debug "$SIMULATOR_DOTNET_LIB/SimulatorWorker.exe" $WORKER_ARGS

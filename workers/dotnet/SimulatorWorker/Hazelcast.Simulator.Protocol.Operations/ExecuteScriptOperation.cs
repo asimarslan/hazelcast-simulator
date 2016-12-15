@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Hazelcast.Simulator.Protocol.Core;
 using Hazelcast.Simulator.Protocol.Processors;
 using Newtonsoft.Json;
@@ -15,7 +16,11 @@ namespace Hazelcast.Simulator.Protocol.Operations
 
         public override async Task<ResponseType> RunInternal(OperationContext operationContext, SimulatorAddress targetAddress)
         {
-            throw new System.NotImplementedException();
+            if ("js:java.lang.System.exit(0);" == this.command)
+            {
+                Environment.Exit(0);
+            }
+            return ResponseType.Success;
         }
     }
 }

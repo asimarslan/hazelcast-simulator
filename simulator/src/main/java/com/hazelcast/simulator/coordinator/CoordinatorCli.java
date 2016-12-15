@@ -463,8 +463,18 @@ final class CoordinatorCli {
         return fileAsText(file);
     }
 
+//    public static String loadClientHzConfig(WorkerType workerType, String vendor) {
+//        File file = getConfigurationFile("client-" + vendor + "-" + workerType.name() + ".xml");
+//        LOGGER.info("Loading Hazelcast client configuration: " + file.getAbsolutePath());
+//        return fileAsText(file);
+//    }
+
     public static String loadLog4jConfig() {
         return getFileAsTextFromWorkingDirOrBaseDir(getSimulatorHome(), "worker-log4j.xml", "Log4j configuration for Worker");
+    }
+
+    public static String loadLog4jConfig(WorkerType workerType, String vendor) {
+        return getFileAsTextFromWorkingDirOrBaseDir(getSimulatorHome(), "worker-log4j-" + vendor + "-" + workerType.name() + ".xml", "Log4j configuration for Worker");
     }
 
     public static void main(String[] args) {

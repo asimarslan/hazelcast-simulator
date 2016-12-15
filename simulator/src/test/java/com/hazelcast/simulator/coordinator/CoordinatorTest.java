@@ -231,8 +231,8 @@ public class CoordinatorTest {
         // start worker.
         coordinator.workerStart(new RcWorkerStartOperation().setHzConfig(hzConfig));
 
-        // start client .net client
-        coordinator.workerStart(new RcWorkerStartOperation().setHzConfig("dotnetclientconfig").setWorkerType("dotnetclient"));
+        String dotnetclientconfig = FileUtils.fileAsText(new File(localResourceDirectory(), "client-hazelcast-dotnetclient.xml"));
+        coordinator.workerStart(new RcWorkerStartOperation().setHzConfig(dotnetclientconfig).setWorkerType("dotnetclient"));
 
         TestSuite suite = newBasicTestSuite();
 
@@ -248,8 +248,6 @@ public class CoordinatorTest {
         coordinator.workerStart(new RcWorkerStartOperation().setHzConfig(hzConfig));
 
         coordinator.workerStart(new RcWorkerStartOperation().setWorkerType("javaclient").setHzConfig(hzClientConfig));
-        // start client .net client
-//        coordinator.workerStart(new RcWorkerStartOperation().setWorkerType("javaclient"));
 
         TestSuite suite = newBasicTestSuite();
 //        TestSuite suite = new TestSuite().addTest(new TestCase());

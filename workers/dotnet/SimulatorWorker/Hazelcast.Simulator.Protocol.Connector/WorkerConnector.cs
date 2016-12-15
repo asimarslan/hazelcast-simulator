@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetty.Transport.Bootstrapping;
@@ -25,7 +26,6 @@ namespace Hazelcast.Simulator.Protocol.Connector
         private static readonly ILog Logger = LogManager.GetLogger(typeof(WorkerConnector));
 
         public SimulatorAddress WorkerAddress;
-        private readonly int addressIndex;
         private long currentMessageId = 1;
 
         private readonly AtomicBoolean isStarted = new AtomicBoolean();
@@ -35,9 +35,6 @@ namespace Hazelcast.Simulator.Protocol.Connector
 
         private readonly IEventLoopGroup eventLoopGroup = new MultithreadEventLoopGroup();
 
-//        private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-
-//        private readonly BlockingCollection<SimulatorMessage> messageQueue = new BlockingCollection<SimulatorMessage>();
         private readonly ConcurrentDictionary<string, TaskCompletionSource<Response>> responseCompletionSources =
             new ConcurrentDictionary<string, TaskCompletionSource<Response>>();
 
@@ -46,6 +43,8 @@ namespace Hazelcast.Simulator.Protocol.Connector
         public string PublicIpAddress => this.worker.PublicIpAddress;
 
         public void SetChannel(IChannel channel) => this.channel = channel;
+
+        private readonly ManualResetEventSlim _startLock = new ManualResetEventSlim(false, 0);
 
         public WorkerConnector(SimulatorAddress workerAddress, int port, IHazelcastInstance hazelcastInstance, ClientWorker worker)
         {
@@ -66,25 +65,28 @@ namespace Hazelcast.Simulator.Protocol.Connector
             {
                 throw new SimulatorProtocolException("ServerConnector cannot be started twice or after shutdown!");
             }
-            var bootstrap = new ServerBootstrap();
-            bootstrap
-                .Group(this.eventLoopGroup)
-                .Channel<TcpServerSocketChannel>()
-                .LocalAddress(this.port)
-                .ChildHandler(new ActionChannelInitializer<ISocketChannel>(this.ConfigureServerPipeline));
+            try
+            {
+                var bootstrap = new ServerBootstrap();
+                bootstrap
+                    .Group(this.eventLoopGroup)
+                    .Channel<TcpServerSocketChannel>()
+                    .LocalAddress(this.port)
+                    .ChildHandler(new ActionChannelInitializer<ISocketChannel>(this.ConfigureServerPipeline));
 
-            var boundChannel = await bootstrap.BindAsync();
-            Logger.Info($"WorkerConnector {this.WorkerAddress} listens on {boundChannel.LocalAddress}");
+                var boundChannel = await bootstrap.BindAsync();
+                Logger.Info($"WorkerConnector {this.WorkerAddress} listens on {boundChannel.LocalAddress}");
 
-//            try
-//            {
-//                await this.ProcessMessageQueue(this.cancellationTokenSource.Token).ConfigureAwait(false);
-//            }
-//            catch (OperationCanceledException)
-//            {
-//                await this.eventLoopGroup.ShutdownGracefullyAsync(TimeSpan.FromSeconds(DefaultShutdownQuietPeriod),
-//                    TimeSpan.FromSeconds(DefaultShutdownTimeout));
-//            }
+                this._startLock.Wait();
+
+                await boundChannel.CloseAsync();
+            }
+            finally
+            {
+                await this.eventLoopGroup.ShutdownGracefullyAsync();
+                this._startLock.Reset();
+            }
+            Logger.Info("Start completed...");
         }
 
         private void ConfigureServerPipeline(ISocketChannel socketChannel)
@@ -109,9 +111,13 @@ namespace Hazelcast.Simulator.Protocol.Connector
 
         public void Shutdown()
         {
-            if (!this.isStarted.CompareAndSet(true, false)) {
+            if (!this.isStarted.CompareAndSet(true, false))
+            {
                 throw new SimulatorProtocolException("ServerConnector cannot be shutdown twice or if not been started!");
             }
+            Logger.Debug("Shutting down worker connector");
+
+            this._startLock.Set();
 
             this.channel?.CloseAsync().Wait();
 
@@ -121,8 +127,7 @@ namespace Hazelcast.Simulator.Protocol.Connector
 
         public Task<Response> Submit(SimulatorAddress source, SimulatorAddress destination, ISimulatorOperation operation)
         {
-            //TODO FIXME
-            TaskCompletionSource<Response> tcs = new TaskCompletionSource<Response>();
+            var tcs = new TaskCompletionSource<Response>();
             long messageId = Interlocked.Increment(ref this.currentMessageId);
             string json = JsonConvert.SerializeObject(operation);
             var message = new SimulatorMessage(destination, source, messageId, operation.GetOperationType(), json);
@@ -133,14 +138,6 @@ namespace Hazelcast.Simulator.Protocol.Connector
             }
             return tcs.Task;
         }
-
-//        private async Task ProcessMessageQueue(CancellationToken token)
-//        {
-//            while (!token.IsCancellationRequested && !messageQueue.IsAddingCompleted)
-//            {
-//            }
-//            token.ThrowIfCancellationRequested();
-//        }
 
         private void HandleReponse(Response response)
         {
@@ -155,7 +152,7 @@ namespace Hazelcast.Simulator.Protocol.Connector
                 return;
             }
             TaskCompletionSource<Response> responseCompletionSource;
-            string key = response.Destination.CreateResponseKey(response.MessageId, this.addressIndex);
+            string key = response.Destination.CreateResponseKey(response.MessageId, this.WorkerAddress.WorkerIndex);
             if (this.responseCompletionSources.TryRemove(key, out responseCompletionSource))
             {
                 responseCompletionSource.SetResult(response);
@@ -166,7 +163,5 @@ namespace Hazelcast.Simulator.Protocol.Connector
                     $"{this.WorkerAddress.GetParent()} , No corresponding request found for received {response},");
             }
         }
-
-//        public int GetMessageQueueSize() => this.messageQueue.Count;
     }
 }
