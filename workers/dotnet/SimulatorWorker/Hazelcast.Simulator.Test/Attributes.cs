@@ -16,7 +16,6 @@ using Hazelcast.Simulator.Metronome;
 
 namespace Hazelcast.Simulator.Test
 {
-
     [AttributeUsage(AttributeTargets.Method)]
     public class SetupAttribute : Attribute
     {
@@ -119,7 +118,7 @@ namespace Hazelcast.Simulator.Test
 //        }
 //    }
 
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property )]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Field | AttributeTargets.Property )]
     public class NamedAttribute : Attribute
     {
         public string Name { get; set; }

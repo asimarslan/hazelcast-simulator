@@ -41,10 +41,21 @@ namespace Hazelcast.Simulator.Utils
             //defaults
             this.testContext = testContext;
             this.testCase = testCase;
+            this.unusedProperties = new HashSet<string>(this.testCase.Properties.Keys);
+            var threadCount = GetProperty("threadCount");
+            var className = GetProperty("class");
             this.metronomeFactory = new MetronomeFactory(testCase.Properties);
-            this.unusedProperties = new HashSet<string>(this.testCase.Properties.Keys.Where(key => key != "class"));
 
         }
+
+        public string GetProperty(string property) {
+            string value = testCase.GetProperty(property);
+            if (value != null) {
+                unusedProperties.Remove(property);
+            }
+            return value;
+        }
+
 
         internal void EnsureNoUnusedProperties()
         {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Hazelcast.Simulator.Protocol.Processors;
 using DotNetty.Transport.Channels;
@@ -55,8 +56,9 @@ namespace Hazelcast.Simulator.Protocol.Handler
                 }
                 else
                 {
-                    response.AddPart(this.localAddress, ResponseType.ExceptionDuringOperationExecution,
-                        task.Exception?.Message);
+                    var ex = task.Exception.Flatten().InnerExceptions.First();
+                    Logger.Error($"Exception during operation excecution {ex?.Message}", ex);
+                    response.AddPart(this.localAddress, ResponseType.ExceptionDuringOperationExecution, ex?.Message);
                 }
                 ctx.WriteAndFlushAsync(response).Wait();
             });

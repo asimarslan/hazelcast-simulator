@@ -23,6 +23,37 @@ namespace Hazelcast.Simulator.Utils
 {
     public class ReflectionUtil
     {
+        public static Type SearchNamedType(string name)
+        {
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                IEnumerator<Type> enumerator = GetNamedTypes(assembly, name).GetEnumerator();
+                try
+                {
+                    if (enumerator.MoveNext())
+                    {
+                        return enumerator.Current;
+                    }
+                }
+                finally
+                {
+                    enumerator.Dispose();
+                }
+            }
+            return null;
+        }
+
+        public static IEnumerable<Type> GetNamedTypes(Assembly assembly, string name) {
+            foreach(Type type in assembly.GetTypes())
+            {
+                var attrs = type.GetCustomAttributes(typeof(NamedAttribute), false);
+                if (attrs.Length > 0 && name == ((NamedAttribute)attrs[0]).Name)
+                {
+                    yield return type;
+                }
+            }
+        }
+
         public static object CreateInstanceOfType(string typeName)
         {
             Type type = Type.GetType(typeName, true, false);

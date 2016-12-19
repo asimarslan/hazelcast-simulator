@@ -18,7 +18,7 @@ namespace Hazelcast.Simulator.Protocol.Operations
         {
             if ("js:java.lang.System.exit(0);" == this.command)
             {
-                Environment.Exit(0);
+                operationContext.Connector.Shutdown();
             }
             return ResponseType.Success;
         }

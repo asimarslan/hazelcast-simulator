@@ -18,12 +18,13 @@ using Hazelcast.Simulator.Test;
 
 namespace Hazelcast.Simulator.Tests
 {
+    [Named("com.hazelcast.simulator.tests.SuccessTest")]
     public class SuccessTest
     {
         private ITestContext context;
 
         [Setup]
-        public void Setup(ITestContext testContext) => this.context = testContext;
+        public void Setup() {}
 
         [Teardown]
         public void LocalTearDown() {}

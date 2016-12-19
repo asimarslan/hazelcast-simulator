@@ -20,7 +20,7 @@ namespace Hazelcast.Simulator.Protocol.Connector
 {
     public class WorkerConnector
     {
-        private const int DefaultShutdownQuietPeriod = 0;
+        private const int DefaultShutdownQuietPeriod = 10;
         private const int DefaultShutdownTimeout = 15;
 
         private static readonly ILog Logger = LogManager.GetLogger(typeof(WorkerConnector));
@@ -45,6 +45,8 @@ namespace Hazelcast.Simulator.Protocol.Connector
         public void SetChannel(IChannel channel) => this.channel = channel;
 
         private readonly ManualResetEventSlim _startLock = new ManualResetEventSlim(false, 0);
+
+        public volatile bool Ready;
 
         public WorkerConnector(SimulatorAddress workerAddress, int port, IHazelcastInstance hazelcastInstance, ClientWorker worker)
         {
@@ -77,6 +79,7 @@ namespace Hazelcast.Simulator.Protocol.Connector
                 var boundChannel = await bootstrap.BindAsync();
                 Logger.Info($"WorkerConnector {this.WorkerAddress} listens on {boundChannel.LocalAddress}");
 
+                this.Ready = true;
                 this._startLock.Wait();
 
                 await boundChannel.CloseAsync();
@@ -113,7 +116,7 @@ namespace Hazelcast.Simulator.Protocol.Connector
         {
             if (!this.isStarted.CompareAndSet(true, false))
             {
-                throw new SimulatorProtocolException("ServerConnector cannot be shutdown twice or if not been started!");
+                return;
             }
             Logger.Debug("Shutting down worker connector");
 

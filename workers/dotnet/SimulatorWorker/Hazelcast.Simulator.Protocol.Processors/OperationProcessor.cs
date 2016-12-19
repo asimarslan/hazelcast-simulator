@@ -20,11 +20,13 @@ using Hazelcast.Simulator.Protocol.Core;
 using Hazelcast.Simulator.Protocol.Operations;
 using Hazelcast.Simulator.Test;
 using Hazelcast.Simulator.Worker;
+using log4net;
 
 namespace Hazelcast.Simulator.Protocol.Processors
 {
     public class OperationProcessor
     {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(OperationProcessor));
         private readonly OperationContext operationContext;
         private readonly ClientWorker worker;
 
@@ -39,6 +41,7 @@ namespace Hazelcast.Simulator.Protocol.Processors
 
         private async Task<Response.Part[]> ProcessMessage(SimulatorMessage msg)
         {
+            Logger.Debug($"Processing simulator message:{msg}");
             if (msg.OperationType == OperationType.TerminateWorker)
             {
                 //SHUTDOWN requested

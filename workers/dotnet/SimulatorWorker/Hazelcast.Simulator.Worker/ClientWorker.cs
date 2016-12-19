@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using Hazelcast.Core;
+using Hazelcast.Logging;
 using Hazelcast.Simulator.Protocol.Connector;
 using Hazelcast.Simulator.Utils;
 using log4net;
@@ -14,7 +15,7 @@ namespace Hazelcast.Simulator.Worker
 {
     public class ClientWorker
     {
-        static readonly ILog log = LogManager.GetLogger(typeof(ClientWorker));
+        static readonly ILog Logger = LogManager.GetLogger(typeof(ClientWorker));
 
         private readonly string workerType;
 
@@ -53,22 +54,22 @@ namespace Hazelcast.Simulator.Worker
             IHazelcastInstance instance = null;
             if (this.autoCreateHzInstance)
             {
-                log.Info($"Creating {this.workerType} HazelcastInstance with config:{this.hzConfigFile}");
+                Logger.Info($"Creating {this.workerType} HazelcastInstance with config:{this.hzConfigFile}");
                 instance = HazelcastUtils.CreateClientHazelcastInstance(this.hzConfigFile);
-                log.Info($"HazelcastInstance IsRunning:{instance.GetLifecycleService().IsRunning()}");
+                Logger.Info($"HazelcastInstance IsRunning:{instance.GetLifecycleService().IsRunning()}");
             }
             return instance;
         }
 
         public static async Task StartWorker()
         {
-            log.Info($"Starting .Net Worker pid:{Process.GetCurrentProcess().Id}");
+            Logger.Info($"Starting .Net Worker pid:{Process.GetCurrentProcess().Id}");
 
             var workerParams = FileUtils.GetParameterDictionary();
-            log.Info("Parameters:");
+            Logger.Info("Parameters:");
             foreach (var param in workerParams)
             {
-                log.Info($"{param.Key}={param.Value}");
+                Logger.Info($"{param.Key}={param.Value}");
             }
 
             string workerId = workerParams["workerId"];
@@ -97,6 +98,7 @@ namespace Hazelcast.Simulator.Worker
                 hzConfigFile, autoCreateHzInstance, workerPerformanceMonitorIntervalSeconds);
 
             await worker.Start();
+            worker.Shutdown();
         }
 
         private void SignalStartToAgent()
@@ -113,7 +115,7 @@ namespace Hazelcast.Simulator.Worker
         {
             if (this.hazelcastInstance != null)
             {
-                log.Info("Stopping HazelcastInstance...");
+                Logger.Info("Stopping HazelcastInstance...");
                 this.hazelcastInstance.Shutdown();
             }
 
@@ -125,21 +127,31 @@ namespace Hazelcast.Simulator.Worker
 
             if (this.Connector != null)
             {
-                log.Info("Stopping WorkerConnector...");
-                this.Connector.Shutdown();
+                Logger.Info("Stopping WorkerConnector...");
+                try
+                {
+                    this.Connector.Shutdown();
+
+                }
+                catch (Exception e)
+                {
+                    Logger.Debug(e);
+                }
             }
 
             //OperationTypeCounter.printStatistics(Level.DEBUG);
         }
 
+        public bool Ready => this.Connector.Ready;
+
         public static void Main(string[] args)
         {
             XmlConfigurator.Configure(new System.IO.FileInfo("log4net.xml"));
 
-            log.Debug($"Starting .Net Worker pid:{Process.GetCurrentProcess().Id}");
+            Logger.Debug($"Starting .Net Worker pid:{Process.GetCurrentProcess().Id}");
             StartWorker().Wait();
 
-            log.Debug($"Stopping .Net Worker pid:{Process.GetCurrentProcess().Id}");
+            Logger.Debug($"Stopping .Net Worker pid:{Process.GetCurrentProcess().Id}");
         }
     }
 }

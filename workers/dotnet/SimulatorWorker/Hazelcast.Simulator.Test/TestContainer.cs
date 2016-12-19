@@ -43,7 +43,9 @@ namespace Hazelcast.Simulator.Test
             this.TestContext = testContext;
             this.TestCase = testCase;
             this.TestAddress = testAddress;
-            this.TestInstance = testInstance ?? ReflectionUtil.CreateInstanceOfType(testCase.GetClassname());
+
+            Type testClass = ReflectionUtil.SearchNamedType(testCase.GetClassname());
+            this.TestInstance = testInstance ?? Activator.CreateInstance(testClass);
             this.bindingContainer = new BindingContainer(testContext, testCase);
 
             this.bindingContainer.Bind(this.TestInstance);

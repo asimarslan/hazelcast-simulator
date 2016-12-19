@@ -11,10 +11,23 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+using System;
+using Hazelcast.Simulator.Tests;
+using Hazelcast.Simulator.Utils;
+using NUnit.Framework;
+
 namespace SimulatorWorker.Test.Hazelcast.Simulator.Utils
 {
-    public class ReflectionUtiTest
+    [TestFixture]
+    public class ReflectionUtilTest
     {
+        [Test]
+        public void TestSearchType()
+        {
+            Type searchNamedType = ReflectionUtil.SearchNamedType("com.hazelcast.simulator.tests.SuccessTest");
+            Assert.AreEqual(searchNamedType, typeof(SuccessTest));
+        }
 
     }
 }
