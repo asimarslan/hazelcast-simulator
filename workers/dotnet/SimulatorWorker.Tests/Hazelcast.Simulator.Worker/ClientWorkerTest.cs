@@ -91,6 +91,7 @@ namespace Hazelcast.Simulator.Worker
             Assert.AreEqual(coordinatorAddress, decodeResponse.Destination);
             Assert.AreEqual(1, decodeResponse.Size());
             Assert.AreEqual(ResponseType.Success, decodeResponse.Parts[workerAddress].ResponseType);
+            networkStream.Dispose();
             tcpClient.Close();
         }
 
@@ -136,6 +137,7 @@ namespace Hazelcast.Simulator.Worker
             Assert.AreEqual(coordinatorAddress, decodeResponse.Destination);
             Assert.AreEqual(1, decodeResponse.Size());
             Assert.AreEqual(ResponseType.Success, decodeResponse.Parts[workerAddress].ResponseType);
+            networkStream.Dispose();
             tcpClient.Close();
         }
 
