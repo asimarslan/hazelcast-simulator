@@ -20,7 +20,7 @@ namespace Hazelcast.Simulator.Protocol.Connector
 {
     public class WorkerConnector
     {
-        private const int DefaultShutdownQuietPeriod = 10;
+        private const int DefaultShutdownQuietPeriod = 1;
         private const int DefaultShutdownTimeout = 15;
 
         private static readonly ILog Logger = LogManager.GetLogger(typeof(WorkerConnector));

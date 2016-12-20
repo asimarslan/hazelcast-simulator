@@ -52,12 +52,12 @@ public final class TestUtils {
 
     public static File createTmpDirectory() {
         try {
-            String path = "/tmp/dotnet/";
-            File dir = new File(path);
+//            String path = "/tmp/dotnet/";
+//            File dir = new File(path);
 
+
+            File dir = File.createTempFile("temp", "tmp-dotnet" /*+ UuidUtil.newUnsecureUuidString()*/);
             deleteQuiet(dir);
-
-////            File dir = File.createTempFile("temp", "tmp-dotnet" /*+ UuidUtil.newUnsecureUuidString()*/);
 //
 //            if (!dir.delete()) {
 //                throw new UncheckedIOException("Failed to delete temp file '" + dir.getAbsolutePath() + "'");

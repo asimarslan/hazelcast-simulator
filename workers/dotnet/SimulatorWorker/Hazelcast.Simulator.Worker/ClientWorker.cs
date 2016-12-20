@@ -94,11 +94,24 @@ namespace Hazelcast.Simulator.Worker
             int workerPerformanceMonitorIntervalSeconds;
             int.TryParse(workerParams["workerPerformanceMonitorIntervalSeconds"], out workerPerformanceMonitorIntervalSeconds);
 
-            ClientWorker worker = new ClientWorker(workerType, publicAddress, agentIndex, workerIndex, workerPort,
-                hzConfigFile, autoCreateHzInstance, workerPerformanceMonitorIntervalSeconds);
+            ClientWorker worker=null;
+            try
+            {
+                worker = new ClientWorker(workerType, publicAddress, agentIndex, workerIndex, workerPort,
+                    hzConfigFile, autoCreateHzInstance, workerPerformanceMonitorIntervalSeconds);
 
-            await worker.Start();
-            worker.Shutdown();
+                await worker.Start();
+
+            }
+            catch (Exception e)
+            {
+                Logger.Warn("Unhandled exception", e);
+            }
+            finally
+            {
+                worker?.Shutdown();
+                
+            }
         }
 
         private void SignalStartToAgent()

@@ -22,7 +22,7 @@ echo $WORKER_TYPE
 echo $WORKER_INDEX
 echo $HAZELCAST_CONFIG
 
-SIMULATOR_DOTNET_LIB="/Users/asimarslan/git/hazelcast-simulator/workers/dotnet/SimulatorWorker/bin/Debug"
+SIMULATOR_DOTNET_LIB="/cygdrive/c/Users/asim/git/hazelcast-simulator/workers/dotnet/SimulatorWorker/bin/Debug"
 
 #DOTNET_PATH="$SIMULATOR_HOME"
 
@@ -45,4 +45,4 @@ WORKER_ARGS="publicAddress=$PUBLIC_ADDRESS \
             hzConfigFile=hazelcast-client.xml \
             workerHome=$workerHome"
 
-mono --debug "$SIMULATOR_DOTNET_LIB/SimulatorWorker.exe" $WORKER_ARGS
+"$SIMULATOR_DOTNET_LIB/SimulatorWorker.exe" $WORKER_ARGS
