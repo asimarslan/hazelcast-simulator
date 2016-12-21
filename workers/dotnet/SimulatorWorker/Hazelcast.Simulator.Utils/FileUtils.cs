@@ -19,11 +19,12 @@ namespace Hazelcast.Simulator.Utils
 {
     public class FileUtils
     {
+        public const string WorkerHome = "WORKER_HOME";
         private static Dictionary<string, string> arguments;
 
         public static string GetUserDirectoryPath()
         {
-            string workerHome = Environment.GetEnvironmentVariable("WORKER_HOME");
+            string workerHome = Environment.GetEnvironmentVariable(WorkerHome);
             return string.IsNullOrEmpty(workerHome) ? GetParameterDictionary()["workerHome"] : workerHome;
         }
 

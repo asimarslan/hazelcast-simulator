@@ -4,6 +4,19 @@
 # copy this file into the 'work dir' of simulator. See the end of this file for examples for different profilers.
 #
 
+function cleanup {
+    echo "cleanup is being performed."
+    if [ "x${workerPid}" != "x" ]
+    then
+        echo "Killing worker with pid ${serverPid}"
+        kill -9 ${workerPid}
+    fi
+    exit
+}
+
+trap cleanup EXIT
+
+
 # Automatic exit on script failure.
 set -e
 
@@ -22,7 +35,8 @@ echo $WORKER_TYPE
 echo $WORKER_INDEX
 echo $HAZELCAST_CONFIG
 
-SIMULATOR_DOTNET_LIB="/cygdrive/c/Users/asim/git/hazelcast-simulator/workers/dotnet/SimulatorWorker/bin/Debug"
+#SIMULATOR_DOTNET_LIB="/cygdrive/c/Users/asimarslan/git/hazelcast-simulator/workers/dotnet/SimulatorWorker/bin/Debug"
+SIMULATOR_DOTNET_LIB="/cygdrive/Z/git/hazelcast-simulator/workers/dotnet/SimulatorWorker/bin/Debug"
 
 #DOTNET_PATH="$SIMULATOR_HOME"
 
@@ -46,3 +60,4 @@ WORKER_ARGS="publicAddress=$PUBLIC_ADDRESS \
             workerHome=$workerHome"
 
 "$SIMULATOR_DOTNET_LIB/SimulatorWorker.exe" $WORKER_ARGS
+workerPid=$!

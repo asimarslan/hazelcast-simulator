@@ -29,6 +29,7 @@ namespace Hazelcast.Simulator.Worker
     public class ClientWorkerTest
     {
         private ClientWorker clientWorker;
+        private int messageId = 0;
 
         [OneTimeSetUp]
         public void Init()
@@ -63,36 +64,13 @@ namespace Hazelcast.Simulator.Worker
         {
             var workerAddress = new SimulatorAddress(AddressLevel.WORKER, 1, 1, 0);
             var coordinatorAddress = new SimulatorAddress(AddressLevel.COORDINATOR, 0, 0, 0);
-            var message = new SimulatorMessage(workerAddress, coordinatorAddress, 1, OperationType.Ping, "{}");
+            Response decodeResponse = SendMessage(workerAddress, coordinatorAddress, OperationType.Ping, "{}");
 
-            var buffer = ByteBufferUtil.DefaultAllocator.Buffer(100);
-            message.EncodeByteBuf(buffer);
-
-            TcpClient tcpClient = new TcpClient("127.0.0.1", 9002);
-            if (!tcpClient.Connected)
-            {
-                Assert.Fail("Socket not connected!!!");
-            }
-            NetworkStream networkStream = tcpClient.GetStream();
-
-            var bufArray = buffer.ToArray();
-            Array.Resize(ref bufArray, buffer.ReadableBytes);
-
-            networkStream.Write(bufArray, 0 , bufArray.Length);
-
-            byte[] response= new byte[100];
-            var rcvSize = networkStream.Read(response, 0, response.Length);
-
-            IByteBuffer responseBuffer = ByteBufferUtil.DefaultAllocator.Buffer(rcvSize);
-            responseBuffer.WriteBytes(response);
-            Response decodeResponse = responseBuffer.DecodeResponse();
-
-            Assert.AreEqual(1, decodeResponse.MessageId);
+            Assert.AreEqual(messageId, decodeResponse.MessageId);
             Assert.AreEqual(coordinatorAddress, decodeResponse.Destination);
             Assert.AreEqual(1, decodeResponse.Size());
             Assert.AreEqual(ResponseType.Success, decodeResponse.Parts[workerAddress].ResponseType);
-            networkStream.Dispose();
-            tcpClient.Close();
+
         }
 
         [Test]
@@ -104,10 +82,58 @@ namespace Hazelcast.Simulator.Worker
         [Test]
         public void TestCreateTest()
         {
+            var testAddress = new SimulatorAddress(AddressLevel.TEST, 1, 1, 1);
             var workerAddress = new SimulatorAddress(AddressLevel.WORKER, 1, 1, 0);
             var coordinatorAddress = new SimulatorAddress(AddressLevel.COORDINATOR, 0, 0, 0);
-            var message = new SimulatorMessage(workerAddress, coordinatorAddress, 1, OperationType.CreateTest,
+
+            Response decodeResponse = CreateTest(workerAddress, coordinatorAddress); 
+            Console.WriteLine(decodeResponse);
+
+            Assert.AreEqual(messageId, decodeResponse.MessageId);
+            Assert.AreEqual(coordinatorAddress, decodeResponse.Destination);
+            Assert.AreEqual(1, decodeResponse.Size());
+            Assert.AreEqual(ResponseType.Success, decodeResponse.Parts[workerAddress].ResponseType);
+
+            //delete test
+            SendMessage(testAddress, coordinatorAddress, OperationType.StartTestPhase, "{'testPhase':'LOCAL_TEARDOWN'}");
+
+        }
+
+        [Test]
+        public void TestStartStopTest()
+        {
+            var testAddress = new SimulatorAddress(AddressLevel.TEST, 1, 1, 1);
+            var workerAddress = new SimulatorAddress(AddressLevel.WORKER, 1, 1, 0);
+            var coordinatorAddress = new SimulatorAddress(AddressLevel.COORDINATOR, 0, 0, 0);
+
+            Response createResponse = CreateTest(workerAddress, coordinatorAddress);
+            Assert.AreEqual(ResponseType.Success, createResponse.Parts[workerAddress].ResponseType);
+
+            Response startResponse = SendMessage(testAddress, coordinatorAddress, OperationType.StartTest, "{ 'targetType':'CLIENT','targetWorkers':[]}");
+            Assert.AreEqual(ResponseType.Success, startResponse.Parts[testAddress].ResponseType);
+
+            Response stopResponse = SendMessage(testAddress, coordinatorAddress, OperationType.StopTest, "{}");
+
+            Assert.AreEqual(messageId, stopResponse.MessageId);
+            Assert.AreEqual(coordinatorAddress, stopResponse.Destination);
+            Assert.AreEqual(1, stopResponse.Size());
+            Assert.AreEqual(ResponseType.Success, stopResponse.Parts[testAddress].ResponseType);
+
+            //delete test
+            SendMessage(testAddress, coordinatorAddress, OperationType.StartTestPhase, "{'testPhase':'LOCAL_TEARDOWN'}");
+
+        }
+
+        private Response CreateTest(SimulatorAddress destination, SimulatorAddress source)
+        {
+            return SendMessage(destination, source, OperationType.CreateTest,
                 @"{'testIndex':1,'testId':'foo','properties':{'threadCount':'1','class':'com.hazelcast.simulator.tests.SuccessTest'}}");
+        }
+
+        private Response SendMessage(SimulatorAddress destination, SimulatorAddress source, OperationType operationType, string payload)
+        {
+            
+            var message = new SimulatorMessage(destination, source, ++messageId, operationType, payload);
 
             var buffer = ByteBufferUtil.DefaultAllocator.Buffer(1000);
             message.EncodeByteBuf(buffer);
@@ -122,9 +148,9 @@ namespace Hazelcast.Simulator.Worker
             var bufArray = buffer.ToArray();
             Array.Resize(ref bufArray, buffer.ReadableBytes);
 
-            networkStream.Write(bufArray, 0 , bufArray.Length);
+            networkStream.Write(bufArray, 0, bufArray.Length);
 
-            byte[] response= new byte[500];
+            byte[] response = new byte[500];
             var rcvSize = networkStream.Read(response, 0, response.Length);
 
             IByteBuffer responseBuffer = ByteBufferUtil.DefaultAllocator.Buffer(rcvSize);
@@ -133,13 +159,11 @@ namespace Hazelcast.Simulator.Worker
 
             Console.WriteLine(decodeResponse);
 
-            Assert.AreEqual(1, decodeResponse.MessageId);
-            Assert.AreEqual(coordinatorAddress, decodeResponse.Destination);
-            Assert.AreEqual(1, decodeResponse.Size());
-            Assert.AreEqual(ResponseType.Success, decodeResponse.Parts[workerAddress].ResponseType);
             networkStream.Dispose();
             tcpClient.Close();
+            return decodeResponse;
         }
+
 
     }
 }

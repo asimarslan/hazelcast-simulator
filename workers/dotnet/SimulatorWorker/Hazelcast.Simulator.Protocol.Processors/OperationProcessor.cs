@@ -27,7 +27,7 @@ namespace Hazelcast.Simulator.Protocol.Processors
     public class OperationProcessor
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(OperationProcessor));
-        private readonly OperationContext operationContext;
+        public readonly OperationContext operationContext;
         private readonly ClientWorker worker;
 
         public OperationProcessor(IHazelcastInstance hazelcastInstance, SimulatorAddress workerAddress, ClientWorker worker)

@@ -29,36 +29,39 @@ namespace Hazelcast.Simulator.Protocol.Operations
 
         public override async Task<ResponseType> RunInternal(OperationContext operationContext, SimulatorAddress targetAddress)
         {
-            TestContainer testContainer;
-            if (!operationContext.Tests.TryGetValue(targetAddress.TestIndex, out testContainer))
+            Task.Run(() =>
             {
-                throw new InvalidOperationException($"Test not created yet with testIndex:{targetAddress.TestIndex}");
-            }
-            TestPhase testPhase = this.GetTestPhase();
-            try
-            {
+                TestContainer testContainer;
+                if (!operationContext.Tests.TryGetValue(targetAddress.TestIndex, out testContainer))
+                {
+                    throw new InvalidOperationException($"Test not created yet with testIndex:{targetAddress.TestIndex}");
+                }
+                TestPhase testPhase = this.GetTestPhase();
                 try
                 {
-                    return await this.StartPhase(operationContext, testContainer);
+                    try
+                    {
+                        this.StartPhase(operationContext, testContainer);
+                    }
+                    finally
+                    {
+                        if (testPhase == TestPhases.GetLastTestPhase())
+                        {
+                            operationContext.Tests.TryRemove(targetAddress.TestIndex, out testContainer);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    string testId = testContainer.TestContext.GetTestId();
+                    Logger.Error($"{testPhase.GetDescription()} of {testId} FAILDED.");
+                    ExceptionReporter.Report(testId, ex);
                 }
                 finally
                 {
-                    if (testPhase == TestPhases.GetLastTestPhase())
-                    {
-                        operationContext.Tests.TryRemove(targetAddress.TestIndex, out testContainer);
-                    }
+                    this.SendPhaseCompletedOperation(operationContext.Connector, testPhase).Wait();
                 }
-            }
-            catch (Exception ex)
-            {
-                string testId = testContainer.TestContext.GetTestId();
-                Logger.Error($"{testPhase.GetDescription()} of {testId} FAILDED.");
-                ExceptionReporter.Report(testId, ex);
-            }
-            finally
-            {
-                await this.SendPhaseCompletedOperation(operationContext.Connector, testPhase);
-            }
+            });
             return ResponseType.Success;
         }
 
@@ -68,7 +71,7 @@ namespace Hazelcast.Simulator.Protocol.Operations
             await connector.Submit(this.sourceAddress, SimulatorAddress.COORDINATOR, operation);
         }
 
-        protected abstract Task<ResponseType> StartPhase(OperationContext operationContext, TestContainer testContainer);
+        protected abstract void StartPhase(OperationContext operationContext, TestContainer testContainer);
 
         protected abstract TestPhase GetTestPhase();
     }

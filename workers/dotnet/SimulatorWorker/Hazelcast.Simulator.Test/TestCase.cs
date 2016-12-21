@@ -30,12 +30,17 @@ namespace Hazelcast.Simulator.Test
         public TestCase(string testTestId, IDictionary<string, string> properties = null)
         {
             this.TestId = testTestId;
-            this.Properties = properties?? new Dictionary<string, string>();
+            this.Properties = properties ?? new Dictionary<string, string>();
         }
 
-        public string GetClassname() => this.Properties["class"];
+        public string GetClassname() => this.GetProperty("class");
 
-        public string GetProperty(string name) => this.Properties[name];
+        public string GetProperty(string name)
+        {
+            string value;
+            this.Properties.TryGetValue(name, out value);
+            return value;
+        }
 
         public string SetProperty(string name, string value) => this.Properties[name] = value;
 

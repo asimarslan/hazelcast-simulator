@@ -61,6 +61,7 @@ namespace Hazelcast.Simulator.Protocol.Handler
                     response.AddPart(this.localAddress, ResponseType.ExceptionDuringOperationExecution, ex?.Message);
                 }
                 ctx.WriteAndFlushAsync(response).Wait();
+                Console.WriteLine($"Test count={operationProcessor.operationContext.Tests.Count}");
             });
         }
     }

@@ -16,6 +16,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using NUnit.Framework;
+using static System.Environment;
 using static Hazelcast.Simulator.TestEnvironmentUtils;
 using static Hazelcast.Simulator.Utils.FileUtils;
 
@@ -28,6 +29,7 @@ namespace Hazelcast.Simulator.Utils
         public void Setup()
         {
             SetupFakeUserDir();
+            SetEnvironmentVariable(WorkerHome, GetEnvironmentVariable(UserDirTest) );
             ExceptionReporter.Reset();
         }
 
@@ -36,6 +38,7 @@ namespace Hazelcast.Simulator.Utils
         {
             TeardownFakeUserDir();
             ExceptionReporter.Reset();
+            SetEnvironmentVariable(WorkerHome, null);
         }
 
         [Test]

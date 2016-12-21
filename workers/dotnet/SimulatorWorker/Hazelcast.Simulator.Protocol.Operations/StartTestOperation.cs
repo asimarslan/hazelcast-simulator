@@ -26,20 +26,19 @@ namespace Hazelcast.Simulator.Protocol.Operations
         [JsonProperty("warmup")]
         private readonly bool warmup;
 
-        protected override async Task<ResponseType> StartPhase(OperationContext operationContext, TestContainer testContainer)
+        protected override void StartPhase(OperationContext operationContext, TestContainer testContainer)
         {
             var testPhase = this.GetTestPhase();
             if (this.SkipRunPhase(testContainer))
             {
                 Logger.Info($"Skipping test {testContainer.TestCase.TestId}");
-                await this.SendPhaseCompletedOperation(operationContext.Connector, testPhase);
+                this.SendPhaseCompletedOperation(operationContext.Connector, testPhase).Wait();
             }
             else
             {
                 Logger.Info($"Starting test {testContainer.TestCase.TestId}");
-                await testContainer.Invoke(testPhase);
+                testContainer.Invoke(testPhase);
             }
-            return ResponseType.Success;
         }
 
         protected override TestPhase GetTestPhase() => this.warmup ? TestPhase.Warmup : TestPhase.Run;

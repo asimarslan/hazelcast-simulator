@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Hazelcast.Simulator.Protocol.Core
 {
@@ -17,7 +18,7 @@ namespace Hazelcast.Simulator.Protocol.Core
 
         public int Size() => this.Parts.Count;
 
-        public override string ToString() => $"[Response: MessageId={this.MessageId}, Destination={this.Destination}]";
+        public override string ToString() => $"[Response: MessageId={this.MessageId}, Destination={this.Destination}], Parts={string.Join(", ", Parts.Values.Select(x => x.ToString()))}";
 
         public Response AddPart(SimulatorAddress sourceAddress, ResponseType responseType, string payload)
         {

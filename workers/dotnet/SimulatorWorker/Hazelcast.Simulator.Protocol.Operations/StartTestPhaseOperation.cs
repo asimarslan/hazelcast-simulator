@@ -21,22 +21,11 @@ namespace Hazelcast.Simulator.Protocol.Operations
             this.testPhaseStr = testPhase.GetName();
         }
 
-        protected override async Task<ResponseType> StartPhase(OperationContext operationContext, TestContainer testContainer)
+        protected override void StartPhase(OperationContext operationContext, TestContainer testContainer)
         {
             var testPhase = this.GetTestPhase();
-            try
-            {
-                Logger.Info($"Starting test {testContainer.TestCase.TestId}");
-                await testContainer.Invoke(testPhase);
-            }
-            finally
-            {
-                if (testPhase == TestPhases.GetLastTestPhase())
-                {
-                    operationContext.Tests.TryRemove(testContainer.TestAddress.TestIndex, out testContainer);
-                }
-            }
-            return ResponseType.Success;
+            Logger.Info($"Starting  phase{testPhase.GetDescription()} for test:{testContainer.TestCase.TestId}");
+            testContainer.Invoke(testPhase);
         }
 
         protected override TestPhase GetTestPhase() => this.testPhaseStr.ToTestPhase();

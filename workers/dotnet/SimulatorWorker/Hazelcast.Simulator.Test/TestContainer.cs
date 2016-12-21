@@ -54,7 +54,7 @@ namespace Hazelcast.Simulator.Test
             //this.testPerformanceTracker = new TestPerformanceTracker(this);
         }
 
-        public async Task Invoke(TestPhase testPhase)
+        public void Invoke(TestPhase testPhase)
         {
             if (!this.running.CompareAndSet(false, true))
             {
@@ -62,7 +62,7 @@ namespace Hazelcast.Simulator.Test
             }
             try
             {
-                await this.InvokeInternal(testPhase);
+                this.InvokeInternal(testPhase);
             }
             finally
             {
@@ -70,7 +70,7 @@ namespace Hazelcast.Simulator.Test
             }
         }
 
-        private async Task InvokeInternal(TestPhase testPhase)
+        private void InvokeInternal(TestPhase testPhase)
         {
             this.currentPhase = testPhase;
 

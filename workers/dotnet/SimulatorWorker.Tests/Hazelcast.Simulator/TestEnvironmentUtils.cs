@@ -19,7 +19,7 @@ namespace Hazelcast.Simulator
 {
     public class TestEnvironmentUtils
     {
-        public const string UserDirTest = "user.dir.test";
+        public const string UserDirTest = "USER_DIR_TEST";
 
         public static DirectoryInfo SetupFakeUserDir()
         {

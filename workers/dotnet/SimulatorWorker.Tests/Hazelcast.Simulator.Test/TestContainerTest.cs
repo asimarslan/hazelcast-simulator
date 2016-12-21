@@ -69,13 +69,10 @@ namespace Hazelcast.Simulator.Test
         [Test]
         public void TestPhaseInvoke()
         {
-            var taskList = new List<Task>();
             foreach (TestPhase testPhase in Enum.GetValues(typeof(TestPhase)))
             {
-                taskList.Add(this.testContainer.Invoke(testPhase));
+                this.testContainer.Invoke(testPhase);
             }
-
-            Task.WaitAll(taskList.ToArray());
 
             foreach (TestPhase testPhase in Enum.GetValues(typeof(TestPhase)))
             {

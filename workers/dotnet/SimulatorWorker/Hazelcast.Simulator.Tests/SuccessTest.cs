@@ -21,7 +21,8 @@ namespace Hazelcast.Simulator.Tests
     [Named("com.hazelcast.simulator.tests.SuccessTest")]
     public class SuccessTest
     {
-        private ITestContext context;
+        [Inject]
+        public ITestContext context;
 
         [Setup]
         public void Setup() {}

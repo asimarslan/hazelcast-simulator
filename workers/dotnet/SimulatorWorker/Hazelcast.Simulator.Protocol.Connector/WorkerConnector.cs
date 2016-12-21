@@ -47,6 +47,7 @@ namespace Hazelcast.Simulator.Protocol.Connector
         private readonly ManualResetEventSlim _startLock = new ManualResetEventSlim(false, 0);
 
         public volatile bool Ready;
+        private readonly OperationProcessor operationProcessor;
 
         public WorkerConnector(SimulatorAddress workerAddress, int port, IHazelcastInstance hazelcastInstance, ClientWorker worker)
         {
@@ -54,6 +55,7 @@ namespace Hazelcast.Simulator.Protocol.Connector
             this.port = port;
             this.hazelcastInstance = hazelcastInstance;
             this.worker = worker;
+            this.operationProcessor = new OperationProcessor(this.hazelcastInstance, this.WorkerAddress, this.worker);
         }
 
         public WorkerConnector(int agentIndex, int workerIndex, int port, IHazelcastInstance hazelcastInstance, ClientWorker worker)
@@ -105,8 +107,7 @@ namespace Hazelcast.Simulator.Protocol.Connector
             pipeline.AddLast("frameDecoder", new SimulatorFrameDecoder());
             pipeline.AddLast("protocolDecoder", new SimulatorProtocolDecoder(this.WorkerAddress));
 
-            pipeline.AddLast("messageConsumeHandler", new SimulatorMessageConsumeHandler(this.WorkerAddress,
-                new OperationProcessor(this.hazelcastInstance, this.WorkerAddress, this.worker)));
+            pipeline.AddLast("messageConsumeHandler", new SimulatorMessageConsumeHandler(this.WorkerAddress, operationProcessor));
 
             pipeline.AddLast("responseHandler", new ResponseHandler(this.HandleReponse));
             pipeline.AddLast("exceptionHandler", new ExceptionHandler());
