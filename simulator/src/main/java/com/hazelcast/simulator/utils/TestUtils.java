@@ -52,7 +52,8 @@ public final class TestUtils {
 
     public static File createTmpDirectory() {
         try {
-            String path = "C:/Users/asimarslan/AppData/Local/Temp/dotnet/";
+//            String path = "C:/Users/asimarslan/AppData/Local/Temp/dotnet/";
+            String path = "/tmp/dotnet/";
             File dir = new File(path);
 
 

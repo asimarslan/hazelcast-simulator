@@ -69,7 +69,7 @@ namespace Hazelcast.Simulator.Worker
             Assert.AreEqual(messageId, decodeResponse.MessageId);
             Assert.AreEqual(coordinatorAddress, decodeResponse.Destination);
             Assert.AreEqual(1, decodeResponse.Size());
-            Assert.AreEqual(ResponseType.Success, decodeResponse.Parts[workerAddress].ResponseType);
+            AssertResponse(decodeResponse, workerAddress);
 
         }
 
@@ -87,17 +87,15 @@ namespace Hazelcast.Simulator.Worker
             var coordinatorAddress = new SimulatorAddress(AddressLevel.COORDINATOR, 0, 0, 0);
 
             Response decodeResponse = CreateTest(workerAddress, coordinatorAddress); 
-            Console.WriteLine(decodeResponse);
 
             Assert.AreEqual(messageId, decodeResponse.MessageId);
             Assert.AreEqual(coordinatorAddress, decodeResponse.Destination);
             Assert.AreEqual(1, decodeResponse.Size());
-            Assert.AreEqual(ResponseType.Success, decodeResponse.Parts[workerAddress].ResponseType);
+            AssertResponse(decodeResponse, workerAddress);
 
             //delete test
             Response finalResponse = SendMessage(testAddress, coordinatorAddress, OperationType.StartTestPhase, "{'testPhase':'LOCAL_TEARDOWN'}");
-            Assert.AreEqual(ResponseType.Success, finalResponse.Parts[testAddress].ResponseType);
-
+            AssertResponse(finalResponse, testAddress);
         }
 
         [Test]
@@ -108,17 +106,17 @@ namespace Hazelcast.Simulator.Worker
             var coordinatorAddress = new SimulatorAddress(AddressLevel.COORDINATOR, 0, 0, 0);
 
             Response createResponse = CreateTest(workerAddress, coordinatorAddress);
-            Assert.AreEqual(ResponseType.Success, createResponse.Parts[workerAddress].ResponseType);
+            AssertResponse(createResponse, workerAddress);
 
             Response startResponse = SendMessage(testAddress, coordinatorAddress, OperationType.StartTest, "{ 'targetType':'CLIENT','targetWorkers':[]}");
-            Assert.AreEqual(ResponseType.Success, startResponse.Parts[testAddress].ResponseType);
+            AssertResponse(startResponse, testAddress);
 
             Response stopResponse = SendMessage(testAddress, coordinatorAddress, OperationType.StopTest, "{}");
 
             Assert.AreEqual(messageId, stopResponse.MessageId);
             Assert.AreEqual(coordinatorAddress, stopResponse.Destination);
             Assert.AreEqual(1, stopResponse.Size());
-            Assert.AreEqual(ResponseType.Success, stopResponse.Parts[testAddress].ResponseType);
+            AssertResponse(stopResponse, testAddress);
 
             //delete test
             SendMessage(testAddress, coordinatorAddress, OperationType.StartTestPhase, "{'testPhase':'LOCAL_TEARDOWN'}");
@@ -163,6 +161,12 @@ namespace Hazelcast.Simulator.Worker
             networkStream.Dispose();
             tcpClient.Close();
             return decodeResponse;
+        }
+
+        private void AssertResponse(Response response, SimulatorAddress address)
+        {
+            Assert.True(response.Parts.ContainsKey(address));
+            Assert.AreEqual(ResponseType.Success, response.Parts[address].ResponseType);
         }
 
 

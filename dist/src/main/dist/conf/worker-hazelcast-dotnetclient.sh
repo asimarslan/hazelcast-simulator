@@ -35,13 +35,12 @@ echo $WORKER_TYPE
 echo $WORKER_INDEX
 echo $HAZELCAST_CONFIG
 
-#SIMULATOR_DOTNET_LIB="/cygdrive/c/Users/asimarslan/git/hazelcast-simulator/workers/dotnet/SimulatorWorker/bin/Debug"
-SIMULATOR_DOTNET_LIB="/cygdrive/Z/git/hazelcast-simulator/workers/dotnet/SimulatorWorker/bin/Debug"
+if [ "$(uname -o)" == "Cygwin" ]; then
+    SIMULATOR_DOTNET_LIB="/cygdrive/Z/git/hazelcast-simulator/workers/dotnet/SimulatorWorker/bin/Debug"
+else
+    SIMULATOR_DOTNET_LIB="/Users/asimarslan/git/hazelcast-simulator/workers/dotnet/SimulatorWorker/bin/Debug"
+fi;
 
-#DOTNET_PATH="$SIMULATOR_HOME"
-
-#hazelcast.logging.type="log4j"
-#log4j.configuration="file:log4j.xml"
 SIMULATOR_HOME=$SIMULATOR_HOME
 workerHome="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
@@ -59,5 +58,9 @@ WORKER_ARGS="publicAddress=$PUBLIC_ADDRESS \
             hzConfigFile=hazelcast-client.xml \
             workerHome=$workerHome"
 
-"$SIMULATOR_DOTNET_LIB/SimulatorWorker.exe" $WORKER_ARGS
+if [ "$(uname -o)" == "Cygwin" ]; then
+    mono --debug "$SIMULATOR_DOTNET_LIB/SimulatorWorker.exe" $WORKER_ARGS
+else
+    "$SIMULATOR_DOTNET_LIB/SimulatorWorker.exe" $WORKER_ARGS
+fi;
 workerPid=$!
