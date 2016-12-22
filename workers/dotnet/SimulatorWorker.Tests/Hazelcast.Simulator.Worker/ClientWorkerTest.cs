@@ -95,7 +95,8 @@ namespace Hazelcast.Simulator.Worker
             Assert.AreEqual(ResponseType.Success, decodeResponse.Parts[workerAddress].ResponseType);
 
             //delete test
-            SendMessage(testAddress, coordinatorAddress, OperationType.StartTestPhase, "{'testPhase':'LOCAL_TEARDOWN'}");
+            Response finalResponse = SendMessage(testAddress, coordinatorAddress, OperationType.StartTestPhase, "{'testPhase':'LOCAL_TEARDOWN'}");
+            Assert.AreEqual(ResponseType.Success, finalResponse.Parts[testAddress].ResponseType);
 
         }
 

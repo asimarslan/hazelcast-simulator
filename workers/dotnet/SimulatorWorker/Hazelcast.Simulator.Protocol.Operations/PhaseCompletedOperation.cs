@@ -25,6 +25,8 @@ namespace Hazelcast.Simulator.Protocol.Operations
         [JsonProperty("testPhase")]
         private readonly string testPhase;
 
+        public PhaseCompletedOperation() { }
+
         public PhaseCompletedOperation(TestPhase testPhase)
         {
             this.testPhase = testPhase.GetName();

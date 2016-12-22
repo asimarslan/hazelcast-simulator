@@ -159,8 +159,16 @@ namespace Hazelcast.Simulator.Worker
 
         public static void Main(string[] args)
         {
-            XmlConfigurator.Configure(new System.IO.FileInfo("log4net.xml"));
+            try
+            {
+                XmlConfigurator.Configure(new FileInfo("log4net.xml"));
 
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
             Logger.Debug($"Starting .Net Worker pid:{Process.GetCurrentProcess().Id}");
             StartWorker().Wait();
 

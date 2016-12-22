@@ -1,4 +1,5 @@
-﻿using Hazelcast.Simulator.Protocol.Operations;
+﻿using System;
+using Hazelcast.Simulator.Protocol.Operations;
 using Newtonsoft.Json;
 
 namespace Hazelcast.Simulator.Protocol.Core
@@ -28,7 +29,16 @@ namespace Hazelcast.Simulator.Protocol.Core
         public ISimulatorOperation ToOperation()
         {
             var type = this.OperationType.GetClassType();
-            var simulatorOperation = (ISimulatorOperation)JsonConvert.DeserializeObject(this.OperationData, type);
+            ISimulatorOperation simulatorOperation;
+            try
+            {
+                simulatorOperation = (ISimulatorOperation)JsonConvert.DeserializeObject(this.OperationData, type);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
             simulatorOperation.SetSourceAddress(this.Source);
             return simulatorOperation;
         }

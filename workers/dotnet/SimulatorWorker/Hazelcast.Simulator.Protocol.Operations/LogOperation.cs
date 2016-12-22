@@ -27,6 +27,8 @@ namespace Hazelcast.Simulator.Protocol.Operations
         [JsonProperty("level")]
         private readonly string level;
 
+        public LogOperation() { }
+
         public LogOperation(string message) :this(message, Level.Info)
         {
         }
