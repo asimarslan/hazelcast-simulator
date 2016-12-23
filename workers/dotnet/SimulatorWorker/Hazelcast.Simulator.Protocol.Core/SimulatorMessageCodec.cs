@@ -1,4 +1,18 @@
-﻿using System;
+﻿// Copyright (c) 2008-2017, Hazelcast, Inc. All Rights Reserved.
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+// http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using System;
 using System.IO;
 using System.Text;
 using DotNetty.Buffers;
@@ -9,7 +23,6 @@ namespace Hazelcast.Simulator.Protocol.Core
 {
     public static class SimulatorMessageCodec
     {
-
         private const uint MAGIC_BYTES = 0xA5E1CA57;
         private const int OFFSET_MAGIC_BYTES = INT_SIZE;
         private const int OFFSET_DST_ADDRESS = 2 * INT_SIZE;
@@ -19,7 +32,7 @@ namespace Hazelcast.Simulator.Protocol.Core
 
         public static void EncodeByteBuf(this SimulatorMessage msg, IByteBuffer buffer)
         {
-            var data = Encoding.UTF8.GetBytes(msg.OperationData);
+            byte[] data = Encoding.UTF8.GetBytes(msg.OperationData);
 
             buffer.WriteInt(HEADER_SIZE + data.Length);
             buffer.WriteUnsignedInt(MAGIC_BYTES);
@@ -28,34 +41,34 @@ namespace Hazelcast.Simulator.Protocol.Core
             msg.Source.EncodeByteBuf(buffer);
 
             buffer.WriteLong(msg.MessageId);
-            buffer.WriteInt((int) msg.OperationType);
+            buffer.WriteInt((int)msg.OperationType);
 
             buffer.WriteBytes(data);
         }
 
         public static SimulatorMessage DecodeSimulatorMessage(this IByteBuffer buffer)
         {
-            var frameLength = buffer.ReadInt();
-            var dataLength = frameLength - HEADER_SIZE;
-            var magicBytes = buffer.ReadUnsignedInt();
+            int frameLength = buffer.ReadInt();
+            int dataLength = frameLength - HEADER_SIZE;
+            uint magicBytes = buffer.ReadUnsignedInt();
             if (magicBytes != MAGIC_BYTES)
             {
                 throw new InvalidDataException("Invalid magic bytes for SimulatorMessage");
             }
-            var destination = buffer.DecodeSimulatorAddress();
-            var source = buffer.DecodeSimulatorAddress();
-            var messageId = buffer.ReadLong();
-            var operationTypeId = buffer.ReadInt();
+            SimulatorAddress destination = buffer.DecodeSimulatorAddress();
+            SimulatorAddress source = buffer.DecodeSimulatorAddress();
+            long messageId = buffer.ReadLong();
+            int operationTypeId = buffer.ReadInt();
             OperationType operationType;
             try
             {
-                operationType = (OperationType) operationTypeId;
+                operationType = (OperationType)operationTypeId;
             }
             catch (Exception)
             {
                 throw new InvalidDataException($"Invalid operation type id:{operationTypeId}");
             }
-            var operationData = buffer.ReadSlice(dataLength).ToString(Encoding.UTF8);
+            string operationData = buffer.ReadSlice(dataLength).ToString(Encoding.UTF8);
             return new SimulatorMessage(destination, source, messageId, operationType, operationData);
         }
 

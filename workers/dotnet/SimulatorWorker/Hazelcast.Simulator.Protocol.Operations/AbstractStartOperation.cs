@@ -1,11 +1,11 @@
-﻿// Copyright (c) 2008-2016, Hazelcast, Inc. All Rights Reserved.
-//
+﻿// Copyright (c) 2008-2017, Hazelcast, Inc. All Rights Reserved.
+// 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-//
+// 
 // http://www.apache.org/licenses/LICENSE-2.0
-//
+// 
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,7 +23,7 @@ using log4net;
 
 namespace Hazelcast.Simulator.Protocol.Operations
 {
-    public abstract class AbstractStartOperation: AbstractTestOperation
+    public abstract class AbstractStartOperation : AbstractTestOperation
     {
         protected static readonly ILog Logger = LogManager.GetLogger(typeof(AbstractStartOperation));
 
@@ -36,12 +36,12 @@ namespace Hazelcast.Simulator.Protocol.Operations
                 {
                     throw new InvalidOperationException($"Test not created yet with testIndex:{targetAddress.TestIndex}");
                 }
-                TestPhase testPhase = this.GetTestPhase();
+                TestPhase testPhase = GetTestPhase();
                 try
                 {
                     try
                     {
-                        this.StartPhase(operationContext, testContainer);
+                        StartPhase(operationContext, testContainer);
                     }
                     finally
                     {
@@ -59,7 +59,7 @@ namespace Hazelcast.Simulator.Protocol.Operations
                 }
                 finally
                 {
-                    this.SendPhaseCompletedOperation(operationContext.Connector, testPhase).Wait();
+                    SendPhaseCompletedOperation(operationContext.Connector, testPhase).Wait();
                 }
             });
             return ResponseType.Success;
@@ -68,7 +68,7 @@ namespace Hazelcast.Simulator.Protocol.Operations
         protected async Task SendPhaseCompletedOperation(WorkerConnector connector, TestPhase testPhase)
         {
             var operation = new PhaseCompletedOperation(testPhase);
-            await connector.Submit(this.sourceAddress, SimulatorAddress.COORDINATOR, operation);
+            await connector.Submit(sourceAddress, SimulatorAddress.COORDINATOR, operation);
         }
 
         protected abstract void StartPhase(OperationContext operationContext, TestContainer testContainer);

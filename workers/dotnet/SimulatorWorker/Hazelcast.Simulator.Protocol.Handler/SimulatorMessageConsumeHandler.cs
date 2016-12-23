@@ -1,9 +1,22 @@
-﻿using System;
+﻿// Copyright (c) 2008-2017, Hazelcast, Inc. All Rights Reserved.
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+// http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using System;
 using System.Linq;
-using System.Threading.Tasks;
-using Hazelcast.Simulator.Protocol.Processors;
 using DotNetty.Transport.Channels;
 using Hazelcast.Simulator.Protocol.Core;
+using Hazelcast.Simulator.Protocol.Processors;
 using log4net;
 
 namespace Hazelcast.Simulator.Protocol.Handler
@@ -27,12 +40,12 @@ namespace Hazelcast.Simulator.Protocol.Handler
             if (msg.Destination.AddressLevel == AddressLevel.WORKER
                 || msg.Destination.AddressLevel == AddressLevel.TEST)
             {
-                this.HandleSimulatorMessage(ctx, msg);
+                HandleSimulatorMessage(ctx, msg);
             }
             else
             {
                 //TODO WRONG ADDRESS LEVEL HOW TO HANDLE IT???
-                Logger.Error($"A wrong AddressLevel: {this.localAddress.AddressLevel} is received by .Net Worker: {this.localAddress} - {msg}");
+                Logger.Error($"A wrong AddressLevel: {localAddress.AddressLevel} is received by .Net Worker: {localAddress} - {msg}");
             }
         }
 
@@ -40,25 +53,25 @@ namespace Hazelcast.Simulator.Protocol.Handler
         {
             if (Logger.IsDebugEnabled)
             {
-                Logger.Debug($"[{msg.MessageId}] SimulatorMessageConsumeHandler -- {this.localAddress} - " +
-                    $"{this.localAddress.AddressLevel} - {msg}");
+                Logger.Debug($"[{msg.MessageId}] SimulatorMessageConsumeHandler -- {localAddress} - " +
+                    $"{localAddress.AddressLevel} - {msg}");
             }
 
-            this.operationProcessor.SubmitAsync(msg).ContinueWith(task =>
+            operationProcessor.SubmitAsync(msg).ContinueWith(task =>
             {
                 var response = new Response(msg.MessageId, msg.Source);
                 if (!task.IsFaulted)
                 {
-                    foreach (var part in task.Result)
+                    foreach (Response.Part part in task.Result)
                     {
                         response.AddPart(part);
                     }
                 }
                 else
                 {
-                    var ex = task.Exception.Flatten().InnerExceptions.First();
+                    Exception ex = task.Exception.Flatten().InnerExceptions.First();
                     Logger.Error($"Exception during operation excecution {ex?.Message}", ex);
-                    response.AddPart(this.localAddress, ResponseType.ExceptionDuringOperationExecution, ex?.Message);
+                    response.AddPart(localAddress, ResponseType.ExceptionDuringOperationExecution, ex?.Message);
                 }
                 ctx.WriteAndFlushAsync(response).Wait();
                 Console.WriteLine($"Test count={operationProcessor.operationContext.Tests.Count}");

@@ -1,4 +1,18 @@
-﻿using System;
+﻿// Copyright (c) 2008-2017, Hazelcast, Inc. All Rights Reserved.
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+// http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 using DotNetty.Buffers;
@@ -16,11 +30,11 @@ namespace Hazelcast.Simulator.Protocol.Core
 
         public static void EncodeByteBuf(this Response response, IByteBuffer buffer)
         {
-            var parts = response.Parts;
+            IDictionary<SimulatorAddress, Response.Part> parts = response.Parts;
 
             // write place holder for length. Eventually we'll overwrite it with the correct length.
             buffer.WriteInt(0);
-            var start = buffer.WriterIndex;
+            int start = buffer.WriterIndex;
 
             buffer.WriteUnsignedInt(MAGIC_BYTES);
             buffer.WriteLong(response.MessageId);
@@ -30,23 +44,23 @@ namespace Hazelcast.Simulator.Protocol.Core
             foreach (KeyValuePair<SimulatorAddress, Response.Part> pair in parts)
             {
                 pair.Key.EncodeByteBuf(buffer);
-                var part = pair.Value;
-                buffer.WriteInt((int) part.ResponseType);
+                Response.Part part = pair.Value;
+                buffer.WriteInt((int)part.ResponseType);
 
-                var payload = part.Payload;
+                string payload = part.Payload;
                 if (payload == null)
                 {
                     buffer.WriteInt(-1);
                 }
                 else
                 {
-                    var data = Encoding.UTF8.GetBytes(payload);
+                    byte[] data = Encoding.UTF8.GetBytes(payload);
                     buffer.WriteInt(data.Length);
                     buffer.WriteBytes(data);
                 }
             }
 
-            var length = buffer.WriterIndex - start;
+            int length = buffer.WriterIndex - start;
             buffer.SetInt(start - INT_SIZE, length);
         }
 
@@ -59,18 +73,18 @@ namespace Hazelcast.Simulator.Protocol.Core
                 throw new ArgumentException("Invalid magic bytes for Response");
             }
 
-            var messageId = buffer.ReadLong();
-            var destination = buffer.DecodeSimulatorAddress();
+            long messageId = buffer.ReadLong();
+            SimulatorAddress destination = buffer.DecodeSimulatorAddress();
             var response = new Response(messageId, destination);
 
-            var partCount = buffer.ReadInt();
+            int partCount = buffer.ReadInt();
             for (var i = 0; i < partCount; i++)
             {
-                var source = buffer.DecodeSimulatorAddress();
-                var responseType = (ResponseType) buffer.ReadInt();
+                SimulatorAddress source = buffer.DecodeSimulatorAddress();
+                var responseType = (ResponseType)buffer.ReadInt();
 
                 string payload = null;
-                var size = buffer.ReadInt();
+                int size = buffer.ReadInt();
                 if (size > -1)
                 {
                     payload = buffer.ReadSlice(size).ToString(Encoding.UTF8);

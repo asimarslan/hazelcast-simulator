@@ -1,11 +1,11 @@
-﻿// Copyright (c) 2008-2016, Hazelcast, Inc. All Rights Reserved.
-//
+﻿// Copyright (c) 2008-2017, Hazelcast, Inc. All Rights Reserved.
+// 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-//
+// 
 // http://www.apache.org/licenses/LICENSE-2.0
-//
+// 
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,7 +25,7 @@ namespace Hazelcast.Simulator.Utils
     {
         public static Type SearchNamedType(string name)
         {
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 IEnumerator<Type> enumerator = GetNamedTypes(assembly, name).GetEnumerator();
                 try
@@ -43,10 +43,11 @@ namespace Hazelcast.Simulator.Utils
             return null;
         }
 
-        public static IEnumerable<Type> GetNamedTypes(Assembly assembly, string name) {
-            foreach(Type type in assembly.GetTypes())
+        public static IEnumerable<Type> GetNamedTypes(Assembly assembly, string name)
+        {
+            foreach (Type type in assembly.GetTypes())
             {
-                var attrs = type.GetCustomAttributes(typeof(NamedAttribute), false);
+                object[] attrs = type.GetCustomAttributes(typeof(NamedAttribute), false);
                 if (attrs.Length > 0 && name == ((NamedAttribute)attrs[0]).Name)
                 {
                     yield return type;
@@ -83,7 +84,7 @@ namespace Hazelcast.Simulator.Utils
             return GetFieldFromResult(memberInfos, memberName);
         }
 
-        static MemberInfo GetFieldFromResult(MemberInfo[] memberInfos, string memberName)
+        private static MemberInfo GetFieldFromResult(MemberInfo[] memberInfos, string memberName)
         {
             if (memberInfos.Length == 1)
             {
@@ -136,7 +137,6 @@ namespace Hazelcast.Simulator.Utils
                 default:
                     throw new NotSupportedException();
             }
-
         }
 
         public static Type GetFieldType(MemberInfo memberInfo)
@@ -158,12 +158,12 @@ namespace Hazelcast.Simulator.Utils
             {
                 case MemberTypes.Field:
                     var fieldInfo = (FieldInfo)memberInfo;
-                    var fieldValue = Convert.ChangeType(valueStr, fieldInfo.FieldType);
+                    object fieldValue = Convert.ChangeType(valueStr, fieldInfo.FieldType);
                     fieldInfo.SetValue(instance, fieldValue);
                     break;
                 case MemberTypes.Property:
                     var propertyInfo = (PropertyInfo)memberInfo;
-                    var propertyValue = Convert.ChangeType(valueStr, propertyInfo.PropertyType);
+                    object propertyValue = Convert.ChangeType(valueStr, propertyInfo.PropertyType);
                     propertyInfo.SetValue(instance, propertyValue);
                     break;
                 default:
@@ -198,11 +198,9 @@ namespace Hazelcast.Simulator.Utils
 
         public static T ReadInstanceFieldValue<T>(object instance, Type type, string fieldName)
         {
-            BindingFlags bindFlags = BindingFlags.Instance | BindingFlags.NonPublic| BindingFlags.Public;
+            BindingFlags bindFlags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
             FieldInfo field = type.GetField(fieldName, bindFlags);
             return (T)field.GetValue(instance);
         }
-
-
     }
 }

@@ -1,30 +1,45 @@
-﻿using System;
+﻿// Copyright (c) 2008-2017, Hazelcast, Inc. All Rights Reserved.
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+// http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using System;
 using System.Reflection;
 
 namespace Hazelcast.Simulator.Utils
 {
-    public class ValueAttribute: Attribute
-	{
-		public object Value { get; private set;}
-		public object Value2 { get; private set;}
-		public object Value3 { get; private set;}
+    public class ValueAttribute : Attribute
+    {
+        public object Value { get; private set; }
 
-		public ValueAttribute(object value, object value2=null, object value3=null)
-		{
-			this.Value = value;
-			this.Value2 = value2;
-			this.Value3 = value3;
-		}
+        public object Value2 { get; private set; }
 
-		public static ValueAttribute GetAttr<T>(T ot)
-		{
-			return (ValueAttribute)GetCustomAttribute(ForValue(ot), typeof(ValueAttribute));
-		}
+        public object Value3 { get; private set; }
 
-		public static MemberInfo ForValue<T>(T ot)
-		{
-			return typeof(T).GetField(Enum.GetName(typeof(T), ot));
-		}
-	}
+        public ValueAttribute(object value, object value2 = null, object value3 = null)
+        {
+            Value = value;
+            Value2 = value2;
+            Value3 = value3;
+        }
+
+        public static ValueAttribute GetAttr<T>(T ot)
+        {
+            return (ValueAttribute)GetCustomAttribute(ForValue(ot), typeof(ValueAttribute));
+        }
+
+        public static MemberInfo ForValue<T>(T ot)
+        {
+            return typeof(T).GetField(Enum.GetName(typeof(T), ot));
+        }
+    }
 }
-

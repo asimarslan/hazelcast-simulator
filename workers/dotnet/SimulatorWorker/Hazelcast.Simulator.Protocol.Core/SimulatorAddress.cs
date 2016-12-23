@@ -1,42 +1,54 @@
-﻿using System;
+﻿// Copyright (c) 2008-2017, Hazelcast, Inc. All Rights Reserved.
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+// http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using System;
 using System.Text;
 
 namespace Hazelcast.Simulator.Protocol.Core
 {
     /// <summary>
-    /// Address object which(uniquely) identifies one or more Simulator components.
+    ///     Address object which(uniquely) identifies one or more Simulator components.
     /// </summary>
-    ///<remark>
-    /// Supports wildcards on each { @link AddressLevel} to target all components on that address level.
-    /// For example a { @link SimulatorMessage}
-    ///	to<c>C_A2_W* _T1</c> will be sent to <c>C_A2_W1_T1</c> and <c>C_A2_W2_T1</c>.
-    ///
-    ///
-    /// <pre>
-    ///                                               +---+
-    /// REMOTE                                        + R +
-    ///                                               +---+
-    ///                                                 |
-    ///                                                 v
-    ///                                               +---+
-    /// COORDINATOR           +-----------------------+ C +----------------------+
-    ///                       |                       +---+                      |
-    ///                       |                                                  |
-    ///                       v v
-    ///                    +--+---+                                           +---+--+
-    /// AGENT              | C_A1 |                              +------------+ C_A2 +------------+
-    ///                    +--+---+                              |            +------+            |
-    ///                       |                                 |                                 |
-    ///                       v v                                 v
-    ///                  +----+----+                       +----+----+                       +----+----+
-    /// WORKER       +---+ C_A1_W1 +---+               +---+ C_A2_W1 +---+               +---+ C_A2_W2 +---+
-    ///              |   +---------+   |               |   +---------+   |               |   +---------+   |
-    ///              |                 |               |                 |               |                 |
-    ///              v v               v v               v v
-    ///        +-----+------+   +------+-----+   +-----+------+   +------+-----+   +-----+------+   +------+-----+
-    /// TEST   | C_A1_W1_T1 |   | C_A1_W1_T2 |   | C_A2_W1_T1 |   | C_A2_W1_T2 |   | C_A2_W2_T1 |   | C_A2_W2_T2 |
-    ///        +------------+   +------------+   +------------+   +------------+   +------------+   +------------+
-    /// </pre>
+    /// <remark>
+    ///     Supports wildcards on each { @link AddressLevel} to target all components on that address level.
+    ///     For example a { @link SimulatorMessage}
+    ///     to<c>C_A2_W* _T1</c> will be sent to <c>C_A2_W1_T1</c> and <c>C_A2_W2_T1</c>.
+    ///     <pre>
+    ///         +---+
+    ///         REMOTE                                        + R +
+    ///         +---+
+    ///         |
+    ///         v
+    ///         +---+
+    ///         COORDINATOR           +-----------------------+ C +----------------------+
+    ///         |                       +---+                      |
+    ///         |                                                  |
+    ///         v v
+    ///         +--+---+                                           +---+--+
+    ///         AGENT              | C_A1 |                              +------------+ C_A2 +------------+
+    ///         +--+---+                              |            +------+            |
+    ///         |                                 |                                 |
+    ///         v v                                 v
+    ///         +----+----+                       +----+----+                       +----+----+
+    ///         WORKER       +---+ C_A1_W1 +---+               +---+ C_A2_W1 +---+               +---+ C_A2_W2 +---+
+    ///         |   +---------+   |               |   +---------+   |               |   +---------+   |
+    ///         |                 |               |                 |               |                 |
+    ///         v v               v v               v v
+    ///         +-----+------+   +------+-----+   +-----+------+   +------+-----+   +-----+------+   +------+-----+
+    ///         TEST   | C_A1_W1_T1 |   | C_A1_W1_T2 |   | C_A2_W1_T1 |   | C_A2_W1_T2 |   | C_A2_W2_T1 |   | C_A2_W2_T2 |
+    ///         +------------+   +------------+   +------------+   +------------+   +------------+   +------------+
+    ///     </pre>
     /// </remark>
     public class SimulatorAddress
     {
@@ -45,8 +57,8 @@ namespace Hazelcast.Simulator.Protocol.Core
         public static readonly SimulatorAddress ALL_AGENTS = new SimulatorAddress(AddressLevel.AGENT, 0, 0, 0);
         public static readonly SimulatorAddress ALL_WORKERS = new SimulatorAddress(AddressLevel.WORKER, 0, 0, 0);
 
-        private const String REMOTE_STRING = "R";
-        private const String COORDINATOR_STRING = "C";
+        private const string REMOTE_STRING = "R";
+        private const string COORDINATOR_STRING = "C";
 
         public SimulatorAddress(AddressLevel addressLevel, int agentIndex, int workerIndex, int testIndex)
         {
@@ -69,17 +81,18 @@ namespace Hazelcast.Simulator.Protocol.Core
             switch (AddressLevel)
             {
                 case AddressLevel.AGENT:
-                    return this.AgentIndex;
+                    return AgentIndex;
                 case AddressLevel.WORKER:
-                    return this.WorkerIndex;
+                    return WorkerIndex;
                 case AddressLevel.TEST:
-                    return this.TestIndex;
+                    return TestIndex;
                 default:
-                    throw new ArgumentException($"No address index for {this.AddressLevel}");
+                    throw new ArgumentException($"No address index for {AddressLevel}");
             }
         }
 
-        public SimulatorAddress GetChild(int childIndex) {
+        public SimulatorAddress GetChild(int childIndex)
+        {
             if (AddressLevel == AddressLevel.WORKER)
             {
                 return new SimulatorAddress(AddressLevel.TEST, AgentIndex, WorkerIndex, childIndex);
@@ -102,7 +115,7 @@ namespace Hazelcast.Simulator.Protocol.Core
                 case AddressLevel.AGENT:
                     return COORDINATOR;
                 default:
-                    throw new ArgumentException($"No parent for {this.AddressLevel}");
+                    throw new ArgumentException($"No parent for {AddressLevel}");
             }
         }
 
@@ -112,57 +125,56 @@ namespace Hazelcast.Simulator.Protocol.Core
             {
                 return true;
             }
-            if (obj == null || this.GetType() != obj.GetType())
+            if (obj == null || GetType() != obj.GetType())
             {
                 return false;
             }
-            SimulatorAddress that = obj as SimulatorAddress;
-            if (this.AgentIndex != that.AgentIndex)
+            var that = obj as SimulatorAddress;
+            if (AgentIndex != that.AgentIndex)
             {
                 return false;
             }
-            if (this.WorkerIndex != that.WorkerIndex)
-            {
-                return false;
-
-            }
-            if (this.TestIndex != that.TestIndex)
+            if (WorkerIndex != that.WorkerIndex)
             {
                 return false;
             }
-            return this.AddressLevel == that.AddressLevel;
+            if (TestIndex != that.TestIndex)
+            {
+                return false;
+            }
+            return AddressLevel == that.AddressLevel;
         }
 
         public override int GetHashCode()
         {
-            int result = this.AddressLevel.GetHashCode();
-            result = 31 * result + this.AgentIndex;
-            result = 31 * result + this.WorkerIndex;
-            result = 31 * result + this.TestIndex;
+            int result = AddressLevel.GetHashCode();
+            result = 31 * result + AgentIndex;
+            result = 31 * result + WorkerIndex;
+            result = 31 * result + TestIndex;
             return result;
         }
 
         public override string ToString()
         {
-            StringBuilder sb = new StringBuilder();
-            sb.Append(AddressLevel.REMOTE == this.AddressLevel ? REMOTE_STRING : COORDINATOR_STRING);
-            this.AppendAddressLevel(sb, AddressLevel.COORDINATOR, "_A", this.AgentIndex);
-            this.AppendAddressLevel(sb, AddressLevel.AGENT, "_W", this.WorkerIndex);
-            this.AppendAddressLevel(sb, AddressLevel.WORKER, "_T", this.TestIndex);
+            var sb = new StringBuilder();
+            sb.Append(AddressLevel.REMOTE == AddressLevel ? REMOTE_STRING : COORDINATOR_STRING);
+            AppendAddressLevel(sb, AddressLevel.COORDINATOR, "_A", AgentIndex);
+            AppendAddressLevel(sb, AddressLevel.AGENT, "_W", WorkerIndex);
+            AppendAddressLevel(sb, AddressLevel.WORKER, "_T", TestIndex);
             return sb.ToString();
         }
 
         private void AppendAddressLevel(StringBuilder sb, AddressLevel parent, string name, int index)
         {
-            if (parent.IsParentAddressLevel(this.AddressLevel))
+            if (parent.IsParentAddressLevel(AddressLevel))
             {
                 sb.Append(name).Append(index != 0 ? index.ToString() : "*");
             }
         }
 
-        public string CreateResponseKey(long messageId, int remoteAddressIndex) {
-            return this.ToString() + '-' + messageId + '-' + remoteAddressIndex;
+        public string CreateResponseKey(long messageId, int remoteAddressIndex)
+        {
+            return ToString() + '-' + messageId + '-' + remoteAddressIndex;
         }
-
     }
 }

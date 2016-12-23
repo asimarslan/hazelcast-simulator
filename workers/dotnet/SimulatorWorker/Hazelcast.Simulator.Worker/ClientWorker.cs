@@ -1,11 +1,24 @@
-﻿using System;
+﻿// Copyright (c) 2008-2017, Hazelcast, Inc. All Rights Reserved.
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+// http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using Hazelcast.Core;
-using Hazelcast.Logging;
 using Hazelcast.Simulator.Protocol.Connector;
-using Hazelcast.Simulator.Utils;
 using log4net;
 using log4net.Config;
 using static Hazelcast.Simulator.Utils.HazelcastUtils;
@@ -15,7 +28,7 @@ namespace Hazelcast.Simulator.Worker
 {
     public class ClientWorker
     {
-        static readonly ILog Logger = LogManager.GetLogger(typeof(ClientWorker));
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(ClientWorker));
 
         private readonly string workerType;
 
@@ -27,7 +40,7 @@ namespace Hazelcast.Simulator.Worker
         private readonly string hzConfigFile;
         private readonly bool autoCreateHzInstance;
         private readonly int workerPerformanceMonitorIntervalSeconds;
-        private IHazelcastInstance hazelcastInstance;
+        private readonly IHazelcastInstance hazelcastInstance;
 
         public WorkerConnector Connector { get; }
 
@@ -35,7 +48,7 @@ namespace Hazelcast.Simulator.Worker
             string hzConfigFile, bool autoCreateHzInstance, int workerPerformanceMonitorIntervalSeconds)
         {
             this.workerType = workerType;
-            this.PublicIpAddress = publicIpAddress;
+            PublicIpAddress = publicIpAddress;
             this.agentIndex = agentIndex;
             this.workerIndex = workerIndex;
             this.workerPort = workerPort;
@@ -43,19 +56,19 @@ namespace Hazelcast.Simulator.Worker
             this.autoCreateHzInstance = autoCreateHzInstance;
             this.workerPerformanceMonitorIntervalSeconds = workerPerformanceMonitorIntervalSeconds;
 
-            this.hazelcastInstance = this.GetHazelcastInstance();
+            hazelcastInstance = GetHazelcastInstance();
 
-            this.Connector = new WorkerConnector(agentIndex, workerIndex, this.workerPort, this.hazelcastInstance, this);
-            this.SignalStartToAgent();
+            Connector = new WorkerConnector(agentIndex, workerIndex, this.workerPort, hazelcastInstance, this);
+            SignalStartToAgent();
         }
 
         private IHazelcastInstance GetHazelcastInstance()
         {
             IHazelcastInstance instance = null;
-            if (this.autoCreateHzInstance)
+            if (autoCreateHzInstance)
             {
-                Logger.Info($"Creating {this.workerType} HazelcastInstance with config:{this.hzConfigFile}");
-                instance = HazelcastUtils.CreateClientHazelcastInstance(this.hzConfigFile);
+                Logger.Info($"Creating {workerType} HazelcastInstance with config:{hzConfigFile}");
+                instance = CreateClientHazelcastInstance(hzConfigFile);
                 Logger.Info($"HazelcastInstance IsRunning:{instance.GetLifecycleService().IsRunning()}");
             }
             return instance;
@@ -65,9 +78,9 @@ namespace Hazelcast.Simulator.Worker
         {
             Logger.Info($"Starting .Net Worker pid:{Process.GetCurrentProcess().Id}");
 
-            var workerParams = FileUtils.GetParameterDictionary();
+            Dictionary<string, string> workerParams = GetParameterDictionary();
             Logger.Info("Parameters:");
-            foreach (var param in workerParams)
+            foreach (KeyValuePair<string, string> param in workerParams)
             {
                 Logger.Info($"{param.Key}={param.Value}");
             }
@@ -94,14 +107,13 @@ namespace Hazelcast.Simulator.Worker
             int workerPerformanceMonitorIntervalSeconds;
             int.TryParse(workerParams["workerPerformanceMonitorIntervalSeconds"], out workerPerformanceMonitorIntervalSeconds);
 
-            ClientWorker worker=null;
+            ClientWorker worker = null;
             try
             {
                 worker = new ClientWorker(workerType, publicAddress, agentIndex, workerIndex, workerPort,
                     hzConfigFile, autoCreateHzInstance, workerPerformanceMonitorIntervalSeconds);
 
                 await worker.Start();
-
             }
             catch (Exception e)
             {
@@ -110,26 +122,25 @@ namespace Hazelcast.Simulator.Worker
             finally
             {
                 worker?.Shutdown();
-                
             }
         }
 
         private void SignalStartToAgent()
         {
-            string address = GetHazelcastAddress(this.workerType, this.PublicIpAddress, this.hazelcastInstance);
-            var path = $"{GetUserDirectoryPath()}/worker.address";
+            string address = GetHazelcastAddress(workerType, PublicIpAddress, hazelcastInstance);
+            string path = $"{GetUserDirectoryPath()}/worker.address";
             Console.WriteLine($"worker.address: {path}");
             File.WriteAllText(path, address);
         }
 
-        public async Task Start() => await this.Connector.Start();
+        public async Task Start() => await Connector.Start();
 
         public void Shutdown()
         {
-            if (this.hazelcastInstance != null)
+            if (hazelcastInstance != null)
             {
                 Logger.Info("Stopping HazelcastInstance...");
-                this.hazelcastInstance.Shutdown();
+                hazelcastInstance.Shutdown();
             }
 
             //TODO PERf monitor
@@ -138,13 +149,12 @@ namespace Hazelcast.Simulator.Worker
             //                performanceMonitor.shutdown();
             //            }
 
-            if (this.Connector != null)
+            if (Connector != null)
             {
                 Logger.Info("Stopping WorkerConnector...");
                 try
                 {
-                    this.Connector.Shutdown();
-
+                    Connector.Shutdown();
                 }
                 catch (Exception e)
                 {
@@ -155,14 +165,13 @@ namespace Hazelcast.Simulator.Worker
             //OperationTypeCounter.printStatistics(Level.DEBUG);
         }
 
-        public bool Ready => this.Connector.Ready;
+        public bool Ready => Connector.Ready;
 
         public static void Main(string[] args)
         {
             try
             {
                 XmlConfigurator.Configure(new FileInfo("log4net.xml"));
-
             }
             catch (Exception e)
             {

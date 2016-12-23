@@ -1,11 +1,11 @@
-﻿// Copyright (c) 2008-2016, Hazelcast, Inc. All Rights Reserved.
-//
+﻿// Copyright (c) 2008-2017, Hazelcast, Inc. All Rights Reserved.
+// 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-//
+// 
 // http://www.apache.org/licenses/LICENSE-2.0
-//
+// 
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,7 +14,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Hazelcast.Core;
 using Hazelcast.Simulator.Protocol.Core;
 using Hazelcast.Simulator.Utils;
@@ -37,33 +36,31 @@ namespace Hazelcast.Simulator.Test
         [SetUp]
         public void Setup()
         {
-            this.hzClient = new Mock<IHazelcastInstance>();
-            var testContext = new TestContext(TestId, this.hzClient.Object);
+            hzClient = new Mock<IHazelcastInstance>();
+            var testContext = new TestContext(TestId, hzClient.Object);
             var dict = new Dictionary<string, string>();
             var testCase = new TestCase(TestId, dict);
             var testAddress = new SimulatorAddress(AddressLevel.TEST, 1, 1, 1);
 
-            this.testInstance = new TestSample();
-            this.testContainer = new TestContainer(testContext, testCase, testAddress, this.testInstance);
+            testInstance = new TestSample();
+            testContainer = new TestContainer(testContext, testCase, testAddress, testInstance);
         }
 
         [TearDown]
-        public void TearDown()
-        {
-        }
+        public void TearDown() {}
 
         [Test]
         public void TestSetupPhase()
         {
-            Assert.IsNotNull(this.testContainer);
-            Assert.IsNotNull(this.testContainer.TestInstance);
+            Assert.IsNotNull(testContainer);
+            Assert.IsNotNull(testContainer.TestInstance);
         }
 
         [Test]
         public void TestSetupPhaseInvoke()
         {
-            this.testContainer.Invoke(TestPhase.Setup);
-            Assert.AreEqual(2, this.testInstance.invokeCounts[TestPhase.Setup]);
+            testContainer.Invoke(TestPhase.Setup);
+            Assert.AreEqual(2, testInstance.invokeCounts[TestPhase.Setup]);
         }
 
         [Test]
@@ -71,7 +68,7 @@ namespace Hazelcast.Simulator.Test
         {
             foreach (TestPhase testPhase in Enum.GetValues(typeof(TestPhase)))
             {
-                this.testContainer.Invoke(testPhase);
+                testContainer.Invoke(testPhase);
             }
 
             foreach (TestPhase testPhase in Enum.GetValues(typeof(TestPhase)))
@@ -79,13 +76,13 @@ namespace Hazelcast.Simulator.Test
                 switch (testPhase)
                 {
                     case TestPhase.Setup:
-                        Assert.AreEqual(2, this.testInstance.invokeCounts[TestPhase.Setup]);
+                        Assert.AreEqual(2, testInstance.invokeCounts[TestPhase.Setup]);
                         break;
                     case TestPhase.Warmup:
-                        Assert.AreEqual(0, this.testInstance.invokeCounts[TestPhase.Warmup]);
+                        Assert.AreEqual(0, testInstance.invokeCounts[TestPhase.Warmup]);
                         break;
                     default:
-                        Assert.AreEqual(1, this.testInstance.invokeCounts[testPhase], $"{testPhase} not invoked!");
+                        Assert.AreEqual(1, testInstance.invokeCounts[testPhase], $"{testPhase} not invoked!");
                         break;
                 }
             }

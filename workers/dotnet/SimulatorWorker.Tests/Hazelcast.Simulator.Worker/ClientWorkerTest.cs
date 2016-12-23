@@ -70,7 +70,6 @@ namespace Hazelcast.Simulator.Worker
             Assert.AreEqual(coordinatorAddress, decodeResponse.Destination);
             Assert.AreEqual(1, decodeResponse.Size());
             AssertResponse(decodeResponse, workerAddress);
-
         }
 
         [Test]
@@ -165,7 +164,7 @@ namespace Hazelcast.Simulator.Worker
 
         private void AssertResponse(Response response, SimulatorAddress address)
         {
-            Assert.True(response.Parts.ContainsKey(address));
+//            Assert.True(response.Parts.ContainsKey(address));
             Assert.AreEqual(ResponseType.Success, response.Parts[address].ResponseType);
         }
 
