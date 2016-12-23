@@ -16,7 +16,7 @@ using System.Threading;
 
 namespace Hazelcast.Simulator.Utils
 {
-    class AtomicBoolean
+    public class AtomicBoolean
     {
         private int _value;
 

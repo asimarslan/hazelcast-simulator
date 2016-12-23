@@ -19,13 +19,11 @@ using System.Threading.Tasks;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
-using Hazelcast.Core;
 using Hazelcast.Simulator.Protocol.Core;
 using Hazelcast.Simulator.Protocol.Handler;
 using Hazelcast.Simulator.Protocol.Operations;
 using Hazelcast.Simulator.Protocol.Processors;
 using Hazelcast.Simulator.Utils;
-using Hazelcast.Simulator.Worker;
 using log4net;
 using Newtonsoft.Json;
 
@@ -34,7 +32,7 @@ namespace Hazelcast.Simulator.Protocol.Connector
     public class WorkerConnector
     {
         private const int DefaultShutdownQuietPeriod = 1;
-        private const int DefaultShutdownTimeout = 5;
+        private const int DefaultShutdownTimeout = 1;
 
         private static readonly ILog Logger = LogManager.GetLogger(typeof(WorkerConnector));
 
@@ -43,8 +41,6 @@ namespace Hazelcast.Simulator.Protocol.Connector
 
         private readonly AtomicBoolean isStarted = new AtomicBoolean();
         private readonly int port;
-        private readonly IHazelcastInstance hazelcastInstance;
-        private readonly ClientWorker worker;
 
         private readonly IEventLoopGroup eventLoopGroup = new MultithreadEventLoopGroup();
 
@@ -53,26 +49,25 @@ namespace Hazelcast.Simulator.Protocol.Connector
 
         private IChannel channel;
 
-        public string PublicIpAddress => worker.PublicIpAddress;
+        public string PublicIpAddress { get; }
 
         public void SetChannel(IChannel channel) => this.channel = channel;
 
         private readonly ManualResetEventSlim _startLock = new ManualResetEventSlim(false, 0);
 
         public volatile bool Ready;
-        private readonly OperationProcessor operationProcessor;
 
-        public WorkerConnector(SimulatorAddress workerAddress, int port, IHazelcastInstance hazelcastInstance, ClientWorker worker)
+        public Func<OperationProcessor> GetOperationProcessor { get; set; }
+
+        public WorkerConnector(SimulatorAddress workerAddress, int port, string publicIpAddress)
         {
             WorkerAddress = workerAddress;
             this.port = port;
-            this.hazelcastInstance = hazelcastInstance;
-            this.worker = worker;
-            operationProcessor = new OperationProcessor(this.hazelcastInstance, WorkerAddress, this.worker);
+            PublicIpAddress = publicIpAddress;
         }
 
-        public WorkerConnector(int agentIndex, int workerIndex, int port, IHazelcastInstance hazelcastInstance, ClientWorker worker)
-            : this(new SimulatorAddress(AddressLevel.WORKER, agentIndex, workerIndex, 0), port, hazelcastInstance, worker) {}
+        public WorkerConnector(int agentIndex, int workerIndex, int port, string publicIpAddress)
+            : this(new SimulatorAddress(AddressLevel.WORKER, agentIndex, workerIndex, 0), port, publicIpAddress) {}
 
         public async Task Start()
         {
@@ -118,7 +113,7 @@ namespace Hazelcast.Simulator.Protocol.Connector
             pipeline.AddLast("frameDecoder", new SimulatorFrameDecoder());
             pipeline.AddLast("protocolDecoder", new SimulatorProtocolDecoder(WorkerAddress));
 
-            pipeline.AddLast("messageConsumeHandler", new SimulatorMessageConsumeHandler(WorkerAddress, operationProcessor));
+            pipeline.AddLast("messageConsumeHandler", new SimulatorMessageConsumeHandler(WorkerAddress, GetOperationProcessor()));
 
             pipeline.AddLast("responseHandler", new ResponseHandler(HandleReponse));
             pipeline.AddLast("exceptionHandler", new ExceptionHandler());
@@ -136,8 +131,7 @@ namespace Hazelcast.Simulator.Protocol.Connector
 
             channel?.CloseAsync().Wait();
 
-            eventLoopGroup.ShutdownGracefullyAsync(TimeSpan.FromSeconds(DefaultShutdownQuietPeriod),
-                TimeSpan.FromSeconds(DefaultShutdownTimeout)).Wait();
+            eventLoopGroup.ShutdownGracefullyAsync().Wait();
         }
 
         public Task<Response> Submit(SimulatorAddress source, SimulatorAddress destination, ISimulatorOperation operation)

@@ -19,6 +19,8 @@ using System.IO;
 using System.Threading.Tasks;
 using Hazelcast.Core;
 using Hazelcast.Simulator.Protocol.Connector;
+using Hazelcast.Simulator.Protocol.Core;
+using Hazelcast.Simulator.Protocol.Processors;
 using log4net;
 using log4net.Config;
 using static Hazelcast.Simulator.Utils.HazelcastUtils;
@@ -41,8 +43,9 @@ namespace Hazelcast.Simulator.Worker
         private readonly bool autoCreateHzInstance;
         private readonly int workerPerformanceMonitorIntervalSeconds;
         private readonly IHazelcastInstance hazelcastInstance;
+        public readonly OperationProcessor operationProcessor;
 
-        public WorkerConnector Connector { get; }
+        public WorkerConnector Connector { get; private set; }
 
         public ClientWorker(string workerType, string publicIpAddress, int agentIndex, int workerIndex, int workerPort,
             string hzConfigFile, bool autoCreateHzInstance, int workerPerformanceMonitorIntervalSeconds)
@@ -57,8 +60,10 @@ namespace Hazelcast.Simulator.Worker
             this.workerPerformanceMonitorIntervalSeconds = workerPerformanceMonitorIntervalSeconds;
 
             hazelcastInstance = GetHazelcastInstance();
-
-            Connector = new WorkerConnector(agentIndex, workerIndex, this.workerPort, hazelcastInstance, this);
+            var workerAddress=new SimulatorAddress(AddressLevel.WORKER, agentIndex, workerIndex, 0);
+            Connector = new WorkerConnector(agentIndex, workerIndex, this.workerPort, publicIpAddress);
+            operationProcessor = new OperationProcessor(new OperationContext(hazelcastInstance, workerAddress, Connector), this);
+            Connector.GetOperationProcessor = ()=> operationProcessor;
             SignalStartToAgent();
         }
 

@@ -1,56 +1,66 @@
-﻿using NUnit.Framework;
+﻿// Copyright (c) 2008-2017, Hazelcast, Inc. All Rights Reserved.
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+// http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using NUnit.Framework;
 
 namespace Hazelcast.Simulator.Test
 {
-	[TestFixture]
-	public class TestPhaseTest
-	{
-		[SetUp]
-		public void Setup()
-		{
-		}
+    [TestFixture]
+    public class TestPhaseTest
+    {
+        [SetUp]
+        public void Setup() {}
 
-		[TearDown]
-		public void TearDown() { }
+        [TearDown]
+        public void TearDown() {}
 
-		[Test]
-		public void TestDescription()
-		{
-			Assert.AreEqual("setup", TestPhase.Setup.GetDescription());
-			Assert.AreEqual("local prepare", TestPhase.LocalPrepare.GetDescription());
-			Assert.AreEqual("global prepare", TestPhase.GlobalPrepare.GetDescription());
-			Assert.AreEqual("warmup", TestPhase.Warmup.GetDescription());
-			Assert.AreEqual("local after warmup", TestPhase.LocalAfterWarmup.GetDescription());
-			Assert.AreEqual("global after warmup", TestPhase.GlobalAfterWarmup.GetDescription());
-			Assert.AreEqual("run", TestPhase.Run.GetDescription());
-			Assert.AreEqual("global verify", TestPhase.GlobalVerify.GetDescription());
-			Assert.AreEqual("local verify", TestPhase.LocalVerify.GetDescription());
-			Assert.AreEqual("global tear down", TestPhase.GlobalTeardown.GetDescription());
-			Assert.AreEqual("local tear down", TestPhase.LocalTeardown.GetDescription());
-		}
+        [Test]
+        public void TestDescription()
+        {
+            Assert.AreEqual("setup", TestPhase.Setup.GetDescription());
+            Assert.AreEqual("local prepare", TestPhase.LocalPrepare.GetDescription());
+            Assert.AreEqual("global prepare", TestPhase.GlobalPrepare.GetDescription());
+            Assert.AreEqual("warmup", TestPhase.Warmup.GetDescription());
+            Assert.AreEqual("local after warmup", TestPhase.LocalAfterWarmup.GetDescription());
+            Assert.AreEqual("global after warmup", TestPhase.GlobalAfterWarmup.GetDescription());
+            Assert.AreEqual("run", TestPhase.Run.GetDescription());
+            Assert.AreEqual("global verify", TestPhase.GlobalVerify.GetDescription());
+            Assert.AreEqual("local verify", TestPhase.LocalVerify.GetDescription());
+            Assert.AreEqual("global tear down", TestPhase.GlobalTeardown.GetDescription());
+            Assert.AreEqual("local tear down", TestPhase.LocalTeardown.GetDescription());
+        }
 
-		[Test]
-		public void TestIsGlobal()
-		{
-			Assert.AreEqual(false, TestPhase.Setup.IsGlobal());
-			Assert.AreEqual(false, TestPhase.LocalPrepare.IsGlobal());
-			Assert.AreEqual(true, TestPhase.GlobalPrepare.IsGlobal());
-			Assert.AreEqual(false, TestPhase.Warmup.IsGlobal());
-			Assert.AreEqual(false, TestPhase.LocalAfterWarmup.IsGlobal());
-			Assert.AreEqual(true, TestPhase.GlobalAfterWarmup.IsGlobal());
-			Assert.AreEqual(false, TestPhase.Run.IsGlobal());
-			Assert.AreEqual(true, TestPhase.GlobalVerify.IsGlobal());
-			Assert.AreEqual(false, TestPhase.LocalVerify.IsGlobal());
-			Assert.AreEqual(true, TestPhase.GlobalTeardown.IsGlobal());
-			Assert.AreEqual(false, TestPhase.LocalTeardown.IsGlobal());
-		}
+        [Test]
+        public void TestIsGlobal()
+        {
+            Assert.AreEqual(false, TestPhase.Setup.IsGlobal());
+            Assert.AreEqual(false, TestPhase.LocalPrepare.IsGlobal());
+            Assert.AreEqual(true, TestPhase.GlobalPrepare.IsGlobal());
+            Assert.AreEqual(false, TestPhase.Warmup.IsGlobal());
+            Assert.AreEqual(false, TestPhase.LocalAfterWarmup.IsGlobal());
+            Assert.AreEqual(true, TestPhase.GlobalAfterWarmup.IsGlobal());
+            Assert.AreEqual(false, TestPhase.Run.IsGlobal());
+            Assert.AreEqual(true, TestPhase.GlobalVerify.IsGlobal());
+            Assert.AreEqual(false, TestPhase.LocalVerify.IsGlobal());
+            Assert.AreEqual(true, TestPhase.GlobalTeardown.IsGlobal());
+            Assert.AreEqual(false, TestPhase.LocalTeardown.IsGlobal());
+        }
 
-
-	    [Test]
-	    public void TestLastPhase()
-	    {
-	        Assert.AreEqual(TestPhase.LocalTeardown, TestPhases.GetLastTestPhase());
-	    }
-	}
+        [Test]
+        public void TestLastPhase()
+        {
+            Assert.AreEqual(TestPhase.LocalTeardown, TestPhases.GetLastTestPhase());
+        }
+    }
 }
-

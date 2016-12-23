@@ -68,7 +68,8 @@ namespace Hazelcast.Simulator.Protocol.Core
         {
             buffer.ReadInt(); //frameLength
 
-            if (buffer.ReadUnsignedInt() != MAGIC_BYTES)
+            uint magicBytes = buffer.ReadUnsignedInt();
+            if (magicBytes != MAGIC_BYTES)
             {
                 throw new ArgumentException("Invalid magic bytes for Response");
             }

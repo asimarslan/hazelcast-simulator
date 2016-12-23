@@ -30,11 +30,17 @@ namespace Hazelcast.Simulator.Protocol.Processors
         public readonly OperationContext operationContext;
         private readonly ClientWorker worker;
 
-        public OperationProcessor(IHazelcastInstance hazelcastInstance, SimulatorAddress workerAddress, ClientWorker worker)
+        public OperationProcessor(OperationContext operationContext,  ClientWorker worker)
         {
-            operationContext = new OperationContext(hazelcastInstance, workerAddress, worker.Connector);
+            this. operationContext = operationContext;
             this.worker = worker;
         }
+
+//        public OperationProcessor(IHazelcastInstance hazelcastInstance, SimulatorAddress workerAddress, ClientWorker worker)
+//        {
+//            operationContext = new OperationContext(hazelcastInstance, workerAddress, worker.Connector);
+//            this.worker = worker;
+//        }
 
         public Task<Response.Part[]> SubmitAsync(SimulatorMessage simulatorMessage)
             => Task.Run(async () => await ProcessMessage(simulatorMessage));

@@ -1,11 +1,11 @@
-﻿// Copyright (c) 2008-2016, Hazelcast, Inc. All Rights Reserved.
-//
+﻿// Copyright (c) 2008-2017, Hazelcast, Inc. All Rights Reserved.
+// 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-//
+// 
 // http://www.apache.org/licenses/LICENSE-2.0
-//
+// 
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -13,10 +13,8 @@
 // limitations under the License.
 
 using System.Collections.Generic;
-using Hazelcast.Simulator.Test;
 using NUnit.Framework;
 using static Hazelcast.Simulator.Utils.DependencyInjectionUtil;
-using TestContext = Hazelcast.Simulator.Test.TestContext;
 
 namespace Hazelcast.Simulator.Utils
 {
@@ -24,20 +22,18 @@ namespace Hazelcast.Simulator.Utils
     public class DependencyInjectionTest
     {
         [SetUp]
-        public void Setup()
-        {
-        }
+        public void Setup() {}
 
         [TearDown]
-        public void TearDown() { }
+        public void TearDown() {}
 
         [Test]
         public void TestInjectPublicNonStaticField()
         {
             const string strVal = "Value0";
             var obj = new Dependent();
-            InjectToPropertyPath(obj,"testStrField", strVal);
-            Assert.AreEqual(obj.testStrField, strVal );
+            InjectToPropertyPath(obj, "testStrField", strVal);
+            Assert.AreEqual(obj.testStrField, strVal);
         }
 
         [Test]
@@ -45,8 +41,8 @@ namespace Hazelcast.Simulator.Utils
         {
             const string strVal = "90";
             var obj = new Dependent();
-            InjectToPropertyPath(obj,"testLongField", strVal);
-            Assert.AreEqual(obj.testLongField, long.Parse(strVal) );
+            InjectToPropertyPath(obj, "testLongField", strVal);
+            Assert.AreEqual(obj.testLongField, long.Parse(strVal));
         }
 
         [Test]
@@ -54,8 +50,8 @@ namespace Hazelcast.Simulator.Utils
         {
             const string strVal = "90";
             var obj = new Dependent();
-            InjectToPropertyPath(obj,"TestIntProperty", strVal);
-            Assert.AreEqual(obj.TestIntProperty, int.Parse(strVal) );
+            InjectToPropertyPath(obj, "TestIntProperty", strVal);
+            Assert.AreEqual(obj.TestIntProperty, int.Parse(strVal));
         }
 
         [Test]
@@ -63,8 +59,8 @@ namespace Hazelcast.Simulator.Utils
         {
             const string strVal = "90";
             var obj = new Dependent();
-            Assert.False(InjectToPropertyPath(obj,"privateField", strVal));
-            Assert.AreEqual(obj.GetPrivateFieldValue(), 1 );
+            Assert.False(InjectToPropertyPath(obj, "privateField", strVal));
+            Assert.AreEqual(obj.GetPrivateFieldValue(), 1);
         }
 
         [Test]
@@ -72,24 +68,23 @@ namespace Hazelcast.Simulator.Utils
         {
             const string strVal = "90";
             var obj = new Dependent();
-            Assert.False(InjectToPropertyPath(obj,"staticField", strVal));
-            Assert.AreEqual(Dependent.StaticField, 100 );
+            Assert.False(InjectToPropertyPath(obj, "staticField", strVal));
+            Assert.AreEqual(Dependent.StaticField, 100);
         }
 
         [Test]
         public void TestInjectProperties()
         {
             var dict = new Dictionary<string, string>();
-            dict.Add("testStrField","Value0");
-            dict.Add("testLongField","99");
-            dict.Add("TestIntProperty","90");
+            dict.Add("testStrField", "Value0");
+            dict.Add("testLongField", "99");
+            dict.Add("TestIntProperty", "90");
             var obj = new Dependent();
             InjectProperties(obj, dict);
 
-            Assert.AreEqual(obj.testStrField, dict["testStrField"] );
-            Assert.AreEqual(obj.testLongField, long.Parse(dict["testLongField"]) );
-            Assert.AreEqual(obj.TestIntProperty, int.Parse(dict["TestIntProperty"]) );
-
+            Assert.AreEqual(obj.testStrField, dict["testStrField"]);
+            Assert.AreEqual(obj.testLongField, long.Parse(dict["testLongField"]));
+            Assert.AreEqual(obj.TestIntProperty, int.Parse(dict["TestIntProperty"]));
         }
 
         [Test]
@@ -97,8 +92,8 @@ namespace Hazelcast.Simulator.Utils
         {
             const string strVal = "1000";
             var obj = new Dependent();
-            InjectToPropertyPath(obj,"child.childLongField", strVal);
-            Assert.AreEqual(obj.child.ChildLongField, long.Parse(strVal) );
+            InjectToPropertyPath(obj, "child.childLongField", strVal);
+            Assert.AreEqual(obj.child.ChildLongField, long.Parse(strVal));
         }
 
         [Test]
@@ -106,8 +101,8 @@ namespace Hazelcast.Simulator.Utils
         {
             const string strVal = "1000";
             var obj = new Dependent();
-            InjectToPropertyPath(obj,"child.grandChild.childLongField", strVal);
-            Assert.AreEqual(obj.child.child.ChildLongField, long.Parse(strVal) );
+            InjectToPropertyPath(obj, "child.grandChild.childLongField", strVal);
+            Assert.AreEqual(obj.child.child.ChildLongField, long.Parse(strVal));
         }
 
         [Test]
@@ -115,12 +110,10 @@ namespace Hazelcast.Simulator.Utils
         {
             const string strVal = "1000";
             var obj = new Dependent();
-            InjectToPropertyPath(obj,"child.childLongField", strVal);
-            InjectToPropertyPath(obj,"child.grandChild.childLongField", strVal);
-            Assert.AreEqual(obj.child.ChildLongField, long.Parse(strVal) );
-            Assert.AreEqual(obj.child.child.ChildLongField, long.Parse(strVal) );
+            InjectToPropertyPath(obj, "child.childLongField", strVal);
+            InjectToPropertyPath(obj, "child.grandChild.childLongField", strVal);
+            Assert.AreEqual(obj.child.ChildLongField, long.Parse(strVal));
+            Assert.AreEqual(obj.child.child.ChildLongField, long.Parse(strVal));
         }
-
     }
-
 }

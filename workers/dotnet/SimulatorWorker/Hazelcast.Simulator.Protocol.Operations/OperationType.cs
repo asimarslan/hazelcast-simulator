@@ -61,14 +61,14 @@ namespace Hazelcast.Simulator.Protocol.Operations
         public static Type GetClassType(this OperationType ot)
         {
             ValueAttribute attr = ValueAttribute.GetAttr(ot);
-            return attr.Value as Type;
+            return attr?.Value as Type;
         }
 
         public static OperationType GetOperationType(this ISimulatorOperation operation)
         {
             foreach (OperationType opType in Enum.GetValues(typeof(OperationType)))
             {
-                if (opType.GetClassType().Equals(operation))
+                if (opType.GetClassType() == operation.GetType())
                 {
                     return opType;
                 }

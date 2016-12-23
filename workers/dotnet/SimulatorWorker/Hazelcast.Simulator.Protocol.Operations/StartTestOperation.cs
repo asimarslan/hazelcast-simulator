@@ -43,7 +43,7 @@ namespace Hazelcast.Simulator.Protocol.Operations
             if (SkipRunPhase(testContainer))
             {
                 Logger.Info($"Skipping test {testContainer.TestCase.TestId}");
-                SendPhaseCompletedOperation(operationContext.Connector, testPhase).Wait();
+                SendPhaseCompletedOperation(operationContext.Connector, testPhase);
             }
             else
             {

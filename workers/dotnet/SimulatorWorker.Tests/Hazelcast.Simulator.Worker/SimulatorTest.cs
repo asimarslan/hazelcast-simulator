@@ -14,69 +14,24 @@
 
 using System;
 using System.Collections.Generic;
-using Hazelcast.Core;
-using Hazelcast.Simulator.Probe;
 using Hazelcast.Simulator.Test;
 
-namespace Hazelcast.Simulator.Utils
+namespace Hazelcast.Simulator.Worker
 {
-    public class Dependent
+    [Named("Custom.Simulator.Name.SimulatorTest")]
+    public class SimulatorTest
     {
-        [Inject, Named("testStrField")]
-        public string testStrField;
-
-        [Inject, Named("testLongField")]
-        public long testLongField;
-
-        [Inject, Named("TestIntProperty")]
-        public int TestIntProperty { get; set; }
-
-        [Inject, Named("privateField")]
-        private readonly long privateField = 1;
-
-        [Inject, Named("staticField")]
-        public static long StaticField = 100;
-
-        [Named("child")]
-        public Child child;
-
         [Inject]
-        public IHazelcastInstance hazelcastClient;
+        public ITestContext Context;
 
-        [Inject]
-        public ITestContext testContext;
+        public IDictionary<TestPhase, int> InvokeCounts;
 
-        [InjectProbe(true), Named("probe-1")]
-        public IProbe probe1;
-
-        [InjectProbe]
-        public IProbe probe2;
-
-        [InjectProbe, Named("probe-1")]
-        public IProbe probe3;
-
-        public long GetPrivateFieldValue() => privateField;
-    }
-
-    public class Child
-    {
-        [Inject, Named("childLongField")]
-        public long ChildLongField;
-
-        [Named("grandChild")]
-        public Child child;
-    }
-
-    public class TestSample
-    {
-        public IDictionary<TestPhase, int> invokeCounts;
-
-        public TestSample()
+        public SimulatorTest()
         {
-            invokeCounts = new Dictionary<TestPhase, int>();
+            InvokeCounts = new Dictionary<TestPhase, int>();
             foreach (TestPhase testPhase in Enum.GetValues(typeof(TestPhase)))
             {
-                invokeCounts.Add(testPhase, 0);
+                InvokeCounts.Add(testPhase, 0);
             }
         }
 
@@ -113,6 +68,6 @@ namespace Hazelcast.Simulator.Utils
         [Run]
         public void Run() => IncrementPhaseInvokeCount(TestPhase.Run);
 
-        private void IncrementPhaseInvokeCount(TestPhase testPhase) => invokeCounts[testPhase] += 1;
+        private void IncrementPhaseInvokeCount(TestPhase testPhase) => InvokeCounts[testPhase] += 1;
     }
 }
