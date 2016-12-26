@@ -23,13 +23,15 @@ namespace Hazelcast.Simulator.Protocol.Operations
     public class PhaseCompletedOperation : AbstractCoordinatorOperation
     {
         [JsonProperty("testPhase")]
-        private readonly string testPhase;
+        private readonly string testPhaseStr;
 
         public PhaseCompletedOperation() {}
 
         public PhaseCompletedOperation(TestPhase testPhase)
         {
-            this.testPhase = testPhase.GetName();
+            this.testPhaseStr = testPhase.GetName();
         }
+
+        public TestPhase TestPhase => testPhaseStr.ToTestPhase();
     }
 }

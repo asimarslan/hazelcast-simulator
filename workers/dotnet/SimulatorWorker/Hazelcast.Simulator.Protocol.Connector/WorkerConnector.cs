@@ -129,9 +129,9 @@ namespace Hazelcast.Simulator.Protocol.Connector
 
             _startLock.Set();
 
-            channel?.CloseAsync().Wait();
+            channel?.CloseAsync().Wait(1000);
 
-            eventLoopGroup.ShutdownGracefullyAsync().Wait();
+            eventLoopGroup.ShutdownGracefullyAsync().Wait(1000);
         }
 
         public Task<Response> Submit(SimulatorAddress source, SimulatorAddress destination, ISimulatorOperation operation)

@@ -73,7 +73,7 @@ namespace Hazelcast.Simulator.Protocol.Handler
                     Logger.Error($"Exception during operation excecution {ex?.Message}", ex);
                     response.AddPart(localAddress, ResponseType.ExceptionDuringOperationExecution, ex?.Message);
                 }
-                ctx.WriteAndFlushAsync(response).Wait();
+                ctx.WriteAndFlushAsync(response);
                 Console.WriteLine($"Test count={operationProcessor.operationContext.Tests.Count}");
             });
         }

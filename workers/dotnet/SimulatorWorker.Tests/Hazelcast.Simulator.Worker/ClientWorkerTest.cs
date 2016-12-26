@@ -63,7 +63,6 @@ namespace Hazelcast.Simulator.Worker
         {
             rc.Shutdown();
             clientWorker.Shutdown();
-            startTask.Wait();
             TestEnvironmentUtils.TeardownFakeUserDir();
         }
 
@@ -157,6 +156,7 @@ namespace Hazelcast.Simulator.Worker
             foreach (TestPhase testPhase in phaseList)
             {
                 Response phaseResponse = rc.Send(CoordinatorAddress, TestAddress, OperationType.StartTestPhase, $"{{'testPhase':'{testPhase.GetName()}'}}").Result;
+                rc.WaitPhaseComplete(testPhase);
                 AssertResponse(phaseResponse, TestAddress);
             }
 

@@ -13,6 +13,7 @@ using DotNetty.Transport.Channels.Sockets;
 using Hazelcast.Simulator.Protocol.Core;
 using Hazelcast.Simulator.Protocol.Handler;
 using Hazelcast.Simulator.Protocol.Operations;
+using Hazelcast.Simulator.Test;
 using Hazelcast.Simulator.Utils;
 using NUnit.Framework;
 
@@ -20,6 +21,17 @@ namespace Hazelcast.Simulator.Worker
 {
     public class RemoteConnector
     {
+        private static readonly Queue<SimulatorMessage> RecievedMessages = new Queue<SimulatorMessage>();
+        private static readonly ConcurrentDictionary<TestPhase, AutoResetEvent> PhasesLocks = new ConcurrentDictionary<TestPhase, AutoResetEvent>();
+
+        static RemoteConnector()
+        {
+            foreach (TestPhase testPhase in Enum.GetValues(typeof(TestPhase)))
+            {
+                PhasesLocks.TryAdd(testPhase, new AutoResetEvent(false));
+            }
+        }
+
         private readonly string address;
         private readonly int port;
         private IChannel channel;
@@ -29,7 +41,6 @@ namespace Hazelcast.Simulator.Worker
         private readonly ConcurrentDictionary<string, TaskCompletionSource<Response>> responseCompletionSources =
             new ConcurrentDictionary<string, TaskCompletionSource<Response>>();
 
-        private static readonly Queue<SimulatorMessage> RecievedMessages = new Queue<SimulatorMessage>();
 
         private readonly SimulatorAddress localAddress;
         private readonly SimulatorAddress remoteAddress;
@@ -71,8 +82,8 @@ namespace Hazelcast.Simulator.Worker
             {
                 return;
             }
-            channel?.CloseAsync().Wait();
-            eventLoopGroup.ShutdownGracefullyAsync().Wait();
+            channel?.CloseAsync().Wait(1000);
+            eventLoopGroup.ShutdownGracefullyAsync().Wait(1000);
         }
 
         private void ConfigurePipeline(ISocketChannel socketChannel)
@@ -123,11 +134,21 @@ namespace Hazelcast.Simulator.Worker
         {
             protected override void ChannelRead0(IChannelHandlerContext ctx, SimulatorMessage msg)
             {
-                RecievedMessages.Enqueue(msg);
+                if (msg.OperationType == OperationType.PhaseCompleted)
+                {
+                    var op = (PhaseCompletedOperation)msg.ToOperation();
+                    PhasesLocks[op.TestPhase].Set();
+                }
+                else
+                {
+                    RecievedMessages.Enqueue(msg);
+                }
                 var response = new Response(msg.MessageId, msg.Source);
                 response.AddPart(new Response.Part(msg.Source, ResponseType.Success));
-                ctx.WriteAndFlushAsync(response).Wait();
+                ctx.WriteAndFlushAsync(response);
             }
         }
+
+        public void WaitPhaseComplete(TestPhase testPhase) => PhasesLocks[testPhase].WaitOne();
     }
 }
