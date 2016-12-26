@@ -122,7 +122,7 @@ public class ClientConnector {
                                 channel.remoteAddress()));
                     }
 
-                    sendAuthMessage();
+                    //sendAuthMessage();
                     return;
                 }
                 future.channel().close();
@@ -138,7 +138,7 @@ public class ClientConnector {
     }
 
     private void sendAuthMessage() {
-        SimulatorMessage message = new SimulatorMessage(remoteAddress, localAddress, 0, AUTH, "AUTH");
+        SimulatorMessage message = new SimulatorMessage(remoteAddress, localAddress, 0, AUTH, "{}");
         writeAsync(message);
     }
 

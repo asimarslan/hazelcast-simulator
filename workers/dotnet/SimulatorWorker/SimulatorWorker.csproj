@@ -132,6 +132,7 @@
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\AbstractStartOperation.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\AbstractTestOperation.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\AbstractWorkerOperation.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Operations\AuthenticationOperation.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\ExecuteScriptOperation.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\IntegrationTestOperation.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\IntegrationType.cs" />

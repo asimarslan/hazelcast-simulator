@@ -187,6 +187,8 @@ namespace Hazelcast.Simulator.Worker
             StartWorker().Wait();
 
             Logger.Debug($"Stopping .Net Worker pid:{Process.GetCurrentProcess().Id}");
+
+            Console.WriteLine("THE END");
         }
     }
 }

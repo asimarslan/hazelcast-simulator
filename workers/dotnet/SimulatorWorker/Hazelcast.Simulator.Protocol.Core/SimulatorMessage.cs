@@ -43,16 +43,7 @@ namespace Hazelcast.Simulator.Protocol.Core
         public ISimulatorOperation ToOperation()
         {
             Type type = OperationType.GetClassType();
-            ISimulatorOperation simulatorOperation;
-            try
-            {
-                simulatorOperation = (ISimulatorOperation)JsonConvert.DeserializeObject(OperationData, type);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
+            var simulatorOperation = (ISimulatorOperation)JsonConvert.DeserializeObject(OperationData, type);
             simulatorOperation.SetSourceAddress(Source);
             return simulatorOperation;
         }

@@ -42,7 +42,13 @@ else
 fi;
 
 SIMULATOR_HOME=$SIMULATOR_HOME
-workerHome="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+workerHomeUnix="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+if [ "$(uname -o)" == "Cygwin" ]; then
+    workerHome="$(cygpath -w "$workerHomeUnix")"
+else
+    workerHome="$workerHomeUnix"
+fi;
 
 echo $(eval "echo \"$LOG4j_CONFIG\"")>log4net.xml
 echo $HAZELCAST_CONFIG>hazelcast-client.xml
@@ -59,8 +65,8 @@ WORKER_ARGS="publicAddress=$PUBLIC_ADDRESS \
             workerHome=$workerHome"
 
 if [ "$(uname -o)" == "Cygwin" ]; then
-    mono --debug "$SIMULATOR_DOTNET_LIB/SimulatorWorker.exe" $WORKER_ARGS
-else
     "$SIMULATOR_DOTNET_LIB/SimulatorWorker.exe" $WORKER_ARGS
+else
+    mono --debug "$SIMULATOR_DOTNET_LIB/SimulatorWorker.exe" $WORKER_ARGS
 fi;
 workerPid=$!

@@ -69,12 +69,11 @@ namespace Hazelcast.Simulator.Protocol.Handler
                 }
                 else
                 {
-                    Exception ex = task.Exception.Flatten().InnerExceptions.First();
+                    Exception ex = task.Exception?.Flatten().InnerExceptions.First();
                     Logger.Error($"Exception during operation excecution {ex?.Message}", ex);
                     response.AddPart(localAddress, ResponseType.ExceptionDuringOperationExecution, ex?.Message);
                 }
                 ctx.WriteAndFlushAsync(response);
-                Console.WriteLine($"Test count={operationProcessor.operationContext.Tests.Count}");
             });
         }
     }

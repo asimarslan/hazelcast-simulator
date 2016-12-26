@@ -25,8 +25,11 @@ namespace Hazelcast.Simulator.Protocol.Operations
         [Value(typeof(IntegrationTestOperation))]
         IntegerationTest = 0,
 
+        [Value(typeof(AuthenticationOperation))]
+        Auth = 1,
+
         [Value(typeof(LogOperation))]
-        Log = 1,
+        Log = 2,
 
         [Value(typeof(PhaseCompletedOperation))]
         PhaseCompleted = 1001,

@@ -59,16 +59,16 @@ namespace Hazelcast.Simulator.Protocol.Operations
                 }
                 finally
                 {
-                    SendPhaseCompletedOperation(operationContext.Connector, testPhase);
+                    SendPhaseCompletedOperation(operationContext.Connector, testPhase, testContainer.TestAddress);
                 }
             });
             return ResponseType.Success;
         }
 
-        protected void SendPhaseCompletedOperation(WorkerConnector connector, TestPhase testPhase)
+        protected void SendPhaseCompletedOperation(WorkerConnector connector, TestPhase testPhase, SimulatorAddress testAddress)
         {
             var operation = new PhaseCompletedOperation(testPhase);
-            connector.Submit(sourceAddress, SimulatorAddress.COORDINATOR, operation);
+            connector.Submit(testAddress, SimulatorAddress.COORDINATOR, operation);
         }
 
         protected abstract void StartPhase(OperationContext operationContext, TestContainer testContainer);
