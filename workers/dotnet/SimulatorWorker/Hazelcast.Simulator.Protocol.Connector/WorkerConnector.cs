@@ -31,15 +31,15 @@ namespace Hazelcast.Simulator.Protocol.Connector
 {
     public class WorkerConnector
     {
-        private const int DefaultShutdownQuietPeriod = 1;
-        private const int DefaultShutdownTimeout = 1;
+        private const int DefaultShutdownQuietPeriod = 0;
+        private const int DefaultShutdownTimeout = 15;
 
         private static readonly ILog Logger = LogManager.GetLogger(typeof(WorkerConnector));
 
-        public SimulatorAddress WorkerAddress;
         private long currentMessageId = 1;
 
         private readonly AtomicBoolean isStarted = new AtomicBoolean();
+
         private readonly int port;
 
         private readonly IEventLoopGroup eventLoopGroup = new MultithreadEventLoopGroup();
@@ -47,17 +47,18 @@ namespace Hazelcast.Simulator.Protocol.Connector
         private readonly ConcurrentDictionary<string, TaskCompletionSource<Response>> responseCompletionSources =
             new ConcurrentDictionary<string, TaskCompletionSource<Response>>();
 
-        private IChannel channel;
+        private readonly ManualResetEventSlim startLock = new ManualResetEventSlim(false, 0);
+
+        //this channel is connected to parent of the worker 
+        private IChannel outChannel;
 
         public string PublicIpAddress { get; }
 
-        public void SetChannel(IChannel channel) => this.channel = channel;
-
-        private readonly ManualResetEventSlim _startLock = new ManualResetEventSlim(false, 0);
-
-        public volatile bool Ready;
+        public SimulatorAddress WorkerAddress { get; }
 
         public Func<OperationProcessor> GetOperationProcessor { get; set; }
+
+        public void SetChannel(IChannel channel) => outChannel = channel;
 
         public WorkerConnector(SimulatorAddress workerAddress, int port, string publicIpAddress)
         {
@@ -86,16 +87,14 @@ namespace Hazelcast.Simulator.Protocol.Connector
 
                 IChannel boundChannel = await bootstrap.BindAsync();
                 Logger.Info($"WorkerConnector {WorkerAddress} listens on {boundChannel.LocalAddress}");
-
-                Ready = true;
-                _startLock.Wait();
+                startLock.Wait();
 
                 await boundChannel.CloseAsync();
             }
             finally
             {
                 await eventLoopGroup.ShutdownGracefullyAsync();
-                _startLock.Reset();
+                startLock.Reset();
             }
             Logger.Info("Start completed...");
         }
@@ -104,17 +103,11 @@ namespace Hazelcast.Simulator.Protocol.Connector
         {
             IChannelPipeline pipeline = socketChannel.Pipeline;
             pipeline.AddLast("connectionValidationHandler", new ConnectionValidationHandler(SetChannel));
-            //            pipeline.AddLast("connectionListenerHandler", new ConnectionListenerHandler(connectionManager));
-
             pipeline.AddLast("responseEncoder", new ResponseEncoder(WorkerAddress));
-            pipeline.AddLast("messageEncoder", new SimulatorMessageEncoder(WorkerAddress,
-                WorkerAddress.GetParent()));
-
+            pipeline.AddLast("messageEncoder", new SimulatorMessageEncoder(WorkerAddress, WorkerAddress.GetParent()));
             pipeline.AddLast("frameDecoder", new SimulatorFrameDecoder());
             pipeline.AddLast("protocolDecoder", new SimulatorProtocolDecoder(WorkerAddress));
-
             pipeline.AddLast("messageConsumeHandler", new SimulatorMessageConsumeHandler(WorkerAddress, GetOperationProcessor()));
-
             pipeline.AddLast("responseHandler", new ResponseHandler(HandleReponse));
             pipeline.AddLast("exceptionHandler", new ExceptionHandler());
         }
@@ -126,12 +119,9 @@ namespace Hazelcast.Simulator.Protocol.Connector
                 return;
             }
             Logger.Debug("Shutting down worker connector");
-
-            _startLock.Set();
-
-            channel?.CloseAsync().Wait(1000);
-
-            eventLoopGroup.ShutdownGracefullyAsync().Wait(1000);
+            startLock.Set();
+            outChannel?.CloseAsync().Wait(DefaultShutdownTimeout);
+            eventLoopGroup.ShutdownGracefullyAsync(TimeSpan.FromSeconds(DefaultShutdownQuietPeriod), TimeSpan.FromSeconds(DefaultShutdownTimeout)).Wait(DefaultShutdownTimeout * 2);
         }
 
         public Task<Response> Submit(SimulatorAddress source, SimulatorAddress destination, ISimulatorOperation operation)
@@ -143,7 +133,7 @@ namespace Hazelcast.Simulator.Protocol.Connector
             string key = source.CreateResponseKey(messageId, 0);
             if (responseCompletionSources.TryAdd(key, tcs))
             {
-                channel.WriteAndFlushAsync(message);
+                outChannel.WriteAndFlushAsync(message);
             }
             return tcs.Task;
         }

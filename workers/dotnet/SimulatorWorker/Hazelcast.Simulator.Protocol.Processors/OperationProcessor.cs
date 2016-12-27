@@ -15,7 +15,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Hazelcast.Core;
 using Hazelcast.Simulator.Protocol.Core;
 using Hazelcast.Simulator.Protocol.Operations;
 using Hazelcast.Simulator.Test;
@@ -27,20 +26,14 @@ namespace Hazelcast.Simulator.Protocol.Processors
     public class OperationProcessor
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(OperationProcessor));
-        public readonly OperationContext operationContext;
+        private readonly OperationContext operationContext;
         private readonly ClientWorker worker;
 
-        public OperationProcessor(OperationContext operationContext,  ClientWorker worker)
+        public OperationProcessor(OperationContext operationContext, ClientWorker worker)
         {
-            this. operationContext = operationContext;
+            this.operationContext = operationContext;
             this.worker = worker;
         }
-
-//        public OperationProcessor(IHazelcastInstance hazelcastInstance, SimulatorAddress workerAddress, ClientWorker worker)
-//        {
-//            operationContext = new OperationContext(hazelcastInstance, workerAddress, worker.Connector);
-//            this.worker = worker;
-//        }
 
         public Task<Response.Part[]> SubmitAsync(SimulatorMessage simulatorMessage)
             => Task.Run(async () => await ProcessMessage(simulatorMessage));

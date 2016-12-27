@@ -15,14 +15,12 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Sockets;
-using System.Threading;
 using System.Threading.Tasks;
-using DotNetty.Buffers;
 using Hazelcast.Simulator.Protocol.Core;
 using Hazelcast.Simulator.Protocol.Operations;
+using Hazelcast.Simulator.Protocol.Processors;
 using Hazelcast.Simulator.Test;
+using Hazelcast.Simulator.Utils;
 using log4net.Config;
 using NUnit.Framework;
 
@@ -49,11 +47,6 @@ namespace Hazelcast.Simulator.Worker
             Environment.SetEnvironmentVariable("WORKER_HOME", tmpFolder.FullName);
             clientWorker = new ClientWorker("dotnetclient", "127.0.0.1:5701", 1, 1, 9002, null, false, 0);
             startTask = clientWorker.Start();
-            while (!clientWorker.Ready)
-            {
-                Thread.Sleep(10);
-            }
-
             rc = new RemoteConnector("127.0.0.1", 9002, WorkerAddress);
             rc.Start().Wait();
         }
@@ -83,55 +76,55 @@ namespace Hazelcast.Simulator.Worker
             AssertResponse(decodeResponse, WorkerAddress);
         }
 
-        //        [Test]
-        //        public void TestWorkerAddressFileExists()
-        //        {
-        //            Assert.True(File.Exists(Environment.GetEnvironmentVariable("WORKER_HOME") + "/worker.address"));
-        //        }
-        //
-        //        [Test]
-        //        public void TestCreateTest()
-        //        {
-        //            var testAddress = new SimulatorAddress(AddressLevel.TEST, 1, 1, 1);
-        //            var workerAddress = new SimulatorAddress(AddressLevel.WORKER, 1, 1, 0);
-        //            var coordinatorAddress = new SimulatorAddress(AddressLevel.COORDINATOR, 0, 0, 0);
-        //
-        //            Response decodeResponse = CreateTest(workerAddress, coordinatorAddress);
-        //
-        //            Assert.AreEqual(messageId, decodeResponse.MessageId);
-        //            Assert.AreEqual(coordinatorAddress, decodeResponse.Destination);
-        //            Assert.AreEqual(1, decodeResponse.Size());
-        //            AssertResponse(decodeResponse, workerAddress);
-        //
-        //            //delete test
-        //            Response finalResponse = SendMessage(testAddress, coordinatorAddress, OperationType.StartTestPhase, "{'testPhase':'LOCAL_TEARDOWN'}");
-        //            AssertResponse(finalResponse, testAddress);
-        //        }
-        //
-        //        [Test]
-        //        public void TestStartStopTest()
-        //        {
-        //            var testAddress = new SimulatorAddress(AddressLevel.TEST, 1, 1, 1);
-        //            var workerAddress = new SimulatorAddress(AddressLevel.WORKER, 1, 1, 0);
-        //            var coordinatorAddress = new SimulatorAddress(AddressLevel.COORDINATOR, 0, 0, 0);
-        //
-        //            Response createResponse = CreateTest(workerAddress, coordinatorAddress);
-        //            AssertResponse(createResponse, workerAddress);
-        //
-        //            Response startResponse = SendMessage(testAddress, coordinatorAddress, OperationType.StartTest, "{ 'targetType':'CLIENT','targetWorkers':[]}");
-        //            AssertResponse(startResponse, testAddress);
-        //
-        //            Response stopResponse = SendMessage(testAddress, coordinatorAddress, OperationType.StopTest, "{}");
-        //
-        //            Assert.AreEqual(messageId, stopResponse.MessageId);
-        //            Assert.AreEqual(coordinatorAddress, stopResponse.Destination);
-        //            Assert.AreEqual(1, stopResponse.Size());
-        //            AssertResponse(stopResponse, testAddress);
-        //
-        //            //delete test
-        //            SendMessage(testAddress, coordinatorAddress, OperationType.StartTestPhase, "{'testPhase':'LOCAL_TEARDOWN'}");
-        //        }
-        //
+        [Test]
+        public void TestWorkerAddressFileExists()
+        {
+            Assert.True(File.Exists(Environment.GetEnvironmentVariable("WORKER_HOME") + "/worker.address"));
+        }
+
+        [Test]
+        public void TestCreateTest()
+        {
+            Response createResponse = rc.Send(CoordinatorAddress, WorkerAddress, OperationType.CreateTest,
+                @"{'testIndex':1,'testId':'SimulatorTest','properties':{'threadCount':'1','class':'Custom.Simulator.Name.SimulatorTest'}}").Result;
+
+            AssertResponse(createResponse, WorkerAddress);
+
+            Assert.AreEqual(rc.LastMessageId, createResponse.MessageId);
+            Assert.AreEqual(CoordinatorAddress, createResponse.Destination);
+            Assert.AreEqual(1, createResponse.Size());
+            AssertResponse(createResponse, WorkerAddress);
+
+            //delete test
+            Response finalResponse = rc.Send(CoordinatorAddress, TestAddress, OperationType.StartTestPhase, "{'testPhase':'LOCAL_TEARDOWN'}").Result;
+            rc.WaitPhaseComplete(TestPhase.LocalTeardown);
+            AssertResponse(finalResponse, TestAddress);
+        }
+
+        [Test]
+        public void TestStartStopTest()
+        {
+            Response createResponse = rc.Send(CoordinatorAddress, WorkerAddress, OperationType.CreateTest,
+                @"{'testIndex':1,'testId':'SimulatorTest','properties':{'threadCount':'1','class':'Custom.Simulator.Name.SimulatorTest'}}").Result;
+
+            AssertResponse(createResponse, WorkerAddress);
+
+            Response startResponse = rc.Send(CoordinatorAddress, TestAddress, OperationType.StartTest, "{ 'targetType':'CLIENT','targetWorkers':[]}").Result;
+            AssertResponse(startResponse, TestAddress);
+
+            Response stopResponse = rc.Send(CoordinatorAddress, TestAddress, OperationType.StopTest, "{}").Result;
+
+            Assert.AreEqual(rc.LastMessageId, stopResponse.MessageId);
+            Assert.AreEqual(CoordinatorAddress, stopResponse.Destination);
+            Assert.AreEqual(1, stopResponse.Size());
+            AssertResponse(stopResponse, TestAddress);
+
+            //delete test
+            Response finalResponse = rc.Send(CoordinatorAddress, TestAddress, OperationType.StartTestPhase, "{'testPhase':'LOCAL_TEARDOWN'}").Result;
+            rc.WaitPhaseComplete(TestPhase.LocalTeardown);
+            AssertResponse(finalResponse, TestAddress);
+        }
+
         [Test]
         public void TestPhaseTest()
         {
@@ -159,8 +152,8 @@ namespace Hazelcast.Simulator.Worker
                 rc.WaitPhaseComplete(testPhase);
                 AssertResponse(phaseResponse, TestAddress);
             }
-
-            var testInstance = clientWorker.operationProcessor.operationContext.Tests.Values.First().TestInstance as SimulatorTest;
+            var operationContext = ReflectionUtil.ReadInstanceFieldValue<OperationContext>(clientWorker.operationProcessor, typeof(OperationProcessor), "operationContext");
+            var testInstance = operationContext.Tests.Values.First().TestInstance as SimulatorTest;
 
             Assert.NotNull(testInstance);
             foreach (TestPhase testPhase in phaseList)
@@ -178,39 +171,12 @@ namespace Hazelcast.Simulator.Worker
                         break;
                 }
             }
-        }
 
-//        private Response SendMessage(SimulatorAddress destination, SimulatorAddress source, OperationType operationType, string payload)
-//        {
-//            var message = new SimulatorMessage(destination, source, 0, operationType, payload);
-//
-//            IByteBuffer buffer = ByteBufferUtil.DefaultAllocator.Buffer(1000);
-//            message.EncodeByteBuf(buffer);
-//
-//            var tcpClient = new TcpClient("127.0.0.1", 9002);
-//            if (!tcpClient.Connected)
-//            {
-//                Assert.Fail("Socket not connected!!!");
-//            }
-//            NetworkStream networkStream = tcpClient.GetStream();
-//
-//            byte[] bufArray = buffer.ToArray();
-//            Array.Resize(ref bufArray, buffer.ReadableBytes);
-//
-//            networkStream.Write(bufArray, 0, bufArray.Length);
-//
-//            var response = new byte[500];
-//            int rcvSize = networkStream.Read(response, 0, response.Length);
-//
-//            IByteBuffer responseBuffer = ByteBufferUtil.DefaultAllocator.Buffer(rcvSize);
-//            responseBuffer.WriteBytes(response);
-//
-//            Response decodeResponse = responseBuffer.DecodeResponse();
-//            Console.WriteLine(decodeResponse);
-//            networkStream.Dispose();
-//            tcpClient.Close();
-//            return decodeResponse;
-//        }
+            //delete test
+            Response finalResponse = rc.Send(CoordinatorAddress, TestAddress, OperationType.StartTestPhase, "{'testPhase':'LOCAL_TEARDOWN'}").Result;
+            rc.WaitPhaseComplete(TestPhase.LocalTeardown);
+            AssertResponse(finalResponse, TestAddress);
+        }
 
         private void AssertResponse(Response response, SimulatorAddress address)
         {

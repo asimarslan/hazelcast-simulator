@@ -28,7 +28,7 @@ namespace Hazelcast.Simulator.Utils
 {
     public class BindingContainer
     {
-        private readonly ConcurrentDictionary<string, object> propertyScopeData = new ConcurrentDictionary<string, object>();
+        //        private readonly ConcurrentDictionary<string, object> propertyScopeData = new ConcurrentDictionary<string, object>();
         private readonly ConcurrentDictionary<string, IProbe> probes = new ConcurrentDictionary<string, IProbe>();
         private readonly ISet<string> unusedProperties;
 
@@ -42,8 +42,9 @@ namespace Hazelcast.Simulator.Utils
             this.testContext = testContext;
             this.testCase = testCase;
             unusedProperties = new HashSet<string>(this.testCase.Properties.Keys);
-            string threadCount = GetProperty("threadCount");
-            string className = GetProperty("class");
+            //read these upfront to ignore unused property case
+            GetProperty("threadCount");
+            GetProperty("class");
             metronomeFactory = new MetronomeFactory(testCase.Properties);
         }
 
@@ -119,7 +120,9 @@ namespace Hazelcast.Simulator.Utils
             }
             else if (type == typeof(IMetronome))
             {
-                return metronomeFactory.CreateMetronome();
+                //TODO implement Metronome!!!
+                //return metronomeFactory.CreateMetronome();
+                throw new NotImplementedException("Metronome not implemented yet!");
             }
             return null;
         }

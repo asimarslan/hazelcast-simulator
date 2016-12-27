@@ -45,7 +45,7 @@ namespace Hazelcast.Simulator.Worker
         private readonly IHazelcastInstance hazelcastInstance;
         public readonly OperationProcessor operationProcessor;
 
-        public WorkerConnector Connector { get; private set; }
+        public WorkerConnector Connector { get; }
 
         public ClientWorker(string workerType, string publicIpAddress, int agentIndex, int workerIndex, int workerPort,
             string hzConfigFile, bool autoCreateHzInstance, int workerPerformanceMonitorIntervalSeconds)
@@ -60,10 +60,10 @@ namespace Hazelcast.Simulator.Worker
             this.workerPerformanceMonitorIntervalSeconds = workerPerformanceMonitorIntervalSeconds;
 
             hazelcastInstance = GetHazelcastInstance();
-            var workerAddress=new SimulatorAddress(AddressLevel.WORKER, agentIndex, workerIndex, 0);
+            var workerAddress = new SimulatorAddress(AddressLevel.WORKER, agentIndex, workerIndex, 0);
             Connector = new WorkerConnector(agentIndex, workerIndex, this.workerPort, publicIpAddress);
             operationProcessor = new OperationProcessor(new OperationContext(hazelcastInstance, workerAddress, Connector), this);
-            Connector.GetOperationProcessor = ()=> operationProcessor;
+            Connector.GetOperationProcessor = () => operationProcessor;
             SignalStartToAgent();
         }
 
@@ -90,9 +90,7 @@ namespace Hazelcast.Simulator.Worker
                 Logger.Info($"{param.Key}={param.Value}");
             }
 
-            string workerId = workerParams["workerId"];
             string workerType = workerParams["workerType"];
-
             string publicAddress = workerParams["publicAddress"];
 
             int agentIndex;
@@ -109,6 +107,7 @@ namespace Hazelcast.Simulator.Worker
 
             bool autoCreateHzInstance;
             bool.TryParse(workerParams["autoCreateHzInstance"], out autoCreateHzInstance);
+
             int workerPerformanceMonitorIntervalSeconds;
             int.TryParse(workerParams["workerPerformanceMonitorIntervalSeconds"], out workerPerformanceMonitorIntervalSeconds);
 
@@ -166,11 +165,7 @@ namespace Hazelcast.Simulator.Worker
                     Logger.Debug(e);
                 }
             }
-
-            //OperationTypeCounter.printStatistics(Level.DEBUG);
         }
-
-        public bool Ready => Connector.Ready;
 
         public static void Main(string[] args)
         {

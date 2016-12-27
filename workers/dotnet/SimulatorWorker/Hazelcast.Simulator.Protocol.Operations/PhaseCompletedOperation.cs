@@ -29,7 +29,7 @@ namespace Hazelcast.Simulator.Protocol.Operations
 
         public PhaseCompletedOperation(TestPhase testPhase)
         {
-            this.testPhaseStr = testPhase.GetName();
+            testPhaseStr = testPhase.GetName();
         }
 
         public TestPhase TestPhase => testPhaseStr.ToTestPhase();

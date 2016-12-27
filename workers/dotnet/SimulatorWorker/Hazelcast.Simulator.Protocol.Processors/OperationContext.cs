@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using System.Collections.Concurrent;
 using Hazelcast.Core;
 using Hazelcast.Simulator.Protocol.Connector;
@@ -38,10 +37,6 @@ namespace Hazelcast.Simulator.Protocol.Processors
         {
             HazelcastInstance = hazelcastInstance;
             WorkerAddress = workerAddress;
-            if (connector == null)
-            {
-                Console.WriteLine("Connector cannor be null here");
-            }
             Connector = connector;
             Tests = new ConcurrentDictionary<int, TestContainer>();
         }

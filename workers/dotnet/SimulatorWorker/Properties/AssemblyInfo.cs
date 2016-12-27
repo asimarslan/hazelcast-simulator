@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("Hazelcast Simulator .Net Worker Implementation")]
 [assembly: AssemblyCompany("Hazelcast Inc.")]
 [assembly: AssemblyProduct("Hazelcast Simulator Worker")]
-[assembly: AssemblyCopyright("Copyright (c) 2008-2016, Hazelcast, Inc")]
+[assembly: AssemblyCopyright("Copyright (c) 2008-2017, Hazelcast, Inc")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: CLSCompliant(true)]

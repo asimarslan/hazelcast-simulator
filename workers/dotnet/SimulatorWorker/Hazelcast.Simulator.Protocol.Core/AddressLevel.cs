@@ -60,14 +60,8 @@ namespace Hazelcast.Simulator.Protocol.Core
             return (int)AddressLevel.REMOTE;
         }
 
-        public static int GetMaxLevel(this AddressLevel al)
-        {
-            return (int)AddressLevel.TEST;
-        }
+        public static int GetMaxLevel(this AddressLevel al) => (int)AddressLevel.TEST;
 
-        public static bool IsParentAddressLevel(this AddressLevel al, AddressLevel addressLevel)
-        {
-            return (int)al < (int)addressLevel;
-        }
+        public static bool IsParentAddressLevel(this AddressLevel al, AddressLevel addressLevel) => (int)al < (int)addressLevel;
     }
 }

@@ -32,7 +32,7 @@ namespace Hazelcast.Simulator.Protocol.Operations
         {
             if (Logger.IsDebugEnabled)
             {
-                Logger.Debug($"Pinged by {sourceAddress} ...");
+                Logger.Debug($"Pinged by {SourceAddress} ...");
             }
             return ResponseType.Success;
         }

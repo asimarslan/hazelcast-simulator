@@ -113,7 +113,6 @@
     <Compile Include="Hazelcast.Simulator.Probe\EmptyProbe.cs" />
     <Compile Include="Hazelcast.Simulator.Probe\HdrProbe.cs" />
     <Compile Include="Hazelcast.Simulator.Probe\IProbe.cs" />
-    <Compile Include="Hazelcast.Simulator.Protocol.Core\FailureType.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Core\Response.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Core\ResponseCodec.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Core\SimulatorAddressCodec.cs" />
@@ -174,7 +173,6 @@
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\CreateTestOperation.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\StartTestOperation.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\StopTestOperation.cs" />
-    <Compile Include="Hazelcast.Simulator.Protocol.Core\ConnectionManager.cs" />
     <Compile Include="Hazelcast.Simulator.Test\TestContainer.cs" />
     <Compile Include="Hazelcast.Simulator.Test\TestContext.cs" />
   </ItemGroup>

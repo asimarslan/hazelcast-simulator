@@ -21,8 +21,6 @@ namespace Hazelcast.Simulator.Test
 {
     public class TestCase
     {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(TestCase));
-
         public string TestId { get; set; }
 
         public IDictionary<string, string> Properties { get; }

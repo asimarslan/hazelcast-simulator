@@ -53,7 +53,7 @@ namespace Hazelcast.Simulator.Protocol.Operations
 
         public override async Task<ResponseType> RunInternal(OperationContext operationContext, SimulatorAddress targetAddress)
         {
-            Logger.Logger.Log(typeof(LogOperation), GetLevel(), $"[{sourceAddress}] {message}", null);
+            Logger.Logger.Log(typeof(LogOperation), GetLevel(), $"[{SourceAddress}] {message}", null);
             return ResponseType.Success;
         }
 

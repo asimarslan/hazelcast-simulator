@@ -22,9 +22,9 @@ namespace Hazelcast.Simulator.Protocol.Operations
     public abstract class AbstractOperation : ISimulatorOperation
     {
         [JsonIgnore]
-        protected SimulatorAddress sourceAddress;
+        protected SimulatorAddress SourceAddress;
 
-        public void SetSourceAddress(SimulatorAddress source) => sourceAddress = source;
+        public void SetSourceAddress(SimulatorAddress source) => SourceAddress = source;
 
         public async Task<Response.Part> Run(OperationContext operationContext, SimulatorAddress targetAddress)
         {
