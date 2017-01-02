@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.Generic;
+using Hazelcast.Core;
 using Hazelcast.Simulator.Test;
 
 namespace Hazelcast.Simulator.Worker
@@ -21,6 +22,8 @@ namespace Hazelcast.Simulator.Worker
     [Named("Custom.Simulator.Name.SimulatorTest")]
     public class SimulatorTest
     {
+        public const string ECHO_TEXT = "ECHO COORDINATOR TEXT";
+
         [Inject]
         public ITestContext Context;
 
@@ -66,8 +69,25 @@ namespace Hazelcast.Simulator.Worker
         public void GlobalVerify() => IncrementPhaseInvokeCount(TestPhase.GlobalVerify);
 
         [Run]
-        public void Run() => IncrementPhaseInvokeCount(TestPhase.Run);
+        public void Run()
+        {
+            IncrementPhaseInvokeCount(TestPhase.Run);
+            Context?.EchoCoordinator(ECHO_TEXT);
+        } 
 
         private void IncrementPhaseInvokeCount(TestPhase testPhase) => InvokeCounts[testPhase] += 1;
+    }
+
+    [Named("Custom.Simulator.Name.FailingSimulatorTest")]
+    public class FailingSimulatorTest
+    {
+        [Inject]
+        public ITestContext Context;
+
+        [Run]
+        public void Run()
+        {
+            throw new Exception("Run failed");
+        } 
     }
 }

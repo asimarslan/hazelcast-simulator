@@ -48,8 +48,7 @@ namespace Hazelcast.Simulator.Test
 
         public void Stop() => stopped = true;
 
-        public void EchoCoordinator(string msg) => connector.Submit(connector.WorkerAddress,
-            COORDINATOR, new LogOperation(msg));
+        public void EchoCoordinator(string msg) => connector.Submit(connector.WorkerAddress, COORDINATOR, new LogOperation(msg));
 
         public void BeforeWarmup() => warmingUp = true;
 

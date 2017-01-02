@@ -13,19 +13,16 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using Hazelcast.Simulator.Protocol.Core;
 using Hazelcast.Simulator.Protocol.Operations;
 using Hazelcast.Simulator.Protocol.Processors;
 using Hazelcast.Simulator.Test;
 using Hazelcast.Simulator.Utils;
-using log4net.Config;
 using Newtonsoft.Json;
 using NUnit.Framework;
-
+using static Hazelcast.Simulator.Utils.FileUtils;
 using static Hazelcast.Simulator.Worker.RemoteConnector;
 
 namespace Hazelcast.Simulator.Worker
@@ -33,38 +30,24 @@ namespace Hazelcast.Simulator.Worker
     [TestFixture]
     public class TestOperationsTest : BaseTestOperation
     {
- 
-        [Test]
-        public void TestClientWorker()
-        {
-            Assert.NotNull(clientWorker);
-        }
+        [SetUp]
+        public void Setup() => CreateTest(1);
 
-        [Test]
-        public void TestPing()
-        {
-            Response decodeResponse = rc.Send(CoordinatorAddress, WorkerAddress, OperationType.Ping, "{}").Result;
-
-            Assert.AreEqual(rc.LastMessageId, decodeResponse.MessageId);
-            Assert.AreEqual(CoordinatorAddress, decodeResponse.Destination);
-            Assert.AreEqual(1, decodeResponse.Size());
-            AssertResponse(decodeResponse, WorkerAddress);
-        }
-
-        [Test]
-        public void TestWorkerAddressFileExists()
-        {
-            Assert.True(File.Exists(Environment.GetEnvironmentVariable("WORKER_HOME") + "/worker.address"));
-        }
+        [TearDown]
+        public void TearDown() => DeleteTest(1);
 
         [Test]
         public void TestStartStopTest()
         {
-            Response startResponse = rc.Send(CoordinatorAddress, TestAddress, OperationType.StartTest, "{ 'targetType':'CLIENT','targetWorkers':[]}").Result;
+            Response startResponse = rc.Send(CoordinatorAddress, TestAddress, OperationType.StartTest, START_CLIENT_PAYLOAD).Result;
             Response stopResponse = rc.Send(CoordinatorAddress, TestAddress, OperationType.StopTest, "{}").Result;
 
             var operationContext = ReflectionUtil.ReadInstanceFieldValue<OperationContext>(clientWorker.operationProcessor, typeof(OperationProcessor), "operationContext");
             var testInstance = operationContext.Tests.Values.First().TestInstance as SimulatorTest;
+
+            var msg= rc.GetFirstLogMessage();
+            var logOperation = msg?.ToOperation() as LogOperation;
+            Assert.AreEqual(SimulatorTest.ECHO_TEXT, logOperation?.GetMessage());
 
             AssertResponse(startResponse, TestAddress);
 
@@ -80,7 +63,7 @@ namespace Hazelcast.Simulator.Worker
         [Test]
         public void TestStartSkipTest()
         {
-            Response startResponse = rc.Send(CoordinatorAddress, TestAddress, OperationType.StartTest, "{ 'targetType':'MEMBER','targetWorkers':[]}").Result;
+            Response startResponse = rc.Send(CoordinatorAddress, TestAddress, OperationType.StartTest, START_MEMBER_PAYLOAD).Result;
             var operationContext = ReflectionUtil.ReadInstanceFieldValue<OperationContext>(clientWorker.operationProcessor, typeof(OperationProcessor), "operationContext");
             var testInstance = operationContext.Tests.Values.First().TestInstance as SimulatorTest;
 
@@ -116,8 +99,8 @@ namespace Hazelcast.Simulator.Worker
                 string json = JsonConvert.SerializeObject(op);
 
                 Response phaseResponse = rc.Send(CoordinatorAddress, TestAddress, OperationType.StartTestPhase, json).Result;
-                rc.WaitPhaseComplete(testPhase);
                 AssertResponse(phaseResponse, TestAddress);
+                rc.WaitPhaseComplete(testPhase);
             }
             var operationContext = ReflectionUtil.ReadInstanceFieldValue<OperationContext>(clientWorker.operationProcessor, typeof(OperationProcessor), "operationContext");
             var testInstance = operationContext.Tests.Values.First().TestInstance as SimulatorTest;
@@ -141,57 +124,104 @@ namespace Hazelcast.Simulator.Worker
         }
 
         [Test]
-        public void TestStartTestTwice()
+        public void TestStartAllTests()
         {
-            Response createResponse = rc.Send(CoordinatorAddress, WorkerAddress, OperationType.CreateTest,
-                @"{'testIndex':1,'testId':'SimulatorTest','properties':{'threadCount':'1','class':'Custom.Simulator.Name.SimulatorTest'}}").Result;
+            CreateTest(2);
+            var testAddress = new SimulatorAddress(AddressLevel.TEST, 1, 1, 0);
+            Response startResponse = rc.Send(CoordinatorAddress, testAddress, OperationType.StartTest, START_CLIENT_PAYLOAD).Result;
+            AssertResponse(startResponse, TestAddress);
+            AssertResponse(startResponse, TestAddress2);
 
-            AssertResponse(createResponse, WorkerAddress);
-
-            rc.Send(CoordinatorAddress, TestAddress, OperationType.StartTest, "{ 'targetType':'CLIENT','targetWorkers':[]}");
-
-            Response startResponse2 = rc.Send(CoordinatorAddress, TestAddress, OperationType.StartTest, "{ 'targetType':'CLIENT','targetWorkers':[]}").Result;
-            AssertResponse(startResponse2, TestAddress);
-
-            //delete test
-            Response finalResponse = rc.Send(CoordinatorAddress, TestAddress, OperationType.StartTestPhase, "{'testPhase':'LOCAL_TEARDOWN'}").Result;
-            rc.WaitPhaseComplete(TestPhase.LocalTeardown);
-            AssertResponse(finalResponse, TestAddress);
-
+            DeleteTest(2);
         }
-//
-//        [Test]
-//        public void TestStartWorkerTwice()
-//        {
-//            clientWorker.Start().ContinueWith(t =>
-//            {
-//                Assert.True(t.IsFaulted);
-//                Assert.AreEqual(t.Exception?.Flatten().InnerExceptions.First().GetType(), typeof(SimulatorProtocolException));
-//            }).Wait();
-//        }
-//
-//        [Test]
-//        public void TestPublicIpAddress()
-//        {
-//            Assert.AreEqual(clientWorker.PublicIpAddress, PUBLIC_ADDRESS);
-//            Assert.AreEqual(clientWorker.Connector.PublicIpAddress, PUBLIC_ADDRESS);
-//        }
-//
-//
-//        [Test]
-//        public void TestLogOperation()
-//        {
-//            Response logResponse= rc.Send(CoordinatorAddress, WorkerAddress, OperationType.Log, "{'message':'Test Log message','level':'INFO'}").Result;
-//
-//            AssertResponse(logResponse, WorkerAddress);
-//
-//            Assert.AreEqual(rc.LastMessageId, logResponse.MessageId);
-//            Assert.AreEqual(CoordinatorAddress, logResponse.Destination);
-//            Assert.AreEqual(1, logResponse.Size());
-//            AssertResponse(logResponse, WorkerAddress);
-//
-//        }
 
+        [Test]
+        public void TestStopNotExistedTest()
+        {
+            Response stopResponse = rc.Send(CoordinatorAddress, TestAddress2, OperationType.StopTest, "{}").Result;
 
+            Assert.AreEqual(rc.LastMessageId, stopResponse.MessageId);
+            Assert.AreEqual(CoordinatorAddress, stopResponse.Destination);
+            Assert.AreEqual(1, stopResponse.Size());
+            AssertResponse(stopResponse, WorkerAddress);
+        }
+
+        [Test]
+        public void TestStartNotExistedTest()
+        {
+            Response response = rc.Send(CoordinatorAddress, TestAddress2, OperationType.StartTest, START_CLIENT_PAYLOAD).Result;
+
+            Assert.AreEqual(rc.LastMessageId, response.MessageId);
+            Assert.AreEqual(CoordinatorAddress, response.Destination);
+            Assert.AreEqual(1, response.Size());
+            AssertResponse(response, WorkerAddress, ResponseType.FailureTestNotFound);
+        }
+
+        [Test]
+        public void TestStartMatchingWorkerTest()
+        {
+            Response response = rc.Send(CoordinatorAddress, TestAddress, OperationType.StartTest, "{'targetType':'CLIENT','targetWorkers':['C_A1_W1']}").Result;
+
+            var operationContext = ReflectionUtil.ReadInstanceFieldValue<OperationContext>(clientWorker.operationProcessor, typeof(OperationProcessor), "operationContext");
+            var testInstance = operationContext.Tests.Values.First().TestInstance as SimulatorTest;
+
+            Assert.NotNull(testInstance);
+            Assert.AreEqual(1, testInstance.InvokeCounts[TestPhase.Run]);
+
+            Assert.AreEqual(rc.LastMessageId, response.MessageId);
+            Assert.AreEqual(CoordinatorAddress, response.Destination);
+            Assert.AreEqual(1, response.Size());
+            AssertResponse(response, TestAddress);
+        }
+
+        [Test]
+        public void TestStartNonMatchingWorkerTest()
+        {
+            Response response = rc.Send(CoordinatorAddress, TestAddress, OperationType.StartTest, "{'targetType':'CLIENT','targetWorkers':['C_A1_W2']}").Result;
+
+            var operationContext = ReflectionUtil.ReadInstanceFieldValue<OperationContext>(clientWorker.operationProcessor, typeof(OperationProcessor), "operationContext");
+            var testInstance = operationContext.Tests.Values.First().TestInstance as SimulatorTest;
+
+            Assert.NotNull(testInstance);
+            Assert.AreEqual(0, testInstance.InvokeCounts[TestPhase.Run]);
+
+            Assert.AreEqual(rc.LastMessageId, response.MessageId);
+            Assert.AreEqual(CoordinatorAddress, response.Destination);
+            Assert.AreEqual(1, response.Size());
+            AssertResponse(response, TestAddress);
+        }
+
+        [Test]
+        public void TestStartFailingTest()
+        {
+            try
+            {
+                Response createResponse = rc.Send(CoordinatorAddress, WorkerAddress, OperationType.CreateTest,
+                    "{'testIndex':2,'testId':'FailingSimulatorTest','properties':{'threadCount':'1','class':'Custom.Simulator.Name.FailingSimulatorTest'}}").Result;
+                AssertResponse(createResponse, WorkerAddress);
+
+                Response response = rc.Send(CoordinatorAddress, TestAddress2, OperationType.StartTest, START_CLIENT_PAYLOAD).Result;
+                AssertResponse(response, TestAddress2);
+                rc.WaitPhaseComplete(TestPhase.Run);
+
+                string userDirectoryPath = GetUserDirectoryPath();
+                string exceptionFile = Path.Combine(userDirectoryPath, "1.exception");
+                string report = File.ReadAllText(exceptionFile);
+
+                Assert.True(File.Exists(exceptionFile));
+                Assert.IsNotEmpty(report);
+                Assert.True(report.StartsWith("FailingSimulatorTest"));
+
+                Assert.AreEqual(rc.LastMessageId, response.MessageId);
+                Assert.AreEqual(CoordinatorAddress, response.Destination);
+                Assert.AreEqual(1, response.Size());
+
+            }
+            finally
+            {
+                DeleteTest(2);
+            }
+            
+        }
     }
 }

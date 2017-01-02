@@ -58,5 +58,7 @@ namespace Hazelcast.Simulator.Protocol.Operations
         }
 
         private Level GetLevel() => LogManager.GetRepository().LevelMap[level];
+
+        public string GetMessage() => message;
     }
 }

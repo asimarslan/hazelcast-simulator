@@ -15,6 +15,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -32,7 +33,7 @@ namespace Hazelcast.Simulator.Worker
 {
     public class RemoteConnector
     {
-        private static readonly Queue<SimulatorMessage> RecievedMessages = new Queue<SimulatorMessage>();
+        private static readonly BlockingCollection<SimulatorMessage> RecievedMessages = new BlockingCollection<SimulatorMessage>();
         private static readonly ConcurrentDictionary<TestPhase, AutoResetEvent> PhasesLocks = new ConcurrentDictionary<TestPhase, AutoResetEvent>();
 
         static RemoteConnector()
@@ -151,7 +152,7 @@ namespace Hazelcast.Simulator.Worker
                 }
                 else
                 {
-                    RecievedMessages.Enqueue(msg);
+                    RecievedMessages.Add(msg);
                 }
                 var response = new Response(msg.MessageId, msg.Source);
                 response.AddPart(new Response.Part(msg.Source, ResponseType.Success));
@@ -161,10 +162,16 @@ namespace Hazelcast.Simulator.Worker
 
         public void WaitPhaseComplete(TestPhase testPhase) => PhasesLocks[testPhase].WaitOne();
 
-        public static void AssertResponse(Response response, SimulatorAddress address, ResponseType result= ResponseType.Success)
+        public static void AssertResponse(Response response, SimulatorAddress address, ResponseType result = ResponseType.Success)
         {
             Assert.True(response.Parts.ContainsKey(address));
             Assert.AreEqual(result, response.Parts[address].ResponseType);
+        }
+
+        public SimulatorMessage GetFirstLogMessage()
+        {
+            var msg = RecievedMessages.Take();
+            return msg.OperationType == OperationType.Log ? msg : null;
         }
     }
 }

@@ -13,64 +13,21 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using Hazelcast.Simulator.Protocol.Core;
 using Hazelcast.Simulator.Protocol.Operations;
 using Hazelcast.Simulator.Protocol.Processors;
 using Hazelcast.Simulator.Test;
 using Hazelcast.Simulator.Utils;
-using log4net.Config;
-using Newtonsoft.Json;
 using NUnit.Framework;
-
 using static Hazelcast.Simulator.Worker.RemoteConnector;
 
 namespace Hazelcast.Simulator.Worker
 {
     [TestFixture]
-    public class ClientWorkerTest
+    public class ClientWorkerTest : BaseTestOperation
     {
-        public static readonly SimulatorAddress TestAddress = new SimulatorAddress(AddressLevel.TEST, 1, 1, 1);
-        public static readonly SimulatorAddress WorkerAddress = new SimulatorAddress(AddressLevel.WORKER, 1, 1, 0);
-        public static readonly SimulatorAddress CoordinatorAddress = new SimulatorAddress(AddressLevel.COORDINATOR, 0, 0, 0);
-        public const string PUBLIC_ADDRESS = "127.0.0.1:5701";
-
-        private ClientWorker clientWorker;
-        private RemoteConnector rc;
-
-        private Task startTask;
-
-        [OneTimeSetUp]
-        public void Init()
-        {
-            BasicConfigurator.Configure();
-
-            DirectoryInfo tmpFolder = TestEnvironmentUtils.SetupFakeUserDir();
-            Environment.SetEnvironmentVariable("WORKER_HOME", tmpFolder.FullName);
-            var workerParams = new Dictionary<string, string>
-            {
-                { "log4netConfig", Properties.Resources.log4net }
-            };
-
-            ClientWorker.InitLog(workerParams);
-
-            clientWorker = new ClientWorker("dotnetclient", PUBLIC_ADDRESS, 1, 1, 9002, null, false, 0);
-            startTask = clientWorker.Start();
-            rc = new RemoteConnector("127.0.0.1", 9002, WorkerAddress);
-            rc.Start().Wait();
-        }
-
-        [OneTimeTearDown]
-        public void Cleanup()
-        {
-            rc.Shutdown();
-            clientWorker.Shutdown();
-            TestEnvironmentUtils.TeardownFakeUserDir();
-        }
-
         [Test]
         public void TestClientWorker()
         {
@@ -95,157 +52,6 @@ namespace Hazelcast.Simulator.Worker
         }
 
         [Test]
-        public void TestCreateTest()
-        {
-            Response createResponse = rc.Send(CoordinatorAddress, WorkerAddress, OperationType.CreateTest,
-                @"{'testIndex':1,'testId':'SimulatorTest','properties':{'threadCount':'1','class':'Custom.Simulator.Name.SimulatorTest'}}").Result;
-
-            AssertResponse(createResponse, WorkerAddress);
-
-            Assert.AreEqual(rc.LastMessageId, createResponse.MessageId);
-            Assert.AreEqual(CoordinatorAddress, createResponse.Destination);
-            Assert.AreEqual(1, createResponse.Size());
-            AssertResponse(createResponse, WorkerAddress);
-
-            //delete test
-            Response finalResponse = rc.Send(CoordinatorAddress, TestAddress, OperationType.StartTestPhase, "{'testPhase':'LOCAL_TEARDOWN'}").Result;
-            rc.WaitPhaseComplete(TestPhase.LocalTeardown);
-            AssertResponse(finalResponse, TestAddress);
-        }
-
-        [Test]
-        public void TestStartStopTest()
-        {
-            Response createResponse = rc.Send(CoordinatorAddress, WorkerAddress, OperationType.CreateTest,
-                @"{'testIndex':1,'testId':'SimulatorTest','properties':{'threadCount':'1','class':'Custom.Simulator.Name.SimulatorTest'}}").Result;
-
- 
-            Response startResponse = rc.Send(CoordinatorAddress, TestAddress, OperationType.StartTest, "{ 'targetType':'CLIENT','targetWorkers':[]}").Result;
-            Response stopResponse = rc.Send(CoordinatorAddress, TestAddress, OperationType.StopTest, "{}").Result;
-
-            var operationContext = ReflectionUtil.ReadInstanceFieldValue<OperationContext>(clientWorker.operationProcessor, typeof(OperationProcessor), "operationContext");
-            var testInstance = operationContext.Tests.Values.First().TestInstance as SimulatorTest;
-
-            AssertResponse(createResponse, WorkerAddress);
-            AssertResponse(startResponse, TestAddress);
-
-            Assert.NotNull(testInstance);
-            Assert.AreEqual(0, testInstance.InvokeCounts[TestPhase.Run]);
-
-            Assert.AreEqual(rc.LastMessageId, stopResponse.MessageId);
-            Assert.AreEqual(CoordinatorAddress, stopResponse.Destination);
-            Assert.AreEqual(1, stopResponse.Size());
-            AssertResponse(stopResponse, TestAddress);
-
-            //delete test
-            Response finalResponse = rc.Send(CoordinatorAddress, TestAddress, OperationType.StartTestPhase, "{'testPhase':'LOCAL_TEARDOWN'}").Result;
-            rc.WaitPhaseComplete(TestPhase.LocalTeardown);
-            AssertResponse(finalResponse, TestAddress);
-        }
-
-        [Test]
-        public void TestStartSkipTest()
-        {
-            Response createResponse = rc.Send(CoordinatorAddress, WorkerAddress, OperationType.CreateTest,
-                @"{'testIndex':1,'testId':'SimulatorTest','properties':{'threadCount':'1','class':'Custom.Simulator.Name.SimulatorTest'}}").Result;
-
-            AssertResponse(createResponse, WorkerAddress);
-
-            Response startResponse = rc.Send(CoordinatorAddress, TestAddress, OperationType.StartTest, "{ 'targetType':'MEMBER','targetWorkers':[]}").Result;
-            var operationContext = ReflectionUtil.ReadInstanceFieldValue<OperationContext>(clientWorker.operationProcessor, typeof(OperationProcessor), "operationContext");
-            var testInstance = operationContext.Tests.Values.First().TestInstance as SimulatorTest;
-
-            Assert.NotNull(testInstance);
-            Assert.AreEqual(0, testInstance.InvokeCounts[TestPhase.Run]);
-
-            Assert.AreEqual(rc.LastMessageId, startResponse.MessageId);
-            Assert.AreEqual(CoordinatorAddress, startResponse.Destination);
-            Assert.AreEqual(1, startResponse.Size());
-            AssertResponse(startResponse, TestAddress);
-
-            //delete test
-            Response finalResponse = rc.Send(CoordinatorAddress, TestAddress, OperationType.StartTestPhase, "{'testPhase':'LOCAL_TEARDOWN'}").Result;
-            rc.WaitPhaseComplete(TestPhase.LocalTeardown);
-            AssertResponse(finalResponse, TestAddress);
-        }
-
-        [Test]
-        public void TestPhaseTest()
-        {
-            Response createResponse = rc.Send(CoordinatorAddress, WorkerAddress, OperationType.CreateTest,
-                @"{'testIndex':1,'testId':'SimulatorTest','properties':{'threadCount':'1','class':'Custom.Simulator.Name.SimulatorTest'}}").Result;
-            AssertResponse(createResponse, WorkerAddress);
-
-            var phaseList = new[]
-            {
-                TestPhase.Setup,
-                TestPhase.LocalPrepare,
-                TestPhase.GlobalPrepare,
-                TestPhase.Warmup,
-                TestPhase.LocalAfterWarmup,
-                TestPhase.GlobalAfterWarmup,
-                TestPhase.Run,
-                TestPhase.GlobalVerify,
-                TestPhase.LocalVerify,
-                TestPhase.GlobalTeardown
-            };
-
-            foreach (TestPhase testPhase in phaseList)
-            {
-                var op = new StartTestPhaseOperation(testPhase);
-                string json = JsonConvert.SerializeObject(op);
-
-                Response phaseResponse = rc.Send(CoordinatorAddress, TestAddress, OperationType.StartTestPhase, json).Result;
-                rc.WaitPhaseComplete(testPhase);
-                AssertResponse(phaseResponse, TestAddress);
-            }
-            var operationContext = ReflectionUtil.ReadInstanceFieldValue<OperationContext>(clientWorker.operationProcessor, typeof(OperationProcessor), "operationContext");
-            var testInstance = operationContext.Tests.Values.First().TestInstance as SimulatorTest;
-
-            Assert.NotNull(testInstance);
-            foreach (TestPhase testPhase in phaseList)
-            {
-                switch (testPhase)
-                {
-                    case TestPhase.Setup:
-                        Assert.AreEqual(2, testInstance.InvokeCounts[TestPhase.Setup]);
-                        break;
-                    case TestPhase.Warmup:
-                        Assert.AreEqual(0, testInstance.InvokeCounts[TestPhase.Warmup]);
-                        break;
-                    default:
-                        Assert.AreEqual(1, testInstance.InvokeCounts[testPhase], $"{testPhase} not invoked!");
-                        break;
-                }
-            }
-
-            //delete test
-            Response finalResponse = rc.Send(CoordinatorAddress, TestAddress, OperationType.StartTestPhase, "{'testPhase':'LOCAL_TEARDOWN'}").Result;
-            rc.WaitPhaseComplete(TestPhase.LocalTeardown);
-            RemoteConnector.AssertResponse(finalResponse, TestAddress);
-        }
-
-        [Test]
-        public void TestStartTestTwice()
-        {
-            Response createResponse = rc.Send(CoordinatorAddress, WorkerAddress, OperationType.CreateTest,
-                @"{'testIndex':1,'testId':'SimulatorTest','properties':{'threadCount':'1','class':'Custom.Simulator.Name.SimulatorTest'}}").Result;
-
-            AssertResponse(createResponse, WorkerAddress);
-
-            rc.Send(CoordinatorAddress, TestAddress, OperationType.StartTest, "{ 'targetType':'CLIENT','targetWorkers':[]}");
-
-            Response startResponse2 = rc.Send(CoordinatorAddress, TestAddress, OperationType.StartTest, "{ 'targetType':'CLIENT','targetWorkers':[]}").Result;
-            AssertResponse(startResponse2, TestAddress);
-
-            //delete test
-            Response finalResponse = rc.Send(CoordinatorAddress, TestAddress, OperationType.StartTestPhase, "{'testPhase':'LOCAL_TEARDOWN'}").Result;
-            rc.WaitPhaseComplete(TestPhase.LocalTeardown);
-            AssertResponse(finalResponse, TestAddress);
-
-        }
-
-        [Test]
         public void TestStartWorkerTwice()
         {
             clientWorker.Start().ContinueWith(t =>
@@ -262,21 +68,26 @@ namespace Hazelcast.Simulator.Worker
             Assert.AreEqual(clientWorker.Connector.PublicIpAddress, PUBLIC_ADDRESS);
         }
 
-
         [Test]
         public void TestLogOperation()
         {
-            Response logResponse= rc.Send(CoordinatorAddress, WorkerAddress, OperationType.Log, "{'message':'Test Log message','level':'INFO'}").Result;
-
-            AssertResponse(logResponse, WorkerAddress);
+            Response logResponse = rc.Send(CoordinatorAddress, WorkerAddress, OperationType.Log, "{'message':'Test Log message','level':'INFO'}").Result;
 
             Assert.AreEqual(rc.LastMessageId, logResponse.MessageId);
             Assert.AreEqual(CoordinatorAddress, logResponse.Destination);
             Assert.AreEqual(1, logResponse.Size());
             AssertResponse(logResponse, WorkerAddress);
-
         }
 
+        [Test]
+        public void TestAuthOperation()
+        {
+            Response response = rc.Send(CoordinatorAddress, WorkerAddress, OperationType.Auth, "{}").Result;
 
+            Assert.AreEqual(rc.LastMessageId, response.MessageId);
+            Assert.AreEqual(CoordinatorAddress, response.Destination);
+            Assert.AreEqual(1, response.Size());
+            AssertResponse(response, WorkerAddress);
+        }
     }
 }

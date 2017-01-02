@@ -15,16 +15,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Hazelcast.Simulator.Protocol.Core;
 using Hazelcast.Simulator.Protocol.Operations;
-using Hazelcast.Simulator.Protocol.Processors;
 using Hazelcast.Simulator.Test;
-using Hazelcast.Simulator.Utils;
 using log4net.Config;
-using Newtonsoft.Json;
 using NUnit.Framework;
+using Properties;
 using static Hazelcast.Simulator.Worker.RemoteConnector;
 
 namespace Hazelcast.Simulator.Worker
@@ -32,9 +28,13 @@ namespace Hazelcast.Simulator.Worker
     public class BaseTestOperation
     {
         public static readonly SimulatorAddress TestAddress = new SimulatorAddress(AddressLevel.TEST, 1, 1, 1);
+        public static readonly SimulatorAddress TestAddress2 = new SimulatorAddress(AddressLevel.TEST, 1, 1, 2);
         public static readonly SimulatorAddress WorkerAddress = new SimulatorAddress(AddressLevel.WORKER, 1, 1, 0);
         public static readonly SimulatorAddress CoordinatorAddress = new SimulatorAddress(AddressLevel.COORDINATOR, 0, 0, 0);
         public const string PUBLIC_ADDRESS = "127.0.0.1:5701";
+
+        public const string START_CLIENT_PAYLOAD = "{'targetType':'CLIENT','targetWorkers':[]}";
+        public const string START_MEMBER_PAYLOAD = "{'targetType':'MEMBER','targetWorkers':[]}";
 
         protected ClientWorker clientWorker;
         protected RemoteConnector rc;
@@ -48,7 +48,7 @@ namespace Hazelcast.Simulator.Worker
             Environment.SetEnvironmentVariable("WORKER_HOME", tmpFolder.FullName);
             var workerParams = new Dictionary<string, string>
             {
-                { "log4netConfig", Properties.Resources.log4net }
+                { "log4netConfig", Resources.log4net }
             };
 
             ClientWorker.InitLog(workerParams);
@@ -56,7 +56,7 @@ namespace Hazelcast.Simulator.Worker
             clientWorker = new ClientWorker("dotnetclient", PUBLIC_ADDRESS, 1, 1, 9002, null, false, 0);
             clientWorker.Start();
             rc = new RemoteConnector("127.0.0.1", 9002, WorkerAddress);
-            rc.Start().Wait();
+            rc.Start().Wait(5000);
         }
 
         [OneTimeTearDown]
@@ -67,21 +67,20 @@ namespace Hazelcast.Simulator.Worker
             TestEnvironmentUtils.TeardownFakeUserDir();
         }
 
-        [Setup]
-        public void Setup()
+        protected void CreateTest(int testIndex)
         {
             Response createResponse = rc.Send(CoordinatorAddress, WorkerAddress, OperationType.CreateTest,
-                @"{'testIndex':1,'testId':'SimulatorTest','properties':{'threadCount':'1','class':'Custom.Simulator.Name.SimulatorTest'}}").Result;
+                "{'testIndex':" + testIndex + ",'testId':'SimulatorTest','properties':{'threadCount':'1','class':'Custom.Simulator.Name.SimulatorTest'}}").Result;
             AssertResponse(createResponse, WorkerAddress);
         }
 
-        [TearDown]
-        public void TearDown()
+        protected void DeleteTest(int testIndex)
         {
-            //delete test
-            Response finalResponse = rc.Send(CoordinatorAddress, TestAddress, OperationType.StartTestPhase, "{'testPhase':'LOCAL_TEARDOWN'}").Result;
+            var testAddress = new SimulatorAddress(AddressLevel.TEST, 1, 1, testIndex);
+            Response finalResponse = rc.Send(CoordinatorAddress, testAddress, OperationType.StartTestPhase, "{'testPhase':'LOCAL_TEARDOWN'}").Result;
+            AssertResponse(finalResponse, testAddress);
             rc.WaitPhaseComplete(TestPhase.LocalTeardown);
-            AssertResponse(finalResponse, TestAddress);
         }
+
     }
 }

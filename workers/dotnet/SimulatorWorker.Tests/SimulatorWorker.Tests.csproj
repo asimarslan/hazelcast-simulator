@@ -89,6 +89,7 @@
   <ItemGroup>
     <Compile Include="Hazelcast.Simulator.Protocol.Core\SimulatorMessageCodecTest.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\OperationSerializationTest.cs" />
+    <Compile Include="Hazelcast.Simulator.Protocol.Operations\OperationRunTest.cs" />
     <Compile Include="Hazelcast.Simulator.Protocol.Operations\OperationTypeTest.cs" />
     <Compile Include="Hazelcast.Simulator.Test\TestContainerTest.cs" />
     <Compile Include="Hazelcast.Simulator.Test\TestPhaseTest.cs" />
