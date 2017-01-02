@@ -50,7 +50,7 @@ namespace Hazelcast.Simulator.Tests
         {
             while (!context.IsStopped())
             {
-                Thread.Sleep(1);
+                Thread.Sleep(1000);
                 Console.WriteLine("testSuccess running");
             }
             Console.WriteLine("testSuccess completed");

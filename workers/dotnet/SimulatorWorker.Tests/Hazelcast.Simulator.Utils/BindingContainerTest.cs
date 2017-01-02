@@ -36,10 +36,12 @@ namespace Hazelcast.Simulator.Utils
         {
             hzClient = new Mock<IHazelcastInstance>();
             var testContext = new TestContext(TestId, hzClient.Object);
-            var dict = new Dictionary<string, string>();
-            dict.Add("testStrField", "Value0");
-            dict.Add("testLongField", "99");
-            dict.Add("TestIntProperty", "90");
+            var dict = new Dictionary<string, string>
+            {
+                { "testStrField", "Value0" },
+                { "testLongField", "99" },
+                { "TestIntProperty", "90" }
+            };
             var testCase = new TestCase(TestId, dict);
             bindingContainer = new BindingContainer(testContext, testCase);
             testInstance = new Dependent();
@@ -81,6 +83,23 @@ namespace Hazelcast.Simulator.Utils
             Assert.AreEqual(bindingContainer.GetProbes().Count, 2);
             Assert.AreEqual(testInstance.probe1.GetType(), typeof(HdrProbe));
             Assert.AreEqual(testInstance.probe2.GetType(), typeof(HdrProbe));
+        }
+
+        [Test]
+        public void TestBindingUnusedProperty()
+        {
+            var testContext = new TestContext(TestId);
+            var dict = new Dictionary<string, string>
+            {
+                { "testStrField", "Value0" },
+                { "testLongField", "99" },
+                { "TestIntProperty", "90" },
+                { "UnusedPropert", "X" }
+            };
+            var testCase = new TestCase(TestId, dict);
+            var container = new BindingContainer(testContext, testCase);
+            var instance = new Dependent();
+            Assert.Throws<BindingException>(() => container.Bind(instance));
         }
     }
 }

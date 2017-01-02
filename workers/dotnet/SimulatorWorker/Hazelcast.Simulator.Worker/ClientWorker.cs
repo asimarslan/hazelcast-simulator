@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using Hazelcast.Core;
 using Hazelcast.Simulator.Protocol.Connector;
@@ -23,6 +24,7 @@ using Hazelcast.Simulator.Protocol.Core;
 using Hazelcast.Simulator.Protocol.Processors;
 using log4net;
 using log4net.Config;
+using log4net.Repository;
 using static Hazelcast.Simulator.Utils.HazelcastUtils;
 using static Hazelcast.Simulator.Utils.FileUtils;
 
@@ -81,14 +83,16 @@ namespace Hazelcast.Simulator.Worker
 
         public static async Task StartWorker()
         {
-            Logger.Info($"Starting .Net Worker pid:{Process.GetCurrentProcess().Id}");
-
             Dictionary<string, string> workerParams = GetParameterDictionary();
+            InitLog(workerParams);
+
             Logger.Info("Parameters:");
             foreach (KeyValuePair<string, string> param in workerParams)
             {
                 Logger.Info($"{param.Key}={param.Value}");
             }
+
+            Logger.Info($"Starting .Net Worker pid:{Process.GetCurrentProcess().Id}");
 
             string workerType = workerParams["workerType"];
             string publicAddress = workerParams["publicAddress"];
@@ -102,8 +106,8 @@ namespace Hazelcast.Simulator.Worker
             int workerPort;
             int.TryParse(workerParams["workerPort"], out workerPort);
 
-            string workerHome = workerParams["workerHome"];
-            string hzConfigFile = workerHome + "/" + workerParams["hzConfigFile"];
+//            string workerHome = workerParams["workerHome"];
+            string hzConfigFile = workerParams["hzConfigFile"];
 
             bool autoCreateHzInstance;
             bool.TryParse(workerParams["autoCreateHzInstance"], out autoCreateHzInstance);
@@ -126,6 +130,36 @@ namespace Hazelcast.Simulator.Worker
             finally
             {
                 worker?.Shutdown();
+            }
+        }
+
+        public static void InitLog(Dictionary<string, string> workerParams)
+        {
+            try
+            {
+                if (workerParams.ContainsKey("log4netConfig"))
+                {
+                    using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(workerParams["log4netConfig"])))
+                    {
+                        XmlConfigurator.Configure(stream);
+                    }
+                }
+                else if (workerParams.ContainsKey("log4netConfigFile"))
+                {
+                    var fileInfo = new FileInfo(workerParams["log4netConfigFile"]);
+                    if (fileInfo.Exists)
+                    {
+                        XmlConfigurator.Configure(fileInfo);
+                    }
+                }
+                else
+                {
+                    BasicConfigurator.Configure();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Exception occured during configuring Log4net: {e}");
             }
         }
 
@@ -169,21 +203,12 @@ namespace Hazelcast.Simulator.Worker
 
         public static void Main(string[] args)
         {
-            try
-            {
-                XmlConfigurator.Configure(new FileInfo("log4net.xml"));
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
-            Logger.Debug($"Starting .Net Worker pid:{Process.GetCurrentProcess().Id}");
+            //init cmd params
+            GetParameterDictionary(args);
+
+            //start worker
             StartWorker().Wait();
-
             Logger.Debug($"Stopping .Net Worker pid:{Process.GetCurrentProcess().Id}");
-
-            Console.WriteLine("THE END");
         }
     }
 }

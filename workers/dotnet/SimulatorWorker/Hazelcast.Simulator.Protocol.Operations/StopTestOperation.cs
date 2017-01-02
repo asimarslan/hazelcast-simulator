@@ -25,20 +25,6 @@ namespace Hazelcast.Simulator.Protocol.Operations
     /// </summary>
     public class StopTestOperation : AbstractTestOperation
     {
-        [JsonIgnore]
-        private SimulatorMessage msg;
-
-        public void SetSimulatorMessage(SimulatorMessage simulatorMessage) => msg = simulatorMessage;
-
-        public async Task<ResponseType> Run(OperationContext operationContext)
-        {
-            TestContainer testContainer;
-            if (operationContext.Tests.TryGetValue(msg.Destination.TestIndex, out testContainer))
-            {
-                testContainer.TestContext.Stop();
-            }
-            return ResponseType.Success;
-        }
 
         public override async Task<ResponseType> RunInternal(OperationContext operationContext, SimulatorAddress targetAddress)
         {

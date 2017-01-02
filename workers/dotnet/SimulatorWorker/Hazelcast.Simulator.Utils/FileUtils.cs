@@ -28,13 +28,13 @@ namespace Hazelcast.Simulator.Utils
             return string.IsNullOrEmpty(workerHome) ? GetParameterDictionary()["workerHome"] : workerHome;
         }
 
-        public static Dictionary<string, string> GetParameterDictionary()
+        public static Dictionary<string, string> GetParameterDictionary(string[] args = null)
         {
             if (arguments != null)
                 return arguments;
             arguments = new Dictionary<string, string>();
 
-            foreach (string argument in Environment.GetCommandLineArgs())
+            foreach (string argument in args??Environment.GetCommandLineArgs())
             {
                 string[] splitted = argument.Split('=');
 

@@ -26,6 +26,7 @@ using Hazelcast.Simulator.Protocol.Handler;
 using Hazelcast.Simulator.Protocol.Operations;
 using Hazelcast.Simulator.Test;
 using Hazelcast.Simulator.Utils;
+using NUnit.Framework;
 
 namespace Hazelcast.Simulator.Worker
 {
@@ -159,5 +160,11 @@ namespace Hazelcast.Simulator.Worker
         }
 
         public void WaitPhaseComplete(TestPhase testPhase) => PhasesLocks[testPhase].WaitOne();
+
+        public static void AssertResponse(Response response, SimulatorAddress address, ResponseType result= ResponseType.Success)
+        {
+            Assert.True(response.Parts.ContainsKey(address));
+            Assert.AreEqual(result, response.Parts[address].ResponseType);
+        }
     }
 }

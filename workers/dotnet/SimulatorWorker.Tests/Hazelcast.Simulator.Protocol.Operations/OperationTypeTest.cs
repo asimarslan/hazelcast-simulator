@@ -42,7 +42,8 @@ namespace Hazelcast.Simulator.Protocol.Operations
         public void TestImplicitConvert()
         {
             Assert.AreEqual(0, (int)OperationType.IntegerationTest);
-            Assert.AreEqual(1, (int)OperationType.Log);
+            Assert.AreEqual(1, (int)OperationType.Auth);
+            Assert.AreEqual(2, (int)OperationType.Log);
             Assert.AreEqual(4000, (int)OperationType.Ping);
             Assert.AreEqual(4001, (int)OperationType.TerminateWorker);
             Assert.AreEqual(4002, (int)OperationType.CreateTest);

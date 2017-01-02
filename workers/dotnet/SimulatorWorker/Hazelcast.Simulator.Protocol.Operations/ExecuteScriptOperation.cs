@@ -12,28 +12,58 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Hazelcast.Simulator.Protocol.Core;
 using Hazelcast.Simulator.Protocol.Processors;
+using Jint;
+using log4net;
 using Newtonsoft.Json;
 
 namespace Hazelcast.Simulator.Protocol.Operations
 {
     public class ExecuteScriptOperation : AbstractWorkerOperation
     {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(ExecuteScriptOperation));
+
         [JsonProperty("command")]
-        public readonly string command;
+        private readonly string command;
 
         [JsonProperty("fireAndForget")]
         private readonly bool fireAndForget;
 
+        public ExecuteScriptOperation(string command, bool fireAndForget)
+        {
+            this.command = command;
+            this.fireAndForget = fireAndForget;
+        }
+
         public override async Task<ResponseType> RunInternal(OperationContext operationContext, SimulatorAddress targetAddress)
         {
-            if ("js:java.lang.System.exit(0);" == command)
+            Task scriptTask = ExecuteScript();
+            if (!fireAndForget)
             {
-                operationContext.Connector.Shutdown();
+                await scriptTask;
+            }
+            else
+            {
+                scriptTask.ContinueWith(t =>
+                {
+                    if (t.IsFaulted)
+                    {
+                        Logger.Warn("FireAndForget script failed after returning success:", t.Exception?.Flatten().InnerExceptions.First());
+                    }
+                });
             }
             return ResponseType.Success;
+        }
+
+        private async Task ExecuteScript()
+        {
+            var script = command.Substring(command.IndexOf("js:", StringComparison.OrdinalIgnoreCase));
+            var engine = new Engine(cfg => cfg.AllowClr());
+            engine.Execute(script);
         }
     }
 }
