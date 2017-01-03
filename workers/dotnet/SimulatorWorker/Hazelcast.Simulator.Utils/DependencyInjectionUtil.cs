@@ -50,19 +50,20 @@ namespace Hazelcast.Simulator.Utils
             }
 
             MemberInfo memberInfo = FindMemberInfo(instance.GetType(), path[path.Length - 1]);
-            if (memberInfo == null || IsProbeType(memberInfo))
-            {
-                return false;
-            }
-
             try
             {
+                
+                if (memberInfo == null || IsProbeType(memberInfo))
+                {
+                    return false;
+                }
+
                 SetValue(instance, memberInfo, valueStr);
                 return true;
             }
             catch (Exception e)
             {
-                throw new BindingException($"Failed to bind value {valueStr} to property {property} of type {GetFieldType(memberInfo)}", e);
+                throw new BindingException($"Failed to bind value {valueStr} to property {property} of type {memberInfo?.MemberType}", e);
             }
         }
 

@@ -73,6 +73,22 @@ namespace Hazelcast.Simulator.Utils
         }
 
         [Test]
+        public void TestInject_NullInstance()
+        {
+            const string strVal = "90";
+            object obj = null;
+            Assert.False(InjectToPropertyPath(obj, "testStrField", strVal));
+        }
+
+        [Test]
+        public void TestInject_ToMethod()
+        {
+            const string strVal = "90";
+            var obj = new Dependent();
+            Assert.Throws<BindingException>(()=>InjectToPropertyPath(obj, "SomeMethod", strVal));
+        }
+
+        [Test]
         public void TestInjectProperties()
         {
             var dict = new Dictionary<string, string>();
@@ -94,6 +110,30 @@ namespace Hazelcast.Simulator.Utils
             var obj = new Dependent();
             InjectToPropertyPath(obj, "child.childLongField", strVal);
             Assert.AreEqual(obj.child.ChildLongField, long.Parse(strVal));
+        }
+
+        [Test]
+        public void TestInjectNonExistChildField()
+        {
+            const string strVal = "1000";
+            var obj = new Dependent
+            {
+                child = new Child()
+            };
+            
+            Assert.Throws<BindingException>(() => InjectToPropertyPath(obj, "child.nonExistGrandChild.childLongField", strVal));
+        }
+
+        [Test]
+        public void TestInjectNonExistChild()
+        {
+            const string strVal = "1000";
+            var obj = new Dependent
+            {
+                child = new Child()
+            };
+            
+            Assert.False(InjectToPropertyPath(obj, "NoSuchChild.childLongField", strVal));
         }
 
         [Test]

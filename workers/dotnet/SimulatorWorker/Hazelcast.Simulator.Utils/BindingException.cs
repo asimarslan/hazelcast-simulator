@@ -18,8 +18,6 @@ namespace Hazelcast.Simulator.Utils
 {
     public class BindingException : Exception
     {
-        public BindingException() {}
-
         public BindingException(string message)
             : base(message) {}
 

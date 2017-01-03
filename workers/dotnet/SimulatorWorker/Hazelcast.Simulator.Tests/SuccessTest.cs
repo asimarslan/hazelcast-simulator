@@ -13,11 +13,13 @@
 // limitations under the License.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using Hazelcast.Simulator.Test;
 
 namespace Hazelcast.Simulator.Tests
 {
+    [ExcludeFromCodeCoverage]
     [Named("com.hazelcast.simulator.tests.SuccessTest")]
     public class SuccessTest
     {

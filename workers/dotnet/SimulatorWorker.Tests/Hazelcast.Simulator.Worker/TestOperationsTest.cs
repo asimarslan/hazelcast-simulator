@@ -191,17 +191,17 @@ namespace Hazelcast.Simulator.Worker
             AssertResponse(response, TestAddress);
         }
 
-        [Test]
+        [Test, Order(1)]
         public void TestStartFailingTest()
         {
             try
             {
                 Response createResponse = rc.Send(CoordinatorAddress, WorkerAddress, OperationType.CreateTest,
-                    "{'testIndex':2,'testId':'FailingSimulatorTest','properties':{'threadCount':'1','class':'Custom.Simulator.Name.FailingSimulatorTest'}}").Result;
+                    "{'testIndex':3,'testId':'FailingSimulatorTest','properties':{'threadCount':'1','class':'Custom.Simulator.Name.FailingSimulatorTest'}}").Result;
                 AssertResponse(createResponse, WorkerAddress);
 
-                Response response = rc.Send(CoordinatorAddress, TestAddress2, OperationType.StartTest, START_CLIENT_PAYLOAD).Result;
-                AssertResponse(response, TestAddress2);
+                Response response = rc.Send(CoordinatorAddress, TestAddress3, OperationType.StartTest, START_CLIENT_PAYLOAD).Result;
+                AssertResponse(response, TestAddress3);
                 rc.WaitPhaseComplete(TestPhase.Run);
 
                 string userDirectoryPath = GetUserDirectoryPath();
@@ -219,7 +219,7 @@ namespace Hazelcast.Simulator.Worker
             }
             finally
             {
-                DeleteTest(2);
+                DeleteTest(3);
             }
             
         }

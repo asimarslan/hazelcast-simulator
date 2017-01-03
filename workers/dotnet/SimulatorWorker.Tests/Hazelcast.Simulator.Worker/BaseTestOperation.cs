@@ -29,6 +29,7 @@ namespace Hazelcast.Simulator.Worker
     {
         public static readonly SimulatorAddress TestAddress = new SimulatorAddress(AddressLevel.TEST, 1, 1, 1);
         public static readonly SimulatorAddress TestAddress2 = new SimulatorAddress(AddressLevel.TEST, 1, 1, 2);
+        public static readonly SimulatorAddress TestAddress3 = new SimulatorAddress(AddressLevel.TEST, 1, 1, 3);
         public static readonly SimulatorAddress WorkerAddress = new SimulatorAddress(AddressLevel.WORKER, 1, 1, 0);
         public static readonly SimulatorAddress CoordinatorAddress = new SimulatorAddress(AddressLevel.COORDINATOR, 0, 0, 0);
         public const string PUBLIC_ADDRESS = "127.0.0.1:5701";

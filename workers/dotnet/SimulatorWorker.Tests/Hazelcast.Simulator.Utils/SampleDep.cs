@@ -56,6 +56,8 @@ namespace Hazelcast.Simulator.Utils
         public IProbe probe3;
 
         public long GetPrivateFieldValue() => privateField;
+
+        public string SomeMethod() => null;
     }
 
     public class Child
