@@ -85,7 +85,7 @@ namespace Hazelcast.Simulator.Utils
         {
             const string strVal = "90";
             var obj = new Dependent();
-            Assert.Throws<BindingException>(()=>InjectToPropertyPath(obj, "SomeMethod", strVal));
+            Assert.Throws<BindingException>(() => InjectToPropertyPath(obj, "SomeMethod", strVal));
         }
 
         [Test]
@@ -120,7 +120,7 @@ namespace Hazelcast.Simulator.Utils
             {
                 child = new Child()
             };
-            
+
             Assert.Throws<BindingException>(() => InjectToPropertyPath(obj, "child.nonExistGrandChild.childLongField", strVal));
         }
 
@@ -132,7 +132,7 @@ namespace Hazelcast.Simulator.Utils
             {
                 child = new Child()
             };
-            
+
             Assert.False(InjectToPropertyPath(obj, "NoSuchChild.childLongField", strVal));
         }
 

@@ -14,8 +14,6 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -170,7 +168,7 @@ namespace Hazelcast.Simulator.Worker
 
         public SimulatorMessage GetFirstLogMessage()
         {
-            var msg = RecievedMessages.Take();
+            SimulatorMessage msg = RecievedMessages.Take();
             return msg.OperationType == OperationType.Log ? msg : null;
         }
     }

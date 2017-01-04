@@ -95,6 +95,7 @@
     <Compile Include="Hazelcast.Simulator.Test\TestPhaseTest.cs" />
     <Compile Include="Hazelcast.Simulator.Utils\BindingContainerTest.cs" />
     <Compile Include="Hazelcast.Simulator.Utils\DependencyInjectionTest.cs" />
+    <Compile Include="Hazelcast.Simulator.Utils\ThreadSpawnerTest.cs" />
     <Compile Include="Hazelcast.Simulator.Utils\ExceptionReporterTest.cs" />
     <Compile Include="Hazelcast.Simulator.Utils\HazelcastUtilTest.cs" />
     <Compile Include="Hazelcast.Simulator.Utils\ReflectionUtilTest.cs" />

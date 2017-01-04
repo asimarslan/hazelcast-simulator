@@ -17,9 +17,6 @@ using System.IO;
 using System.Linq;
 using Hazelcast.Simulator.Protocol.Core;
 using Hazelcast.Simulator.Protocol.Operations;
-using Hazelcast.Simulator.Protocol.Processors;
-using Hazelcast.Simulator.Test;
-using Hazelcast.Simulator.Utils;
 using NUnit.Framework;
 using static Hazelcast.Simulator.Worker.RemoteConnector;
 

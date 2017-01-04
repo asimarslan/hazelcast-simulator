@@ -14,7 +14,6 @@
 
 using System;
 using System.Collections.Generic;
-using Hazelcast.Core;
 using Hazelcast.Simulator.Test;
 
 namespace Hazelcast.Simulator.Worker
@@ -73,7 +72,7 @@ namespace Hazelcast.Simulator.Worker
         {
             IncrementPhaseInvokeCount(TestPhase.Run);
             Context?.EchoCoordinator(ECHO_TEXT);
-        } 
+        }
 
         private void IncrementPhaseInvokeCount(TestPhase testPhase) => InvokeCounts[testPhase] += 1;
     }
@@ -88,6 +87,6 @@ namespace Hazelcast.Simulator.Worker
         public void Run()
         {
             throw new Exception("Run failed");
-        } 
+        }
     }
 }

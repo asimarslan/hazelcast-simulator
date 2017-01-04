@@ -82,6 +82,5 @@ namespace Hazelcast.Simulator.Worker
             AssertResponse(finalResponse, testAddress);
             rc.WaitPhaseComplete(TestPhase.LocalTeardown);
         }
-
     }
 }

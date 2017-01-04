@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using System.IO;
 using System.Linq;
 using Hazelcast.Simulator.Protocol.Core;
@@ -45,7 +44,7 @@ namespace Hazelcast.Simulator.Worker
             var operationContext = ReflectionUtil.ReadInstanceFieldValue<OperationContext>(clientWorker.operationProcessor, typeof(OperationProcessor), "operationContext");
             var testInstance = operationContext.Tests.Values.First().TestInstance as SimulatorTest;
 
-            var msg= rc.GetFirstLogMessage();
+            SimulatorMessage msg = rc.GetFirstLogMessage();
             var logOperation = msg?.ToOperation() as LogOperation;
             Assert.AreEqual(SimulatorTest.ECHO_TEXT, logOperation?.GetMessage());
 
@@ -215,13 +214,11 @@ namespace Hazelcast.Simulator.Worker
                 Assert.AreEqual(rc.LastMessageId, response.MessageId);
                 Assert.AreEqual(CoordinatorAddress, response.Destination);
                 Assert.AreEqual(1, response.Size());
-
             }
             finally
             {
                 DeleteTest(3);
             }
-            
         }
     }
 }
