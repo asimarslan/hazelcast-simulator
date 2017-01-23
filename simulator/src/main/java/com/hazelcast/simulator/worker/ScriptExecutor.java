@@ -98,6 +98,7 @@ public class ScriptExecutor {
             public String call() throws Exception {
                 Object result = new EmbeddedScriptCommand(command)
                         .addEnvironment("hazelcastInstance", hazelcastInstance)
+                        .addEnvironment("simulator", new SimulatorScope())
                         .setEngineName(extension)
                         .execute();
                 LOGGER.info(format("Script [%s] with [%s]", command, result));
@@ -105,5 +106,12 @@ public class ScriptExecutor {
             }
         };
         return task;
+    }
+
+    public class SimulatorScope {
+
+        public void exit(int exitCode) {
+            System.exit(exitCode);
+        }
     }
 }

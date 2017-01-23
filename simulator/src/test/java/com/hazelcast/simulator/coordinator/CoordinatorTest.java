@@ -22,7 +22,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import sun.management.resources.agent;
 
 import java.io.File;
 
@@ -51,7 +50,8 @@ public class CoordinatorTest {
 
     @BeforeClass
     public static void beforeClass() {
-        setupFakeEnvironment();
+        File file = setupFakeEnvironment();
+        System.out.println(file.toURI());
 
         hzConfig = FileUtils.fileAsText(new File(localResourceDirectory(), "hazelcast.xml"));
         hzClientConfig = FileUtils.fileAsText(new File(localResourceDirectory(), "client-hazelcast.xml"));
@@ -82,7 +82,7 @@ public class CoordinatorTest {
 
     @After
     public void after() throws Exception {
-        coordinator.workerKill(new RcWorkerKillOperation("js:java.lang.System.exit(0);", new WorkerQuery()));
+        coordinator.workerKill(new RcWorkerKillOperation("js:simulator.exit(0);", new WorkerQuery()));
     }
 
     @AfterClass
@@ -193,9 +193,25 @@ public class CoordinatorTest {
     }
 
     @Test
-    public void testRun() throws Exception {
+    public void testRunJavaClient() throws Exception {
         // start worker.
         coordinator.workerStart(new RcWorkerStartOperation().setHzConfig(hzConfig));
+
+        TestSuite suite = newBasicTestSuite();
+
+        StubPromise promise = new StubPromise();
+        coordinator.testRun(new RcTestRunOperation(suite).setAsync(false), promise);
+
+        assertEquals(SUCCESS, promise.get());
+    }
+
+    @Test
+    public void testRunDotNetClient() throws Exception {
+        // start worker.
+        coordinator.workerStart(new RcWorkerStartOperation().setHzConfig(hzConfig));
+
+        String dotnetclientconfig = FileUtils.fileAsText(new File(localResourceDirectory(), "client-hazelcast-dotnetclient.xml"));
+        coordinator.workerStart(new RcWorkerStartOperation().setHzConfig(dotnetclientconfig).setWorkerType("dotnetclient"));
 
         TestSuite suite = newBasicTestSuite();
 

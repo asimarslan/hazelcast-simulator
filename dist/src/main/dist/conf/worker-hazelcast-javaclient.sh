@@ -9,6 +9,14 @@ set -e
 
 # Printing the command being executed (useful for debugging)
 #set -x
+echo "Java client worker is starting ..."
+
+echo $SIMULATOR_HOME
+echo $WORKER_TYPE
+echo $WORKER_INDEX
+echo $HAZELCAST_CONFIG
+
+
 
 # redirecting output/error to the right logfiles.
 exec > worker.out

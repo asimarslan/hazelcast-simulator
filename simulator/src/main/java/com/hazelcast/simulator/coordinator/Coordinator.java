@@ -445,7 +445,7 @@ public class Coordinator implements Closeable {
                 env.putAll(simulatorProperties.asMap());
                 env.put("HAZELCAST_CONFIG", loadConfig(op, workerType, agentData.getTags()));
                 env.put("AUTOCREATE_HAZELCAST_INSTANCE", "true");
-                env.put("LOG4j_CONFIG", loadLog4jConfig());
+                env.put("LOG4j_CONFIG", loadLog4jConfig(workerType, simulatorProperties.get("VENDOR")));
                 env.put("JVM_OPTIONS", op.getVmOptions());
                 env.put("WORKER_PERFORMANCE_MONITOR_INTERVAL_SECONDS",
                         "" + parameters.getPerformanceMonitorIntervalSeconds());
@@ -513,6 +513,13 @@ public class Coordinator implements Closeable {
         } else if (WorkerType.JAVA_CLIENT.equals(workerType)) {
             config = initClientHzConfig(
                     op.getHzConfig() == null ? loadClientHzConfig() : op.getHzConfig(),
+                    componentRegistry,
+                    env,
+                    parameters.getLicenseKey());
+        } else if (WorkerType.DOTNET_CLIENT.equals(workerType)) {
+            config = initClientHzConfig(
+                    op.getHzConfig() == null ? loadClientHzConfig()//(WorkerType.DOTNET_CLIENT, simulatorProperties.get("VENDOR"))
+                            : op.getHzConfig(),
                     componentRegistry,
                     env,
                     parameters.getLicenseKey());
